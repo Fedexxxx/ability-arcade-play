@@ -5,6 +5,7 @@ import ProgressBar from "@/components/ProgressBar";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa from "@/components/Sherpa";
 import { userProfile, superpowers, missions } from "@/data/mockData";
+import { useExplorer } from "@/hooks/useExplorer";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
 const greetings = [
@@ -15,10 +16,13 @@ const greetings = [
 
 const BasecampPage = () => {
   const navigate = useNavigate();
+  const explorer = useExplorer();
   const activeSP = superpowers.find((s) => s.status === "in-progress") ?? superpowers.find((s) => s.status === "available");
   const activeModule = activeSP?.modules.find((m) => m.status === "in-progress") ?? activeSP?.modules.find((m) => m.status === "available");
   const dailyMission = missions.find((m) => m.type === "daily" && !m.completed);
 
+  const explorerName = explorer?.name ?? userProfile.name;
+  const explorerAvatar = explorer?.avatar ?? userProfile.avatar;
   const greeting = greetings[Math.floor(userProfile.streak) % greetings.length];
 
   return (
