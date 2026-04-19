@@ -122,6 +122,17 @@
     background: linear-gradient(180deg, hsl(var(--sky-1) / 0.4), hsl(var(--snow)));
   }
 
+  /* Backward-compat aliases (legacy pages) */
+  .gradient-energy {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--summit)));
+  }
+  .gradient-xp {
+    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
+  }
+  .glow-primary {
+    box-shadow: 0 0 24px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.12);
+  }
+
   .text-gradient-sunrise {
     background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
     -webkit-background-clip: text;
