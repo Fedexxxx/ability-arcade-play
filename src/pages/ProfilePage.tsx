@@ -30,8 +30,15 @@ const stats = [
 ];
 
 const ExplorerProfilePage = () => {
+  const navigate = useNavigate();
+  const explorer = useExplorer();
   const [soundEnabled, setSoundEnabled] = useSoundEnabled();
   const [reducedMotion, setReducedMotion] = useState<boolean>(() => prefersReducedMotion());
+
+  const handleReset = () => {
+    clearExplorer();
+    navigate("/onboarding", { replace: true });
+  };
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
