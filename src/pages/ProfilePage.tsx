@@ -1,20 +1,21 @@
 import { motion } from "framer-motion";
-import { Star, BookOpen, Zap, Trophy, Volume2, VolumeX, Sparkles } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
 import { userProfile } from "@/data/mockData";
 import { useSoundEnabled } from "@/hooks/useSoundEnabled";
 import { prefersReducedMotion } from "@/lib/prefs";
 import { useEffect, useState } from "react";
+import Sherpa from "@/components/Sherpa";
 
 const stats = [
-  { icon: Trophy, label: "Dominados", value: userProfile.superpowersMastered, color: "text-xp" },
-  { icon: BookOpen, label: "Módulos", value: userProfile.modulesCompleted, color: "text-power" },
-  { icon: Zap, label: "Desafíos", value: userProfile.challengesCompleted, color: "text-energy" },
-  { icon: Star, label: "Monedas", value: userProfile.coins, color: "text-accent" },
+  { icon: MountainIcon, label: "Montañas",     value: userProfile.superpowersMastered, color: "text-primary" },
+  { icon: Flag,         label: "Checkpoints",  value: userProfile.modulesCompleted,    color: "text-secondary" },
+  { icon: Footprints,   label: "Climbs",       value: userProfile.challengesCompleted, color: "text-accent" },
+  { icon: Compass,      label: "Monedas",      value: userProfile.coins,                color: "text-primary" },
 ];
 
-const ProfilePage = () => {
+const ExplorerProfilePage = () => {
   const [soundEnabled, setSoundEnabled] = useSoundEnabled();
   const [reducedMotion, setReducedMotion] = useState<boolean>(() => prefersReducedMotion());
 
@@ -27,62 +28,62 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-6 max-w-lg mx-auto">
-      <motion.div
+    <div className="min-h-screen pb-28 px-5 pt-8 max-w-lg mx-auto">
+      <motion.header
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
+        className="text-center mb-7"
       >
-        <div className="w-20 h-20 rounded-full bg-muted mx-auto flex items-center justify-center text-4xl mb-3">
-          {userProfile.avatar}
+        <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold mb-3">
+          <Compass size={14} />
+          <span>Explorador</span>
         </div>
-        <h1 className="font-display text-2xl font-bold">{userProfile.name}</h1>
-        <p className="text-sm text-muted-foreground">Nivel {userProfile.level}</p>
+        <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
+        <h1 className="font-display text-2xl mt-2">{userProfile.name}</h1>
+        <p className="text-sm text-muted-foreground">Nivel {userProfile.level} · Aprendiz de cima</p>
 
-        <div className="max-w-[200px] mx-auto mt-3">
-          <ProgressBar value={userProfile.xp} max={userProfile.xpToNext} variant="xp" size="md" />
-          <p className="text-[10px] text-muted-foreground mt-1">
-            {userProfile.xp} / {userProfile.xpToNext} XP
+        <div className="max-w-[220px] mx-auto mt-3">
+          <ProgressBar value={userProfile.xp} max={userProfile.xpToNext} variant="sunrise" size="md" />
+          <p className="text-[10px] text-muted-foreground mt-1 font-semibold">
+            {userProfile.xp} / {userProfile.xpToNext} XP hacia el siguiente nivel
           </p>
         </div>
-      </motion.div>
+      </motion.header>
 
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-7">
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="gradient-card rounded-2xl p-4 border border-border text-center"
+            className="bg-card border border-border rounded-2xl p-4 text-center shadow-terrain"
           >
             <s.icon size={22} className={`mx-auto mb-2 ${s.color}`} />
-            <p className="text-xl font-display font-bold">{s.value}</p>
-            <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            <p className="text-2xl font-display">{s.value}</p>
+            <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">{s.label}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* Preferences */}
       <section className="mb-6">
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 px-1">
-          Preferencias
+          Preferencias del viaje
         </h2>
-        <div className="gradient-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {/* Sound toggle */}
+        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-terrain">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-primary-soft flex items-center justify-center">
                 {soundEnabled ? (
-                  <Volume2 size={18} className="text-energy" />
+                  <Volume2 size={18} className="text-primary" />
                 ) : (
                   <VolumeX size={18} className="text-muted-foreground" />
                 )}
               </div>
               <div>
-                <p className="text-sm font-semibold">Sonidos</p>
+                <p className="text-sm font-bold">Sonidos del sendero</p>
                 <p className="text-[11px] text-muted-foreground">
-                  Fanfares y chimes de celebración
+                  Pequeñas chimes al llegar a un checkpoint
                 </p>
               </div>
             </div>
@@ -93,21 +94,20 @@ const ProfilePage = () => {
             />
           </div>
 
-          {/* Reduced motion (read-only OS preference) */}
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-secondary-soft flex items-center justify-center">
                 <Sparkles
                   size={18}
-                  className={reducedMotion ? "text-muted-foreground" : "text-primary"}
+                  className={reducedMotion ? "text-muted-foreground" : "text-secondary"}
                 />
               </div>
               <div>
-                <p className="text-sm font-semibold">Animaciones intensas</p>
+                <p className="text-sm font-bold">Celebraciones</p>
                 <p className="text-[11px] text-muted-foreground">
                   {reducedMotion
-                    ? "Desactivadas por tu sistema (movimiento reducido)"
-                    : "Confetti y efectos de celebración activados"}
+                    ? "Reducidas por preferencia del sistema"
+                    : "Pequeñas chispas cuando lo logras"}
                 </p>
               </div>
             </div>
@@ -115,7 +115,7 @@ const ProfilePage = () => {
               className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
                 reducedMotion
                   ? "bg-muted text-muted-foreground"
-                  : "bg-energy/15 text-energy"
+                  : "bg-secondary-soft text-secondary"
               }`}
             >
               {reducedMotion ? "Off" : "On"}
@@ -123,16 +123,15 @@ const ProfilePage = () => {
           </div>
         </div>
         <p className="text-[10px] text-muted-foreground mt-2 px-1 leading-relaxed">
-          Para cambiar las animaciones, ajusta la preferencia de "movimiento reducido" en tu
-          sistema operativo.
+          Para reducir las animaciones, ajusta "movimiento reducido" en tu sistema operativo.
         </p>
       </section>
 
-      <button className="w-full gradient-energy text-primary-foreground rounded-2xl py-3 font-display font-bold glow-primary">
-        Mejorar Avatar
+      <button className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-display text-base shadow-summit">
+        Personalizar a Sherpa
       </button>
     </div>
   );
 };
 
-export default ProfilePage;
+export default ExplorerProfilePage;

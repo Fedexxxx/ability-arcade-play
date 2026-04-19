@@ -4,7 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import BottomNav from "@/components/BottomNav";
-import HomePage from "./pages/HomePage";
+import BasecampPage from "./pages/BasecampPage";
+import JourneyPage from "./pages/JourneyPage";
 import ExplorePage from "./pages/ExplorePage";
 import SuperpowerPage from "./pages/SuperpowerPage";
 import ModulePage from "./pages/ModulePage";
@@ -26,13 +27,16 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          {/* Sherpa Go journey */}
+          <Route path="/" element={<BasecampPage />} />
+          <Route path="/journey" element={<JourneyPage />} />
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/superpower/:id" element={<SuperpowerPage />} />
           <Route path="/module/:spId/:modId" element={<ModulePage />} />
           <Route path="/module/:spId/:modId/victory" element={<ModuleVictoryPage />} />
           <Route path="/superpower/:id/victory" element={<SuperpowerVictoryPage />} />
           <Route path="/challenge/:spId/:modId/:chId" element={<ChallengePage />} />
+          {/* Legacy routes still reachable from older internal links */}
           <Route path="/missions" element={<MissionsPage />} />
           <Route path="/achievements" element={<AchievementsPage />} />
           <Route path="/mastery" element={<MasteryGalleryPage />} />

@@ -1,57 +1,75 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================
+   SHERPA GO — Design System
+   Inspired by sky, snow, sunrise & mountain rock.
+   ===================================================== */
+
 @layer base {
   :root {
-    --background: 230 25% 7%;
-    --foreground: 220 20% 95%;
+    /* Surfaces (sky-light theme) */
+    --background: 200 60% 97%;
+    --foreground: 215 35% 18%;
 
-    --card: 230 20% 12%;
-    --card-foreground: 220 20% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 35% 18%;
 
-    --popover: 230 20% 12%;
-    --popover-foreground: 220 20% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 35% 18%;
 
-    --primary: 165 80% 48%;
-    --primary-foreground: 230 25% 7%;
+    /* Primary = sky/teal (the climb) */
+    --primary: 195 70% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 195 80% 92%;
 
-    --secondary: 260 70% 60%;
-    --secondary-foreground: 220 20% 95%;
+    /* Secondary = sunrise orange (warmth, encouragement) */
+    --secondary: 22 92% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-soft: 22 100% 94%;
 
-    --muted: 230 18% 16%;
-    --muted-foreground: 220 15% 55%;
+    /* Accent = sunrise yellow */
+    --accent: 42 95% 62%;
+    --accent-foreground: 215 35% 18%;
 
-    --accent: 45 95% 60%;
-    --accent-foreground: 230 25% 7%;
+    --muted: 200 30% 94%;
+    --muted-foreground: 215 18% 45%;
 
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 220 20% 95%;
+    --destructive: 358 70% 58%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 230 15% 20%;
-    --input: 230 15% 20%;
-    --ring: 165 80% 48%;
+    --border: 200 30% 88%;
+    --input: 200 30% 88%;
+    --ring: 195 70% 48%;
 
-    --radius: 1rem;
+    --radius: 1.25rem;
 
-    --energy: 165 80% 48%;
-    --power: 260 70% 60%;
-    --xp: 45 95% 60%;
-    --streak: 15 90% 55%;
-    --health: 340 75% 55%;
+    /* Semantic journey tokens */
+    --summit: 215 70% 30%;        /* deep blue, the peak */
+    --snow: 200 60% 98%;          /* snow */
+    --rock: 215 15% 35%;           /* rock */
+    --sunrise-1: 22 100% 75%;      /* warm peach */
+    --sunrise-2: 42 100% 78%;      /* warm yellow */
+    --sky-1: 200 90% 88%;          /* light sky */
+    --sky-2: 195 85% 75%;          /* mid sky */
+    --xp: 22 92% 60%;              /* xp = sunrise */
+    --streak: 358 80% 62%;         /* streak = sunrise red */
+    --energy: 195 70% 48%;         /* progress */
+    --power: 215 70% 30%;          /* summit */
 
-    --sidebar-background: 230 20% 10%;
-    --sidebar-foreground: 220 20% 95%;
-    --sidebar-primary: 165 80% 48%;
-    --sidebar-primary-foreground: 230 25% 7%;
-    --sidebar-accent: 230 18% 16%;
-    --sidebar-accent-foreground: 220 20% 95%;
-    --sidebar-border: 230 15% 20%;
-    --sidebar-ring: 165 80% 48%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 35% 18%;
+    --sidebar-primary: 195 70% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 30% 94%;
+    --sidebar-accent-foreground: 215 35% 18%;
+    --sidebar-border: 200 30% 88%;
+    --sidebar-ring: 195 70% 48%;
 
-    font-family: 'Inter', sans-serif;
+    font-family: 'Nunito', system-ui, sans-serif;
   }
 }
 
@@ -62,136 +80,146 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Nunito', system-ui, sans-serif;
+    background-image:
+      radial-gradient(ellipse at top, hsl(var(--sky-1) / 0.6), transparent 60%),
+      radial-gradient(ellipse at bottom, hsl(var(--sunrise-2) / 0.25), transparent 55%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.015em;
   }
 
-  .glow-primary {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.1);
+  /* ===== Sky / sunrise gradients ===== */
+  .gradient-sky {
+    background: linear-gradient(180deg, hsl(var(--sky-1)) 0%, hsl(var(--sky-2)) 100%);
   }
-
-  .glow-power {
-    box-shadow: 0 0 20px hsl(var(--power) / 0.3), 0 0 60px hsl(var(--power) / 0.1);
+  .gradient-sunrise {
+    background: linear-gradient(135deg, hsl(var(--sunrise-1)), hsl(var(--sunrise-2)));
   }
-
-  .glow-xp {
-    box-shadow: 0 0 20px hsl(var(--xp) / 0.3), 0 0 60px hsl(var(--xp) / 0.1);
+  .gradient-summit {
+    background: linear-gradient(180deg, hsl(var(--sky-1)) 0%, hsl(var(--snow)) 60%, hsl(var(--summit) / 0.05) 100%);
   }
-
-  .gradient-energy {
-    background: linear-gradient(135deg, hsl(var(--energy)), hsl(var(--power)));
+  .gradient-basecamp {
+    background:
+      linear-gradient(180deg, hsl(var(--sky-1) / 0.9) 0%, hsl(var(--sunrise-2) / 0.35) 60%, hsl(var(--snow)) 100%);
   }
-
-  .gradient-xp {
-    background: linear-gradient(135deg, hsl(var(--xp)), hsl(var(--streak)));
-  }
-
   .gradient-card {
-    background: linear-gradient(145deg, hsl(230 20% 14%), hsl(230 20% 10%));
+    background: linear-gradient(160deg, hsl(0 0% 100%) 0%, hsl(var(--primary-soft) / 0.35) 100%);
+  }
+  .gradient-trail {
+    background: linear-gradient(180deg, hsl(var(--sky-1) / 0.4), hsl(var(--snow)));
   }
 
-  .text-gradient-energy {
-    background: linear-gradient(135deg, hsl(var(--energy)), hsl(var(--power)));
+  /* Backward-compat aliases (legacy pages) */
+  .gradient-energy {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--summit)));
+  }
+  .gradient-xp {
+    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
+  }
+  .glow-primary {
+    box-shadow: 0 0 24px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.12);
+  }
+
+  .text-gradient-sunrise {
+    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  .text-gradient-summit {
+    background: linear-gradient(135deg, hsl(var(--summit)), hsl(var(--primary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ===== Soft layered terrain shadows ===== */
+  .shadow-terrain {
+    box-shadow:
+      0 1px 0 hsl(var(--snow)) inset,
+      0 10px 30px -12px hsl(var(--summit) / 0.18),
+      0 4px 12px -4px hsl(var(--summit) / 0.08);
+  }
+  .shadow-summit {
+    box-shadow:
+      0 20px 50px -20px hsl(var(--primary) / 0.5),
+      0 8px 20px -10px hsl(var(--secondary) / 0.25);
+  }
+  .shadow-sherpa {
+    filter: drop-shadow(0 8px 16px hsl(var(--summit) / 0.25));
+  }
+
+  .glow-sunrise {
+    box-shadow: 0 0 24px hsl(var(--secondary) / 0.35), 0 0 60px hsl(var(--accent) / 0.18);
+  }
+  .glow-sky {
+    box-shadow: 0 0 24px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.12);
   }
 
   .safe-bottom {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
   }
 
-  /* ===== Holographic mastery card =====
-     Layered conic gradients + grain create an iridescent foil effect.
-     Reacts to the --mx / --my CSS vars (set on pointer move) so the shine
-     follows the cursor. Falls back gracefully without JS interaction. */
-  .holo-card {
-    --mx: 50%;
-    --my: 50%;
-    position: relative;
-    isolation: isolate;
-    background:
-      radial-gradient(
-        circle at var(--mx) var(--my),
-        hsl(var(--xp) / 0.25),
-        transparent 45%
-      ),
-      conic-gradient(
-        from 210deg at 50% 50%,
-        hsl(280 90% 65% / 0.35),
-        hsl(190 95% 60% / 0.35),
-        hsl(150 85% 55% / 0.35),
-        hsl(45 95% 60% / 0.35),
-        hsl(330 85% 65% / 0.35),
-        hsl(280 90% 65% / 0.35)
-      ),
-      linear-gradient(145deg, hsl(230 20% 14%), hsl(230 25% 8%));
-    background-blend-mode: screen, overlay, normal;
-    border: 1px solid hsl(var(--xp) / 0.35);
-    box-shadow:
-      0 10px 40px -10px hsl(var(--xp) / 0.35),
-      0 0 0 1px hsl(var(--xp) / 0.1) inset;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .holo-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background:
-      repeating-linear-gradient(
-        115deg,
-        transparent 0,
-        transparent 6px,
-        hsl(var(--xp) / 0.08) 6px,
-        hsl(var(--xp) / 0.08) 7px
-      );
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .holo-card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: radial-gradient(
-      circle at var(--mx) var(--my),
-      hsl(0 0% 100% / 0.22),
-      transparent 35%
+  /* ===== The trail (dashed climbing path) ===== */
+  .trail-line {
+    background-image: linear-gradient(
+      to bottom,
+      hsl(var(--primary) / 0.5) 0,
+      hsl(var(--primary) / 0.5) 8px,
+      transparent 8px,
+      transparent 16px
     );
-    mix-blend-mode: soft-light;
-    pointer-events: none;
-    z-index: 2;
+    background-size: 100% 16px;
+    background-repeat: repeat-y;
   }
 
-  .holo-card:hover {
-    box-shadow:
-      0 20px 60px -10px hsl(var(--xp) / 0.5),
-      0 0 0 1px hsl(var(--xp) / 0.25) inset;
+  /* ===== Sherpa entrance / micro-motion ===== */
+  @keyframes sherpa-breathe {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-3px) scale(1.01); }
+  }
+  @keyframes sherpa-blink-bob {
+    0%, 90%, 100% { transform: translateY(0); }
+    45%, 55%      { transform: translateY(-4px); }
+  }
+  @keyframes sun-rise {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes drift {
+    0%   { transform: translateX(-10px); }
+    100% { transform: translateX(10px); }
+  }
+  @keyframes sparkle-up {
+    0%   { transform: translateY(0) scale(0.8); opacity: 0; }
+    30%  { opacity: 1; }
+    100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
   }
 
-  /* Locked / silhouette variant for not-yet-mastered superpowers */
-  .holo-card-locked {
-    background: linear-gradient(145deg, hsl(230 20% 12%), hsl(230 25% 8%));
-    border: 1px dashed hsl(var(--border));
-  }
+  .animate-sherpa-breathe { animation: sherpa-breathe 4s ease-in-out infinite; }
+  .animate-sherpa-bob     { animation: sherpa-blink-bob 5s ease-in-out infinite; }
+  .animate-sun-rise       { animation: sun-rise 1.2s ease-out both; }
+  .animate-drift          { animation: drift 14s ease-in-out infinite alternate; }
+  .animate-sparkle        { animation: sparkle-up 1.4s ease-out forwards; }
 
   @media (prefers-reduced-motion: reduce) {
-    .holo-card {
-      transition: none;
+    .animate-sherpa-breathe,
+    .animate-sherpa-bob,
+    .animate-drift {
+      animation: none;
     }
   }
 }
-

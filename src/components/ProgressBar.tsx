@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 interface ProgressBarProps {
   value: number;
   max?: number;
-  variant?: "energy" | "xp" | "power" | "default";
+  variant?: "energy" | "xp" | "power" | "summit" | "sunrise" | "default";
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
 }
@@ -11,7 +11,9 @@ interface ProgressBarProps {
 const variantClasses = {
   energy: "gradient-energy",
   xp: "gradient-xp",
-  power: "bg-power",
+  summit: "gradient-summit",
+  sunrise: "gradient-sunrise",
+  power: "bg-summit",
   default: "bg-primary",
 };
 
@@ -35,7 +37,7 @@ const ProgressBar = ({ value, max = 100, variant = "default", size = "md", showL
         />
       </div>
       {showLabel && (
-        <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+        <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
           {Math.round(pct)}%
         </span>
       )}
