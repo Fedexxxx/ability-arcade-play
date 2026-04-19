@@ -159,6 +159,32 @@ const ExplorerProfilePage = () => {
       <button className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-display text-base shadow-summit">
         Personalizar a Sherpa
       </button>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button className="mt-3 w-full bg-card border border-border rounded-2xl py-3.5 font-display text-base text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors flex items-center justify-center gap-2 shadow-terrain">
+            <RotateCcw size={16} />
+            Reiniciar explorador
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Empezar el ascenso de nuevo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Borraré tu nombre, tu insignia y tu altitud. Volverás al inicio del sendero para crear un nuevo explorador.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Seguir escalando</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReset}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Sí, reiniciar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
