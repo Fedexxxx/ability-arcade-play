@@ -59,9 +59,17 @@ const ExplorerProfilePage = () => {
           <Compass size={14} />
           <span>Explorador</span>
         </div>
-        <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
-        <h1 className="font-display text-2xl mt-2">{userProfile.name}</h1>
-        <p className="text-sm text-muted-foreground">Nivel {userProfile.level} · Aprendiz de cima</p>
+        {explorer ? (
+          <div className="mx-auto w-20 h-20 rounded-full bg-card border-2 border-primary/40 shadow-summit flex items-center justify-center text-4xl">
+            {explorer.avatar}
+          </div>
+        ) : (
+          <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
+        )}
+        <h1 className="font-display text-2xl mt-2">{explorer?.name ?? userProfile.name}</h1>
+        <p className="text-sm text-muted-foreground">
+          Nivel {userProfile.level} · {explorer ? `${explorer.ageBand} años · ` : ""}Aprendiz de cima
+        </p>
 
         <div className="max-w-[220px] mx-auto mt-3">
           <ProgressBar value={userProfile.xp} max={userProfile.xpToNext} variant="sunrise" size="md" />
