@@ -46,7 +46,7 @@ const BasecampPage = () => {
 
       <header className="px-5 pt-8 pb-4 flex items-center gap-3">
         <div className="w-11 h-11 rounded-2xl bg-card border border-border flex items-center justify-center text-xl shadow-terrain">
-          {userProfile.avatar}
+          {explorerAvatar}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
@@ -72,7 +72,7 @@ const BasecampPage = () => {
         <h1 className="font-display text-3xl leading-tight text-foreground">
           {greeting.split(",")[0]},
           <br />
-          <span className="text-gradient-summit">{userProfile.name}</span>
+          <span className="text-gradient-summit">{explorerName}</span>
         </h1>
       </section>
 
