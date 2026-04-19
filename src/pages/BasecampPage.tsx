@@ -5,6 +5,7 @@ import ProgressBar from "@/components/ProgressBar";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa from "@/components/Sherpa";
 import { userProfile, superpowers, missions } from "@/data/mockData";
+import { useExplorer } from "@/hooks/useExplorer";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
 const greetings = [
@@ -15,10 +16,13 @@ const greetings = [
 
 const BasecampPage = () => {
   const navigate = useNavigate();
+  const explorer = useExplorer();
   const activeSP = superpowers.find((s) => s.status === "in-progress") ?? superpowers.find((s) => s.status === "available");
   const activeModule = activeSP?.modules.find((m) => m.status === "in-progress") ?? activeSP?.modules.find((m) => m.status === "available");
   const dailyMission = missions.find((m) => m.type === "daily" && !m.completed);
 
+  const explorerName = explorer?.name ?? userProfile.name;
+  const explorerAvatar = explorer?.avatar ?? userProfile.avatar;
   const greeting = greetings[Math.floor(userProfile.streak) % greetings.length];
 
   return (
@@ -42,7 +46,7 @@ const BasecampPage = () => {
 
       <header className="px-5 pt-8 pb-4 flex items-center gap-3">
         <div className="w-11 h-11 rounded-2xl bg-card border border-border flex items-center justify-center text-xl shadow-terrain">
-          {userProfile.avatar}
+          {explorerAvatar}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
@@ -68,7 +72,7 @@ const BasecampPage = () => {
         <h1 className="font-display text-3xl leading-tight text-foreground">
           {greeting.split(",")[0]},
           <br />
-          <span className="text-gradient-summit">{userProfile.name}</span>
+          <span className="text-gradient-summit">{explorerName}</span>
         </h1>
       </section>
 
