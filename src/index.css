@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 230 25% 7%;
+    --foreground: 220 20% 95%;
+
+    --card: 230 20% 12%;
+    --card-foreground: 220 20% 95%;
+
+    --popover: 230 20% 12%;
+    --popover-foreground: 220 20% 95%;
+
+    --primary: 165 80% 48%;
+    --primary-foreground: 230 25% 7%;
+
+    --secondary: 260 70% 60%;
+    --secondary-foreground: 220 20% 95%;
+
+    --muted: 230 18% 16%;
+    --muted-foreground: 220 15% 55%;
+
+    --accent: 45 95% 60%;
+    --accent-foreground: 230 25% 7%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 220 20% 95%;
+
+    --border: 230 15% 20%;
+    --input: 230 15% 20%;
+    --ring: 165 80% 48%;
+
+    --radius: 1rem;
+
+    --energy: 165 80% 48%;
+    --power: 260 70% 60%;
+    --xp: 45 95% 60%;
+    --streak: 15 90% 55%;
+    --health: 340 75% 55%;
+
+    --sidebar-background: 230 20% 10%;
+    --sidebar-foreground: 220 20% 95%;
+    --sidebar-primary: 165 80% 48%;
+    --sidebar-primary-foreground: 230 25% 7%;
+    --sidebar-accent: 230 18% 16%;
+    --sidebar-accent-foreground: 220 20% 95%;
+    --sidebar-border: 230 15% 20%;
+    --sidebar-ring: 165 80% 48%;
+
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.1);
+  }
+
+  .glow-power {
+    box-shadow: 0 0 20px hsl(var(--power) / 0.3), 0 0 60px hsl(var(--power) / 0.1);
+  }
+
+  .glow-xp {
+    box-shadow: 0 0 20px hsl(var(--xp) / 0.3), 0 0 60px hsl(var(--xp) / 0.1);
+  }
+
+  .gradient-energy {
+    background: linear-gradient(135deg, hsl(var(--energy)), hsl(var(--power)));
+  }
+
+  .gradient-xp {
+    background: linear-gradient(135deg, hsl(var(--xp)), hsl(var(--streak)));
+  }
+
+  .gradient-card {
+    background: linear-gradient(145deg, hsl(230 20% 14%), hsl(230 20% 10%));
+  }
+
+  .text-gradient-energy {
+    background: linear-gradient(135deg, hsl(var(--energy)), hsl(var(--power)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .safe-bottom {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* ===== Holographic mastery card =====
+     Layered conic gradients + grain create an iridescent foil effect.
+     Reacts to the --mx / --my CSS vars (set on pointer move) so the shine
+     follows the cursor. Falls back gracefully without JS interaction. */
+  .holo-card {
+    --mx: 50%;
+    --my: 50%;
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(
+        circle at var(--mx) var(--my),
+        hsl(var(--xp) / 0.25),
+        transparent 45%
+      ),
+      conic-gradient(
+        from 210deg at 50% 50%,
+        hsl(280 90% 65% / 0.35),
+        hsl(190 95% 60% / 0.35),
+        hsl(150 85% 55% / 0.35),
+        hsl(45 95% 60% / 0.35),
+        hsl(330 85% 65% / 0.35),
+        hsl(280 90% 65% / 0.35)
+      ),
+      linear-gradient(145deg, hsl(230 20% 14%), hsl(230 25% 8%));
+    background-blend-mode: screen, overlay, normal;
+    border: 1px solid hsl(var(--xp) / 0.35);
+    box-shadow:
+      0 10px 40px -10px hsl(var(--xp) / 0.35),
+      0 0 0 1px hsl(var(--xp) / 0.1) inset;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .holo-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      repeating-linear-gradient(
+        115deg,
+        transparent 0,
+        transparent 6px,
+        hsl(var(--xp) / 0.08) 6px,
+        hsl(var(--xp) / 0.08) 7px
+      );
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .holo-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at var(--mx) var(--my),
+      hsl(0 0% 100% / 0.22),
+      transparent 35%
+    );
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .holo-card:hover {
+    box-shadow:
+      0 20px 60px -10px hsl(var(--xp) / 0.5),
+      0 0 0 1px hsl(var(--xp) / 0.25) inset;
+  }
+
+  /* Locked / silhouette variant for not-yet-mastered superpowers */
+  .holo-card-locked {
+    background: linear-gradient(145deg, hsl(230 20% 12%), hsl(230 25% 8%));
+    border: 1px dashed hsl(var(--border));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .holo-card {
+      transition: none;
+    }
+  }
+}
+

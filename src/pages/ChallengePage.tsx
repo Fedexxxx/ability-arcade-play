@@ -1,0 +1,280 @@
+import { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, CheckCircle2, XCircle } from "lucide-react";
+import ProgressBar from "@/components/ProgressBar";
+import QuizChallenge from "@/components/challenges/QuizChallenge";
+import VisualChallenge from "@/components/challenges/VisualChallenge";
+import MatchingChallenge from "@/components/challenges/MatchingChallenge";
+import DragDropChallenge from "@/components/challenges/DragDropChallenge";
+import { superpowers } from "@/data/mockData";
+import { celebrate } from "@/lib/celebrate";
+
+const ChallengePage = () => {
+  const { spId, modId, chId } = useParams();
+  const navigate = useNavigate();
+  const sp = superpowers.find((s) => s.id === spId);
+  const mod = sp?.modules.find((m) => m.id === modId);
+  const challenge = mod?.challenges.find((c) => c.id === chId);
+
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [phase, setPhase] = useState<"learn" | "interact" | "feedback">("learn");
+  // For non-quiz interactive challenges (matching, drag-drop) the component
+  // itself decides when the user is done and whether the answer is correct.
+  const [interactiveCorrect, setInteractiveCorrect] = useState<boolean | null>(null);
+  const celebratedRef = useRef(false);
+
+  const isQuizLike =
+    challenge?.type === "quiz" || challenge?.type === "visual";
+  const isCorrect = isQuizLike
+    ? selectedAnswer === challenge?.correctAnswer
+    : interactiveCorrect === true;
+
+  // Celebrate on entering feedback with a correct answer (once per challenge attempt).
+  useEffect(() => {
+    if (phase === "feedback" && isCorrect && !celebratedRef.current) {
+      celebratedRef.current = true;
+      celebrate();
+    }
+  }, [phase, isCorrect]);
+
+  if (!sp || !mod || !challenge) {
+    return <div className="p-4 text-center text-muted-foreground">Desafío no encontrado</div>;
+  }
+
+  const handleSubmit = () => {
+    if (isQuizLike && selectedAnswer === null) return;
+    setSubmitted(true);
+    setPhase("feedback");
+  };
+
+  const handleInteractiveResolve = (correct: boolean) => {
+    setInteractiveCorrect(correct);
+    setSubmitted(true);
+    // Small delay so the user sees the final state before feedback
+    setTimeout(() => setPhase("feedback"), 600);
+  };
+
+  const handleNext = () => {
+    const idx = mod.challenges.findIndex((c) => c.id === chId);
+    const next = mod.challenges[idx + 1];
+    if (next && next.status !== "locked") {
+      navigate(`/challenge/${spId}/${modId}/${next.id}`, { replace: true });
+      setSelectedAnswer(null);
+      setSubmitted(false);
+      setInteractiveCorrect(null);
+      celebratedRef.current = false;
+      setPhase("learn");
+    } else {
+      // Last challenge of the module → victory screen
+      navigate(`/module/${spId}/${modId}/victory`, { replace: true });
+    }
+  };
+
+  const retry = () => {
+    setSelectedAnswer(null);
+    setSubmitted(false);
+    setInteractiveCorrect(null);
+    celebratedRef.current = false;
+    setPhase("interact");
+  };
+
+  const chIdx = mod.challenges.findIndex((c) => c.id === chId);
+  const progressPct = ((chIdx + (submitted ? 1 : 0)) / mod.challenges.length) * 100;
+
+  const correctAnswerLabel = (() => {
+    if (challenge.type === "quiz") return challenge.options?.[challenge.correctAnswer!];
+    if (challenge.type === "visual") return challenge.visualOptions?.[challenge.correctAnswer!]?.label;
+    return null;
+  })();
+
+  const renderInteractive = () => {
+    switch (challenge.type) {
+      case "quiz":
+        return (
+          <QuizChallenge
+            challenge={challenge}
+            selected={selectedAnswer}
+            submitted={submitted}
+            onSelect={setSelectedAnswer}
+          />
+        );
+      case "visual":
+        return (
+          <VisualChallenge
+            challenge={challenge}
+            selected={selectedAnswer}
+            submitted={submitted}
+            onSelect={setSelectedAnswer}
+          />
+        );
+      case "matching":
+        return (
+          <MatchingChallenge
+            challenge={challenge}
+            submitted={submitted}
+            onResolve={handleInteractiveResolve}
+          />
+        );
+      case "drag-drop":
+        return (
+          <DragDropChallenge
+            challenge={challenge}
+            submitted={submitted}
+            onResolve={handleInteractiveResolve}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const ctaLabel =
+    challenge.type === "visual" ? "¡Esa es!" : "Confirmar Respuesta";
+
+  return (
+    <div className="min-h-screen px-4 pt-4 pb-8 max-w-lg mx-auto flex flex-col">
+      {/* Top bar */}
+      <div className="flex items-center gap-3 mb-4">
+        <button onClick={() => navigate(-1)} className="text-muted-foreground" aria-label="Cerrar">
+          <X size={22} />
+        </button>
+        <div className="flex-1">
+          <ProgressBar value={progressPct} variant="energy" size="sm" />
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {chIdx + 1}/{mod.challenges.length}
+        </span>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {/* Learn Phase */}
+        {phase === "learn" && challenge.concept && (
+          <motion.div
+            key="learn"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex-1 flex flex-col"
+          >
+            <div className="gradient-card rounded-2xl p-5 border border-border mb-6">
+              <p className="text-xs text-primary font-semibold mb-2 uppercase tracking-wider">
+                Concepto Clave
+              </p>
+              <p className="text-sm leading-relaxed">{challenge.concept}</p>
+              <p className="mt-4 text-[10px] uppercase tracking-wider text-muted-foreground">
+                Tipo de reto:{" "}
+                <span className="text-foreground font-semibold">
+                  {challenge.type === "quiz" && "Quiz"}
+                  {challenge.type === "visual" && "Visual"}
+                  {challenge.type === "matching" && "Asociar parejas"}
+                  {challenge.type === "drag-drop" && "Arrastrar y soltar"}
+                </span>
+              </p>
+            </div>
+
+            <div className="mt-auto">
+              <button
+                onClick={() => setPhase("interact")}
+                className="w-full gradient-energy text-primary-foreground rounded-2xl py-4 font-display font-bold text-lg glow-primary"
+              >
+                ¡A Entrenar!
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Interact Phase */}
+        {(phase === "interact" || (phase === "learn" && !challenge.concept)) && (
+          <motion.div
+            key="interact"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex-1 flex flex-col"
+          >
+            {renderInteractive()}
+
+            {isQuizLike && (
+              <div className="mt-auto">
+                <button
+                  onClick={handleSubmit}
+                  disabled={selectedAnswer === null}
+                  className={`w-full rounded-2xl py-4 font-display font-bold text-lg transition-all ${
+                    selectedAnswer !== null
+                      ? "gradient-energy text-primary-foreground glow-primary"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {ctaLabel}
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Feedback Phase */}
+        {phase === "feedback" && (
+          <motion.div
+            key="feedback"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 flex flex-col items-center justify-center text-center"
+          >
+            {isCorrect ? (
+              <>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <CheckCircle2 size={80} className="text-energy mb-4" />
+                </motion.div>
+                <h2 className="font-display text-2xl font-bold mb-2">¡Excelente!</h2>
+                <p className="text-muted-foreground text-sm mb-2">¡Lo clavaste! +25 XP</p>
+              </>
+            ) : (
+              <>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <XCircle size={80} className="text-streak mb-4" />
+                </motion.div>
+                <h2 className="font-display text-2xl font-bold mb-2">¡Casi!</h2>
+                {correctAnswerLabel && (
+                  <p className="text-muted-foreground text-sm mb-1">
+                    La respuesta correcta era:{" "}
+                    <span className="text-foreground font-medium">{correctAnswerLabel}</span>
+                  </p>
+                )}
+                <p className="text-muted-foreground text-xs mb-2">¡Sigue evolucionando! +5 XP</p>
+              </>
+            )}
+
+            <div className="w-full mt-8 space-y-3">
+              {!isCorrect && (
+                <button
+                  onClick={retry}
+                  className="w-full border border-primary text-primary rounded-2xl py-3 font-semibold"
+                >
+                  Intentar de Nuevo
+                </button>
+              )}
+              <button
+                onClick={handleNext}
+                className="w-full gradient-energy text-primary-foreground rounded-2xl py-3 font-display font-bold glow-primary"
+              >
+                Seguir Evolucionando →
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default ChallengePage;
