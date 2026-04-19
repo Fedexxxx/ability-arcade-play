@@ -1,12 +1,26 @@
 import { motion } from "framer-motion";
-import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { userProfile } from "@/data/mockData";
 import { useSoundEnabled } from "@/hooks/useSoundEnabled";
 import { prefersReducedMotion } from "@/lib/prefs";
 import { useEffect, useState } from "react";
 import Sherpa from "@/components/Sherpa";
+import { useExplorer } from "@/hooks/useExplorer";
+import { clearExplorer } from "@/lib/explorer";
 
 const stats = [
   { icon: MountainIcon, label: "Montañas",     value: userProfile.superpowersMastered, color: "text-primary" },
