@@ -1,12 +1,26 @@
 import { motion } from "framer-motion";
-import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { userProfile } from "@/data/mockData";
 import { useSoundEnabled } from "@/hooks/useSoundEnabled";
 import { prefersReducedMotion } from "@/lib/prefs";
 import { useEffect, useState } from "react";
 import Sherpa from "@/components/Sherpa";
+import { useExplorer } from "@/hooks/useExplorer";
+import { clearExplorer } from "@/lib/explorer";
 
 const stats = [
   { icon: MountainIcon, label: "Montañas",     value: userProfile.superpowersMastered, color: "text-primary" },
@@ -16,8 +30,15 @@ const stats = [
 ];
 
 const ExplorerProfilePage = () => {
+  const navigate = useNavigate();
+  const explorer = useExplorer();
   const [soundEnabled, setSoundEnabled] = useSoundEnabled();
   const [reducedMotion, setReducedMotion] = useState<boolean>(() => prefersReducedMotion());
+
+  const handleReset = () => {
+    clearExplorer();
+    navigate("/onboarding", { replace: true });
+  };
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
@@ -38,9 +59,17 @@ const ExplorerProfilePage = () => {
           <Compass size={14} />
           <span>Explorador</span>
         </div>
-        <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
-        <h1 className="font-display text-2xl mt-2">{userProfile.name}</h1>
-        <p className="text-sm text-muted-foreground">Nivel {userProfile.level} · Aprendiz de cima</p>
+        {explorer ? (
+          <div className="mx-auto w-20 h-20 rounded-full bg-card border-2 border-primary/40 shadow-summit flex items-center justify-center text-4xl">
+            {explorer.avatar}
+          </div>
+        ) : (
+          <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
+        )}
+        <h1 className="font-display text-2xl mt-2">{explorer?.name ?? userProfile.name}</h1>
+        <p className="text-sm text-muted-foreground">
+          Nivel {userProfile.level} · {explorer ? `${explorer.ageBand} años · ` : ""}Aprendiz de cima
+        </p>
 
         <div className="max-w-[220px] mx-auto mt-3">
           <ProgressBar value={userProfile.xp} max={userProfile.xpToNext} variant="sunrise" size="md" />
@@ -130,6 +159,32 @@ const ExplorerProfilePage = () => {
       <button className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-display text-base shadow-summit">
         Personalizar a Sherpa
       </button>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button className="mt-3 w-full bg-card border border-border rounded-2xl py-3.5 font-display text-base text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors flex items-center justify-center gap-2 shadow-terrain">
+            <RotateCcw size={16} />
+            Reiniciar explorador
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Empezar el ascenso de nuevo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Borraré tu nombre, tu insignia y tu altitud. Volverás al inicio del sendero para crear un nuevo explorador.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Seguir escalando</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReset}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Sí, reiniciar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
