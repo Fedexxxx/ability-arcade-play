@@ -75,15 +75,15 @@ const OnboardingPage = () => {
       {/* Top bar with progress dots */}
       <header className="px-5 pt-6 pb-2 max-w-lg w-full mx-auto flex items-center gap-3">
         <button
-          onClick={back}
-          disabled={step === 0}
+          onClick={editMode && step === 1 ? () => navigate("/profile") : back}
+          disabled={!editMode && step === 0}
           className="w-10 h-10 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center disabled:opacity-30"
-          aria-label="Volver"
+          aria-label={editMode && step === 1 ? "Cancelar edición" : "Volver"}
         >
           <ArrowLeft size={18} />
         </button>
         <div className="flex-1 flex items-center gap-1.5 justify-center">
-          {[0, 1, 2, 3, 4].map((i) => (
+          {(editMode ? [1, 2, 3, 4] : [0, 1, 2, 3, 4]).map((i) => (
             <span
               key={i}
               className={`h-1.5 rounded-full transition-all ${
@@ -141,7 +141,7 @@ const OnboardingPage = () => {
             disabled={!canContinue}
             className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-4 px-5 font-display text-lg shadow-summit flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none active:scale-[0.99] transition-transform"
           >
-            {ctaLabel(step)}
+            {ctaLabel(step, editMode)}
             {step === 4 ? <Mountain size={20} /> : <ArrowRight size={20} />}
           </button>
         </div>
@@ -293,13 +293,13 @@ const messageFor = (step: Step, name: string) => {
   }
 };
 
-const ctaLabel = (step: Step) => {
+const ctaLabel = (step: Step, editMode = false) => {
   switch (step) {
     case 0: return "Empezar el ascenso";
     case 1: return "Continuar";
     case 2: return "Continuar";
     case 3: return "Continuar";
-    case 4: return "Ir al Basecamp";
+    case 4: return editMode ? "Guardar cambios" : "Ir al Basecamp";
   }
 };
 
