@@ -10,9 +10,9 @@ import { useDensity } from "@/contexts/AgeDensityContext";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
 const greetings = [
-  "Buen día, explorador.",
-  "Listo para subir un poco más.",
-  "Hoy avanzamos juntos.",
+  "Buen día",
+  "Listo para subir un poco más",
+  "Hoy avanzamos juntos",
 ];
 
 const BasecampPage = () => {
