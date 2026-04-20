@@ -15,9 +15,16 @@ const statusIcon = {
 const SuperpowerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const density = useDensity();
   const sp = superpowers.find((s) => s.id === id);
 
   if (!sp) return <div className="p-4 text-center text-muted-foreground">No encontrado</div>;
+
+  const heroIconSize = density.scale === "lg" ? "text-7xl" : density.scale === "md" ? "text-5xl" : "text-4xl";
+  const heroTitle = density.scale === "lg" ? "text-3xl" : density.scale === "md" ? "text-2xl" : "text-xl";
+  const cardPad = density.scale === "lg" ? "p-5" : density.scale === "md" ? "p-4" : "p-3.5";
+  const modIcon = density.scale === "lg" ? "w-11 h-11" : density.scale === "md" ? "w-8 h-8" : "w-7 h-7";
+  const modTitle = density.scale === "lg" ? "text-base" : density.scale === "md" ? "text-sm" : "text-sm";
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-4 max-w-lg mx-auto">

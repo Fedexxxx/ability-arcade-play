@@ -22,10 +22,16 @@ const typeColors: Record<string, string> = {
 const ModulePage = () => {
   const { spId, modId } = useParams();
   const navigate = useNavigate();
+  const density = useDensity();
   const sp = superpowers.find((s) => s.id === spId);
   const mod = sp?.modules.find((m) => m.id === modId);
 
   if (!sp || !mod) return <div className="p-4 text-center text-muted-foreground">No encontrado</div>;
+
+  const heroTitle = density.scale === "lg" ? "text-2xl" : density.scale === "md" ? "text-xl" : "text-lg";
+  const cardPad = density.scale === "lg" ? "p-4" : density.scale === "md" ? "p-3.5" : "p-3";
+  const cardTitle = density.scale === "lg" ? "text-base" : density.scale === "md" ? "text-sm" : "text-sm";
+  const cardIcon = density.scale === "lg" ? "w-11 h-11" : density.scale === "md" ? "w-8 h-8" : "w-7 h-7";
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-4 max-w-lg mx-auto">
