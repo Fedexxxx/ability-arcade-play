@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useDensity } from "@/contexts/AgeDensityContext";
 
 const tabs = [
-  { path: "/", icon: Tent, label: "Basecamp" },
+  { path: "/", icon: Tent, label: "Campamento" },
   { path: "/explore", icon: Mountain, label: "Montañas" },
   { path: "/journey", icon: Map, label: "Ruta" },
   { path: "/profile", icon: User, label: "Explorador" },

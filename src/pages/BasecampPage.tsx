@@ -76,7 +76,7 @@ const BasecampPage = () => {
       <section className="px-5 pt-4 pb-2">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mb-2">
           <Tent size={14} />
-          <span>Basecamp</span>
+          <span>Campamento</span>
         </div>
 <h1 className={`font-display ${heroSize} leading-tight text-foreground max-w-[16ch]`}>
   {greeting},
