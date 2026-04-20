@@ -5,6 +5,7 @@ import { Flag, Lock, CheckCircle2, Sparkles, Mountain as MountainIcon } from "lu
 import { superpowers, userProfile } from "@/data/mockData";
 import Sherpa from "@/components/Sherpa";
 import SherpaSpeech from "@/components/SherpaSpeech";
+import { useDensity } from "@/contexts/AgeDensityContext";
 
 /**
  * JourneyMap — vertical scrolling mountain path.
@@ -14,6 +15,7 @@ import SherpaSpeech from "@/components/SherpaSpeech";
 const JourneyPage = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+  const density = useDensity();
 
   // Flatten all mountains into a single chain of checkpoints,
   // ordered by mountain order then module order.
@@ -37,6 +39,14 @@ const JourneyPage = () => {
   const completedCount = checkpoints.filter((c) => c.status === "completed").length;
   const totalCount = checkpoints.length;
   const altitude = Math.round((completedCount / totalCount) * 100);
+
+  // Density-tuned class fragments
+  const summitTitle = density.scale === "lg" ? "text-3xl" : density.scale === "md" ? "text-2xl" : "text-xl";
+  const cpMarker = density.scale === "lg" ? "w-12 h-12" : density.scale === "md" ? "w-10 h-10" : "w-9 h-9";
+  const cpMarkerIcon = density.scale === "lg" ? 20 : density.scale === "md" ? 16 : 14;
+  const cpCardPad = density.scale === "lg" ? "p-4" : density.scale === "md" ? "p-3" : "p-2.5";
+  const cpCardTitle = density.scale === "lg" ? "text-base" : density.scale === "md" ? "text-sm" : "text-xs";
+  const trailGap = density.scale === "lg" ? "gap-9" : density.scale === "md" ? "gap-7" : "gap-6";
 
   return (
     <div className="min-h-screen pb-28 max-w-lg mx-auto" ref={containerRef}>
@@ -62,10 +72,12 @@ const JourneyPage = () => {
           <span className="text-[10px] uppercase tracking-[0.18em] font-bold text-secondary">La cima</span>
           <Sparkles size={14} className="text-secondary" />
         </div>
-        <h2 className="font-display text-2xl text-summit">Cumbre del Conocimiento</h2>
-        <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-          Cada checkpoint te acerca un poco más. Hoy escalaste {completedCount} de {totalCount}.
-        </p>
+        <h2 className={`font-display ${summitTitle} text-summit`}>Cumbre del Conocimiento</h2>
+        {density.showSubtext && (
+          <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+            Cada checkpoint te acerca un poco más. Hoy escalaste {completedCount} de {totalCount}.
+          </p>
+        )}
       </section>
 
       {/* The trail (rendered top→bottom in DOM, but col-reverse so user climbs upward) */}
@@ -76,7 +88,7 @@ const JourneyPage = () => {
           className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[3px] trail-line"
         />
 
-        <ol className="relative flex flex-col-reverse gap-7">
+        <ol className={`relative flex flex-col-reverse ${trailGap}`}>
           {checkpoints.map((cp, i) => {
             const side = i % 2 === 0 ? "left" : "right";
             const StatusIcon =
@@ -101,14 +113,14 @@ const JourneyPage = () => {
                 <button
                   disabled={cp.status === "locked"}
                   onClick={() => navigate(`/module/${cp.spId}/${cp.modId}`)}
-                  className={`w-[44%] bg-card border border-border rounded-2xl p-3 shadow-terrain text-left ${
+                  className={`w-[44%] bg-card border border-border rounded-2xl ${cpCardPad} shadow-terrain text-left ${
                     side === "left" ? "mr-auto" : "ml-auto"
                   } ${cp.status === "locked" ? "opacity-55" : "active:scale-[0.98] transition-transform"}`}
                 >
                   <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground truncate">
                     {cp.spIcon} {cp.spTitle}
                   </p>
-                  <p className="font-display text-sm leading-tight mt-0.5 line-clamp-2">
+                  <p className={`font-display ${cpCardTitle} leading-tight mt-0.5 line-clamp-2`}>
                     {cp.isBoss ? "🏔️ " : ""}
                     {cp.title}
                   </p>
@@ -117,9 +129,9 @@ const JourneyPage = () => {
                 {/* Checkpoint marker on the trail line */}
                 <div className="absolute left-1/2 -translate-x-1/2">
                   <div
-                    className={`w-10 h-10 rounded-full border-2 flex items-center justify-center shadow-terrain ${accent}`}
+                    className={`${cpMarker} rounded-full border-2 flex items-center justify-center shadow-terrain ${accent}`}
                   >
-                    <StatusIcon size={16} />
+                    <StatusIcon size={cpMarkerIcon} />
                   </div>
                 </div>
               </motion.li>
