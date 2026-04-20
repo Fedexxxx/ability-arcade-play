@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import BottomNav from "@/components/BottomNav";
 import RequireExplorer from "@/components/RequireExplorer";
+import { AgeDensityProvider } from "@/contexts/AgeDensityContext";
 import OnboardingPage from "./pages/OnboardingPage";
 import BasecampPage from "./pages/BasecampPage";
 import JourneyPage from "./pages/JourneyPage";
@@ -36,23 +37,25 @@ const App = () => (
             path="*"
             element={
               <RequireExplorer>
-                <Routes>
-                  <Route path="/" element={<BasecampPage />} />
-                  <Route path="/journey" element={<JourneyPage />} />
-                  <Route path="/explore" element={<ExplorePage />} />
-                  <Route path="/superpower/:id" element={<SuperpowerPage />} />
-                  <Route path="/module/:spId/:modId" element={<ModulePage />} />
-                  <Route path="/module/:spId/:modId/victory" element={<ModuleVictoryPage />} />
-                  <Route path="/superpower/:id/victory" element={<SuperpowerVictoryPage />} />
-                  <Route path="/challenge/:spId/:modId/:chId" element={<ChallengePage />} />
-                  {/* Legacy routes still reachable from older internal links */}
-                  <Route path="/missions" element={<MissionsPage />} />
-                  <Route path="/achievements" element={<AchievementsPage />} />
-                  <Route path="/mastery" element={<MasteryGalleryPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <BottomNav />
+                <AgeDensityProvider>
+                  <Routes>
+                    <Route path="/" element={<BasecampPage />} />
+                    <Route path="/journey" element={<JourneyPage />} />
+                    <Route path="/explore" element={<ExplorePage />} />
+                    <Route path="/superpower/:id" element={<SuperpowerPage />} />
+                    <Route path="/module/:spId/:modId" element={<ModulePage />} />
+                    <Route path="/module/:spId/:modId/victory" element={<ModuleVictoryPage />} />
+                    <Route path="/superpower/:id/victory" element={<SuperpowerVictoryPage />} />
+                    <Route path="/challenge/:spId/:modId/:chId" element={<ChallengePage />} />
+                    {/* Legacy routes still reachable from older internal links */}
+                    <Route path="/missions" element={<MissionsPage />} />
+                    <Route path="/achievements" element={<AchievementsPage />} />
+                    <Route path="/mastery" element={<MasteryGalleryPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <BottomNav />
+                </AgeDensityProvider>
               </RequireExplorer>
             }
           />
