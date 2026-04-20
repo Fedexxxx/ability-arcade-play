@@ -125,7 +125,7 @@ const OnboardingPage = () => {
             <div className="mt-auto pt-6">
               <SherpaSpeech
                 mood={stepMoods[step]}
-                size="md"
+                size="lg"
                 message={messageFor(step, name)}
               />
             </div>
@@ -153,15 +153,15 @@ const OnboardingPage = () => {
 // ───────────────────────── Steps ─────────────────────────
 
 const Welcome = forwardRef<HTMLDivElement>((_, ref) => (
-  <div ref={ref} className="text-center pt-6">
-    <div className="flex justify-center mb-4">
+  <div ref={ref} className="text-center pt-8">
+    <div className="flex justify-center mb-6">
       <Sherpa mood="encouraging" size="xl" halo priority />
     </div>
-    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground font-semibold">
       Bienvenido a
     </p>
-    <h1 className="font-display text-4xl mt-1 text-gradient-summit">Sherpa Go</h1>
-    <p className="text-muted-foreground mt-3 max-w-sm mx-auto">
+    <h1 className="font-display text-5xl mt-2 text-gradient-summit">Sherpa Go</h1>
+    <p className="text-muted-foreground mt-4 max-w-sm mx-auto text-lg leading-relaxed">
       Soy Sherpa. Voy a guiarte mientras escalas tu propia montaña de conocimiento.
     </p>
   </div>
@@ -170,23 +170,23 @@ Welcome.displayName = "Welcome";
 
 const NameStep = forwardRef<HTMLDivElement, { name: string; setName: (v: string) => void }>(
   ({ name, setName }, ref) => (
-    <div ref={ref} className="pt-2">
-      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+    <div ref={ref} className="pt-4">
+      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground font-semibold">
         Paso 1 · Tu nombre
       </p>
-      <h2 className="font-display text-3xl mt-1">¿Cómo te llamo?</h2>
-      <p className="text-sm text-muted-foreground mt-1">Así te saludaré en cada Basecamp.</p>
+      <h2 className="font-display text-4xl mt-2">¿Cómo te llamo?</h2>
+      <p className="text-base text-muted-foreground mt-2">Así te saludaré en cada Basecamp.</p>
 
-      <div className="mt-6">
+      <div className="mt-8">
         <input
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value.slice(0, 20))}
           placeholder="Tu nombre de explorador"
           maxLength={20}
-          className="w-full bg-card border border-border rounded-2xl px-5 py-4 font-display text-xl shadow-terrain focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="w-full bg-card border border-border rounded-2xl px-6 py-5 font-display text-2xl shadow-terrain focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
-        <p className="text-xs text-muted-foreground mt-2 text-right">{name.trim().length}/20</p>
+        <p className="text-sm text-muted-foreground mt-3 text-right">{name.trim().length}/20</p>
       </div>
     </div>
   )
@@ -202,14 +202,14 @@ const AvatarStep = forwardRef<HTMLDivElement, { avatar: string; setAvatar: (v: s
       <h2 className="font-display text-3xl mt-1">Elige tu compañero</h2>
       <p className="text-sm text-muted-foreground mt-1">Te acompañará en la mochila.</p>
 
-      <div className="grid grid-cols-4 gap-3 mt-6">
+      <div className="grid grid-cols-4 gap-4 mt-6">
         {AVATAR_CHOICES.map((emoji) => {
           const selected = avatar === emoji;
           return (
             <button
               key={emoji}
               onClick={() => setAvatar(emoji)}
-              className={`aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl transition-all active:scale-95 ${
+              className={`aspect-square rounded-2xl border-2 flex items-center justify-center text-4xl transition-all active:scale-95 ${
                 selected
                   ? "border-primary bg-primary/10 shadow-summit scale-105"
                   : "border-border bg-card shadow-terrain"
@@ -231,21 +231,21 @@ const AgeStep = forwardRef<
   HTMLDivElement,
   { ageBand: AgeBand | ""; setAgeBand: (v: AgeBand) => void }
 >(({ ageBand, setAgeBand }, ref) => (
-  <div ref={ref} className="pt-2">
-    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+  <div ref={ref} className="pt-4">
+    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground font-semibold">
       Paso 3 · Tu altitud
     </p>
-    <h2 className="font-display text-3xl mt-1">¿Cuántos años tienes?</h2>
-    <p className="text-sm text-muted-foreground mt-1">Ajusto el ritmo para ti.</p>
+    <h2 className="font-display text-4xl mt-2">¿Cuántos años tienes?</h2>
+    <p className="text-base text-muted-foreground mt-2">Ajusto el ritmo para ti.</p>
 
-    <div className="space-y-3 mt-6">
+    <div className="space-y-4 mt-8">
       {AGE_BANDS.map((band) => {
         const selected = ageBand === band.id;
         return (
           <button
             key={band.id}
             onClick={() => setAgeBand(band.id)}
-            className={`w-full text-left rounded-2xl border-2 p-4 flex items-center gap-3 transition-all active:scale-[0.99] ${
+            className={`w-full text-left rounded-2xl border-2 p-5 flex items-center gap-4 transition-all active:scale-[0.99] ${
               selected
                 ? "border-primary bg-primary/10 shadow-summit"
                 : "border-border bg-card shadow-terrain"
@@ -253,15 +253,15 @@ const AgeStep = forwardRef<
             aria-pressed={selected}
           >
             <div className="flex-1">
-              <p className="font-display text-lg">{band.label}</p>
-              <p className="text-xs text-muted-foreground">{band.hint}</p>
+              <p className="font-display text-xl">{band.label}</p>
+              <p className="text-sm text-muted-foreground">{band.hint}</p>
             </div>
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+              className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${
                 selected ? "border-primary bg-primary text-primary-foreground" : "border-border"
               }`}
             >
-              {selected && <Check size={14} strokeWidth={3} />}
+              {selected && <Check size={16} strokeWidth={3} />}
             </div>
           </button>
         );
