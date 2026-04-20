@@ -10,9 +10,9 @@ import { useDensity } from "@/contexts/AgeDensityContext";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
 const greetings = [
-  "Buen día, explorador.",
-  "Listo para subir un poco más.",
-  "Hoy avanzamos juntos.",
+  "Buen día",
+  "Listo para subir un poco más",
+  "Hoy avanzamos juntos",
 ];
 
 const BasecampPage = () => {
@@ -79,7 +79,7 @@ const BasecampPage = () => {
           <span>Basecamp</span>
         </div>
         <h1 className={`font-display ${heroSize} leading-tight text-foreground`}>
-          {greeting.split(",")[0]},
+          {greeting},
           <br />
           <span className="text-gradient-summit">{explorerName}</span>
         </h1>
