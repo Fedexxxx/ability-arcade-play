@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
@@ -38,6 +38,23 @@ const ExplorerProfilePage = () => {
   const handleReset = () => {
     clearExplorer();
     navigate("/onboarding", { replace: true });
+  };
+
+  const handleEdit = () => {
+    if (!explorer) {
+      navigate("/onboarding");
+      return;
+    }
+    navigate("/onboarding", {
+      state: {
+        editMode: true,
+        prefill: {
+          name: explorer.name,
+          avatar: explorer.avatar,
+          ageBand: explorer.ageBand,
+        },
+      },
+    });
   };
 
   useEffect(() => {
@@ -156,8 +173,12 @@ const ExplorerProfilePage = () => {
         </p>
       </section>
 
-      <button className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-display text-base shadow-summit">
-        Personalizar a Sherpa
+      <button
+        onClick={handleEdit}
+        className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-display text-base shadow-summit flex items-center justify-center gap-2"
+      >
+        <Pencil size={16} />
+        Editar explorador
       </button>
 
       <AlertDialog>
