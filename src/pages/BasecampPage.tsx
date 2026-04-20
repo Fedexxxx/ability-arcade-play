@@ -18,6 +18,7 @@ const greetings = [
 const BasecampPage = () => {
   const navigate = useNavigate();
   const explorer = useExplorer();
+  const density = useDensity();
   const activeSP = superpowers.find((s) => s.status === "in-progress") ?? superpowers.find((s) => s.status === "available");
   const activeModule = activeSP?.modules.find((m) => m.status === "in-progress") ?? activeSP?.modules.find((m) => m.status === "available");
   const dailyMission = missions.find((m) => m.type === "daily" && !m.completed);
@@ -25,6 +26,13 @@ const BasecampPage = () => {
   const explorerName = explorer?.name ?? userProfile.name;
   const explorerAvatar = explorer?.avatar ?? userProfile.avatar;
   const greeting = greetings[Math.floor(userProfile.streak) % greetings.length];
+
+  // Density-tuned class fragments
+  const heroSize = density.scale === "lg" ? "text-4xl" : density.scale === "md" ? "text-3xl" : "text-2xl";
+  const ctaTitle = density.scale === "lg" ? "text-2xl" : density.scale === "md" ? "text-xl" : "text-lg";
+  const ctaPad = density.scale === "lg" ? "p-6" : density.scale === "md" ? "p-5" : "p-4";
+  const ctaArrow = density.scale === "lg" ? "w-14 h-14" : density.scale === "md" ? "w-12 h-12" : "w-10 h-10";
+  const cardTitle = density.scale === "lg" ? "text-lg" : density.scale === "md" ? "text-base" : "text-sm";
 
   return (
     <div className="min-h-screen pb-28 max-w-lg mx-auto relative overflow-hidden">
