@@ -135,6 +135,13 @@ const ChallengePage = () => {
   const ctaLabel =
     challenge.type === "visual" ? "¡Esa es!" : "Confirmar Respuesta";
 
+  // Density-tuned classes
+  const ctaPad = density.scale === "lg" ? "py-5 text-xl" : density.scale === "md" ? "py-4 text-lg" : "py-3.5 text-base";
+  const conceptPad = density.scale === "lg" ? "p-6" : density.scale === "md" ? "p-5" : "p-4";
+  const conceptText = density.scale === "lg" ? "text-base" : density.scale === "md" ? "text-sm" : "text-sm";
+  const feedbackIconSize = density.scale === "lg" ? 100 : density.scale === "md" ? 80 : 64;
+  const feedbackTitle = density.scale === "lg" ? "text-3xl" : density.scale === "md" ? "text-2xl" : "text-xl";
+
   return (
     <div className="min-h-screen px-4 pt-4 pb-8 max-w-lg mx-auto flex flex-col">
       {/* Top bar */}
