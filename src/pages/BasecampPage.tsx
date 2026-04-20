@@ -11,8 +11,8 @@ import mountainBg from "@/assets/mountain-bg.jpg";
 
 const greetings = [
   "Buen día",
-  "Listo para subir un poco más",
-  "Hoy avanzamos juntos",
+  "A subir",
+  "Hoy avanzamos",
 ];
 
 const BasecampPage = () => {
@@ -78,11 +78,11 @@ const BasecampPage = () => {
           <Tent size={14} />
           <span>Basecamp</span>
         </div>
-        <h1 className={`font-display ${heroSize} leading-tight text-foreground`}>
-          {greeting},
-          <br />
-          <span className="text-gradient-summit">{explorerName}</span>
-        </h1>
+<h1 className={`font-display ${heroSize} leading-tight text-foreground max-w-[16ch]`}>
+  {greeting},
+  <br />
+  <span className="text-gradient-summit">{explorerName}</span>
+</h1>
       </section>
 
       <section className="px-5 pt-2 pb-4">
