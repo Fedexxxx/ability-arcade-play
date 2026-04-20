@@ -1,11 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Mountain, Check } from "lucide-react";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa, { type SherpaMood } from "@/components/Sherpa";
 import { AGE_BANDS, AVATAR_CHOICES, saveExplorer, type AgeBand } from "@/lib/explorer";
 import mountainBg from "@/assets/mountain-bg.jpg";
+
+/** Optional state passed via navigate("/onboarding", { state: { editMode, prefill } }). */
+interface OnboardingNavState {
+  editMode?: boolean;
+  prefill?: { name?: string; avatar?: string; ageBand?: AgeBand };
+}
 
 type Step = 0 | 1 | 2 | 3 | 4;
 
@@ -19,10 +25,16 @@ const stepMoods: Record<Step, SherpaMood> = {
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>(0);
-  const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState<string>("");
-  const [ageBand, setAgeBand] = useState<AgeBand | "">("");
+  const location = useLocation();
+  const navState = (location.state as OnboardingNavState | null) ?? null;
+  const editMode = !!navState?.editMode;
+  const prefill = navState?.prefill;
+
+  // In edit mode we skip the welcome step and seed the form with current values.
+  const [step, setStep] = useState<Step>(editMode ? 1 : 0);
+  const [name, setName] = useState(prefill?.name ?? "");
+  const [avatar, setAvatar] = useState<string>(prefill?.avatar ?? "");
+  const [ageBand, setAgeBand] = useState<AgeBand | "">(prefill?.ageBand ?? "");
 
   const canContinue =
     (step === 0) ||
@@ -35,13 +47,15 @@ const OnboardingPage = () => {
     if (step === 4) {
       if (!ageBand || !avatar || !name.trim()) return;
       saveExplorer({ name: name.trim(), avatar, ageBand });
-      navigate("/", { replace: true });
+      // Edit mode returns to the profile so the user sees the updated card.
+      navigate(editMode ? "/profile" : "/", { replace: true });
       return;
     }
     setStep((s) => Math.min(4, (s + 1)) as Step);
   };
 
-  const back = () => setStep((s) => Math.max(0, (s - 1)) as Step);
+  // In edit mode, never let the back button drop us back to the welcome step.
+  const back = () => setStep((s) => Math.max(editMode ? 1 : 0, (s - 1)) as Step);
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col">
