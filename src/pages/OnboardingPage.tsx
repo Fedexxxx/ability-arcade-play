@@ -152,8 +152,8 @@ const OnboardingPage = () => {
 
 // ───────────────────────── Steps ─────────────────────────
 
-const Welcome = () => (
-  <div className="text-center pt-6">
+const Welcome = forwardRef<HTMLDivElement>((_, ref) => (
+  <div ref={ref} className="text-center pt-6">
     <div className="flex justify-center mb-4">
       <Sherpa mood="encouraging" size="xl" halo priority />
     </div>
@@ -165,63 +165,73 @@ const Welcome = () => (
       Soy Sherpa. Voy a guiarte mientras escalas tu propia montaña de conocimiento.
     </p>
   </div>
-);
+));
+Welcome.displayName = "Welcome";
 
-const NameStep = ({ name, setName }: { name: string; setName: (v: string) => void }) => (
-  <div className="pt-2">
-    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
-      Paso 1 · Tu nombre
-    </p>
-    <h2 className="font-display text-3xl mt-1">¿Cómo te llamo?</h2>
-    <p className="text-sm text-muted-foreground mt-1">Así te saludaré en cada Basecamp.</p>
+const NameStep = forwardRef<HTMLDivElement, { name: string; setName: (v: string) => void }>(
+  ({ name, setName }, ref) => (
+    <div ref={ref} className="pt-2">
+      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+        Paso 1 · Tu nombre
+      </p>
+      <h2 className="font-display text-3xl mt-1">¿Cómo te llamo?</h2>
+      <p className="text-sm text-muted-foreground mt-1">Así te saludaré en cada Basecamp.</p>
 
-    <div className="mt-6">
-      <input
-        autoFocus
-        value={name}
-        onChange={(e) => setName(e.target.value.slice(0, 20))}
-        placeholder="Tu nombre de explorador"
-        maxLength={20}
-        className="w-full bg-card border border-border rounded-2xl px-5 py-4 font-display text-xl shadow-terrain focus:outline-none focus:ring-2 focus:ring-primary/40"
-      />
-      <p className="text-xs text-muted-foreground mt-2 text-right">{name.trim().length}/20</p>
+      <div className="mt-6">
+        <input
+          autoFocus
+          value={name}
+          onChange={(e) => setName(e.target.value.slice(0, 20))}
+          placeholder="Tu nombre de explorador"
+          maxLength={20}
+          className="w-full bg-card border border-border rounded-2xl px-5 py-4 font-display text-xl shadow-terrain focus:outline-none focus:ring-2 focus:ring-primary/40"
+        />
+        <p className="text-xs text-muted-foreground mt-2 text-right">{name.trim().length}/20</p>
+      </div>
     </div>
-  </div>
+  )
 );
+NameStep.displayName = "NameStep";
 
-const AvatarStep = ({ avatar, setAvatar }: { avatar: string; setAvatar: (v: string) => void }) => (
-  <div className="pt-2">
-    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
-      Paso 2 · Tu insignia
-    </p>
-    <h2 className="font-display text-3xl mt-1">Elige tu compañero</h2>
-    <p className="text-sm text-muted-foreground mt-1">Te acompañará en la mochila.</p>
+const AvatarStep = forwardRef<HTMLDivElement, { avatar: string; setAvatar: (v: string) => void }>(
+  ({ avatar, setAvatar }, ref) => (
+    <div ref={ref} className="pt-2">
+      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+        Paso 2 · Tu insignia
+      </p>
+      <h2 className="font-display text-3xl mt-1">Elige tu compañero</h2>
+      <p className="text-sm text-muted-foreground mt-1">Te acompañará en la mochila.</p>
 
-    <div className="grid grid-cols-4 gap-3 mt-6">
-      {AVATAR_CHOICES.map((emoji) => {
-        const selected = avatar === emoji;
-        return (
-          <button
-            key={emoji}
-            onClick={() => setAvatar(emoji)}
-            className={`aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl transition-all active:scale-95 ${
-              selected
-                ? "border-primary bg-primary/10 shadow-summit scale-105"
-                : "border-border bg-card shadow-terrain"
-            }`}
-            aria-pressed={selected}
-            aria-label={`Avatar ${emoji}`}
-          >
-            {emoji}
-          </button>
-        );
-      })}
+      <div className="grid grid-cols-4 gap-3 mt-6">
+        {AVATAR_CHOICES.map((emoji) => {
+          const selected = avatar === emoji;
+          return (
+            <button
+              key={emoji}
+              onClick={() => setAvatar(emoji)}
+              className={`aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl transition-all active:scale-95 ${
+                selected
+                  ? "border-primary bg-primary/10 shadow-summit scale-105"
+                  : "border-border bg-card shadow-terrain"
+              }`}
+              aria-pressed={selected}
+              aria-label={`Avatar ${emoji}`}
+            >
+              {emoji}
+            </button>
+          );
+        })}
+      </div>
     </div>
-  </div>
+  )
 );
+AvatarStep.displayName = "AvatarStep";
 
-const AgeStep = ({ ageBand, setAgeBand }: { ageBand: AgeBand | ""; setAgeBand: (v: AgeBand) => void }) => (
-  <div className="pt-2">
+const AgeStep = forwardRef<
+  HTMLDivElement,
+  { ageBand: AgeBand | ""; setAgeBand: (v: AgeBand) => void }
+>(({ ageBand, setAgeBand }, ref) => (
+  <div ref={ref} className="pt-2">
     <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
       Paso 3 · Tu altitud
     </p>
@@ -258,10 +268,14 @@ const AgeStep = ({ ageBand, setAgeBand }: { ageBand: AgeBand | ""; setAgeBand: (
       })}
     </div>
   </div>
-);
+));
+AgeStep.displayName = "AgeStep";
 
-const Ready = ({ name, avatar, ageBand }: { name: string; avatar: string; ageBand: AgeBand }) => (
-  <div className="text-center pt-4">
+const Ready = forwardRef<
+  HTMLDivElement,
+  { name: string; avatar: string; ageBand: AgeBand }
+>(({ name, avatar, ageBand }, ref) => (
+  <div ref={ref} className="text-center pt-4">
     <div className="flex justify-center mb-4">
       <Sherpa mood="celebrating" size="xl" halo priority />
     </div>
@@ -279,7 +293,8 @@ const Ready = ({ name, avatar, ageBand }: { name: string; avatar: string; ageBan
       </div>
     </div>
   </div>
-);
+));
+Ready.displayName = "Ready";
 
 // ───────────────────────── Helpers ─────────────────────────
 
