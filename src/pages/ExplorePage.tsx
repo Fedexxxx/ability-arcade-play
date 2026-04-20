@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Clock, Mountain as MountainIcon, Lock, Star } from "lucide-react";
 import { superpowers, areas, categories } from "@/data/mockData";
 import SherpaSpeech from "@/components/SherpaSpeech";
+import { useDensity } from "@/contexts/AgeDensityContext";
 
 const difficultyLabels = {
   beginner: "Sendero suave",
@@ -21,6 +22,7 @@ const statusBadge = {
 const MountainsPage = () => {
   const [searchParams] = useSearchParams();
   const areaParam = searchParams.get("area");
+  const density = useDensity();
 
   const areaToCategory: Record<string, string> = {};
   areas.forEach((a) => {
@@ -34,6 +36,13 @@ const MountainsPage = () => {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const navigate = useNavigate();
 
+  // Density-tuned class fragments
+  const heroSize = density.scale === "lg" ? "text-4xl" : density.scale === "md" ? "text-3xl" : "text-2xl";
+  const cardPad = density.scale === "lg" ? "p-5" : density.scale === "md" ? "p-4" : "p-3.5";
+  const cardTitle = density.scale === "lg" ? "text-lg" : density.scale === "md" ? "text-base" : "text-sm";
+  const iconBox = density.scale === "lg" ? "w-16 h-16 text-4xl" : density.scale === "md" ? "w-14 h-14 text-3xl" : "w-12 h-12 text-2xl";
+  const chipPad = density.scale === "lg" ? "px-5 py-2 text-base" : density.scale === "md" ? "px-4 py-1.5 text-sm" : "px-3.5 py-1 text-sm";
+
   const filtered =
     activeCategory === "Todas"
       ? superpowers
@@ -46,7 +55,7 @@ const MountainsPage = () => {
           <MountainIcon size={14} />
           <span>Tus montañas</span>
         </div>
-        <h1 className="font-display text-3xl leading-tight">
+        <h1 className={`font-display ${heroSize} leading-tight`}>
           Elige tu próxima <span className="text-gradient-summit">cima</span>
         </h1>
       </header>
@@ -64,7 +73,7 @@ const MountainsPage = () => {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors border ${
+            className={`${chipPad} rounded-full font-bold whitespace-nowrap transition-colors border ${
               activeCategory === cat
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card text-foreground border-border"
@@ -87,33 +96,37 @@ const MountainsPage = () => {
               transition={{ delay: i * 0.05 }}
               onClick={() => !locked && navigate(`/superpower/${sp.id}`)}
               disabled={locked}
-              className={`w-full text-left bg-card border border-border rounded-3xl p-4 shadow-terrain ${
+              className={`w-full text-left bg-card border border-border rounded-3xl ${cardPad} shadow-terrain ${
                 locked ? "opacity-55" : "active:scale-[0.99] transition-transform"
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className="w-14 h-14 rounded-2xl gradient-sky flex items-center justify-center text-3xl flex-shrink-0">
+                <div className={`${iconBox} rounded-2xl gradient-sky flex items-center justify-center flex-shrink-0`}>
                   {sp.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-display text-base truncate">{sp.title}</h3>
+                    <h3 className={`font-display ${cardTitle} truncate`}>{sp.title}</h3>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${badge.className}`}>
                       {badge.label}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{sp.description}</p>
-                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} /> {sp.duration}
-                    </span>
-                    <span className="capitalize">{difficultyLabels[sp.difficulty]}</span>
-                    <span className="flex items-center gap-1">
-                      <Star size={12} className="text-secondary" /> {sp.rewards} XP
-                    </span>
-                  </div>
+                  {density.showSubtext && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{sp.description}</p>
+                  )}
+                  {density.showSubtext && (
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} /> {sp.duration}
+                      </span>
+                      <span className="capitalize">{difficultyLabels[sp.difficulty]}</span>
+                      <span className="flex items-center gap-1">
+                        <Star size={12} className="text-secondary" /> {sp.rewards} XP
+                      </span>
+                    </div>
+                  )}
                 </div>
-                {locked && <Lock size={18} className="text-muted-foreground mt-1" />}
+                {locked && <Lock size={density.scale === "lg" ? 22 : 18} className="text-muted-foreground mt-1" />}
               </div>
 
               {sp.status !== "locked" && sp.progress > 0 && (
