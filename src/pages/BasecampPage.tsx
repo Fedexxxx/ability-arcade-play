@@ -79,7 +79,7 @@ const BasecampPage = () => {
           <span>Basecamp</span>
         </div>
         <h1 className={`font-display ${heroSize} leading-tight text-foreground`}>
-          {greeting.split(",")[0]},
+          {greeting},
           <br />
           <span className="text-gradient-summit">{explorerName}</span>
         </h1>
