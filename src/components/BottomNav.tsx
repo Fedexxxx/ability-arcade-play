@@ -1,6 +1,7 @@
 import { Tent, Mountain, Map, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useDensity } from "@/contexts/AgeDensityContext";
 
 const tabs = [
   { path: "/", icon: Tent, label: "Basecamp" },
@@ -12,9 +13,17 @@ const tabs = [
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const density = useDensity();
 
   const hiddenPaths = ["/challenge/"];
   if (hiddenPaths.some((p) => location.pathname.includes(p))) return null;
+
+  // Tap target & label sizing scale with age band.
+  const iconSize = density.scale === "lg" ? 28 : density.scale === "md" ? 22 : 20;
+  const btnPad = density.scale === "lg" ? "px-4 py-2.5" : density.scale === "md" ? "px-3 py-1.5" : "px-2.5 py-1";
+  const labelClass =
+    density.scale === "lg" ? "text-xs" : density.scale === "md" ? "text-[10px]" : "text-[10px]";
+  const showLabel = density.scale !== "lg" ? true : true; // keep labels for accessibility, just bigger
 
   return (
     <nav
@@ -31,7 +40,7 @@ const BottomNav = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className="relative flex flex-col items-center gap-0.5 px-3 py-1.5"
+              className={`relative flex flex-col items-center gap-0.5 ${btnPad}`}
               aria-current={isActive ? "page" : undefined}
               aria-label={tab.label}
             >
@@ -43,17 +52,19 @@ const BottomNav = () => {
                 />
               )}
               <tab.icon
-                size={22}
+                size={iconSize}
                 className={isActive ? "text-primary" : "text-muted-foreground"}
                 strokeWidth={isActive ? 2.4 : 2}
               />
-              <span
-                className={`text-[10px] font-semibold tracking-wide ${
-                  isActive ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                {tab.label}
-              </span>
+              {showLabel && (
+                <span
+                  className={`${labelClass} font-semibold tracking-wide ${
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              )}
             </button>
           );
         })}
