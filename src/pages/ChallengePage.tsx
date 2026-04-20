@@ -9,10 +9,12 @@ import MatchingChallenge from "@/components/challenges/MatchingChallenge";
 import DragDropChallenge from "@/components/challenges/DragDropChallenge";
 import { superpowers } from "@/data/mockData";
 import { celebrate } from "@/lib/celebrate";
+import { useDensity } from "@/contexts/AgeDensityContext";
 
 const ChallengePage = () => {
   const { spId, modId, chId } = useParams();
   const navigate = useNavigate();
+  const density = useDensity();
   const sp = superpowers.find((s) => s.id === spId);
   const mod = sp?.modules.find((m) => m.id === modId);
   const challenge = mod?.challenges.find((c) => c.id === chId);
@@ -133,6 +135,13 @@ const ChallengePage = () => {
   const ctaLabel =
     challenge.type === "visual" ? "¡Esa es!" : "Confirmar Respuesta";
 
+  // Density-tuned classes
+  const ctaPad = density.scale === "lg" ? "py-5 text-xl" : density.scale === "md" ? "py-4 text-lg" : "py-3.5 text-base";
+  const conceptPad = density.scale === "lg" ? "p-6" : density.scale === "md" ? "p-5" : "p-4";
+  const conceptText = density.scale === "lg" ? "text-base" : density.scale === "md" ? "text-sm" : "text-sm";
+  const feedbackIconSize = density.scale === "lg" ? 100 : density.scale === "md" ? 80 : 64;
+  const feedbackTitle = density.scale === "lg" ? "text-3xl" : density.scale === "md" ? "text-2xl" : "text-xl";
+
   return (
     <div className="min-h-screen px-4 pt-4 pb-8 max-w-lg mx-auto flex flex-col">
       {/* Top bar */}
@@ -158,26 +167,28 @@ const ChallengePage = () => {
             exit={{ opacity: 0, y: -20 }}
             className="flex-1 flex flex-col"
           >
-            <div className="gradient-card rounded-2xl p-5 border border-border mb-6">
+            <div className={`gradient-card rounded-2xl ${conceptPad} border border-border mb-6`}>
               <p className="text-xs text-primary font-semibold mb-2 uppercase tracking-wider">
                 Concepto Clave
               </p>
-              <p className="text-sm leading-relaxed">{challenge.concept}</p>
-              <p className="mt-4 text-[10px] uppercase tracking-wider text-muted-foreground">
-                Tipo de reto:{" "}
-                <span className="text-foreground font-semibold">
-                  {challenge.type === "quiz" && "Quiz"}
-                  {challenge.type === "visual" && "Visual"}
-                  {challenge.type === "matching" && "Asociar parejas"}
-                  {challenge.type === "drag-drop" && "Arrastrar y soltar"}
-                </span>
-              </p>
+              <p className={`${conceptText} leading-relaxed`}>{challenge.concept}</p>
+              {density.showSubtext && (
+                <p className="mt-4 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Tipo de reto:{" "}
+                  <span className="text-foreground font-semibold">
+                    {challenge.type === "quiz" && "Quiz"}
+                    {challenge.type === "visual" && "Visual"}
+                    {challenge.type === "matching" && "Asociar parejas"}
+                    {challenge.type === "drag-drop" && "Arrastrar y soltar"}
+                  </span>
+                </p>
+              )}
             </div>
 
             <div className="mt-auto">
               <button
                 onClick={() => setPhase("interact")}
-                className="w-full gradient-energy text-primary-foreground rounded-2xl py-4 font-display font-bold text-lg glow-primary"
+                className={`w-full gradient-energy text-primary-foreground rounded-2xl ${ctaPad} font-display font-bold glow-primary`}
               >
                 ¡A Entrenar!
               </button>
@@ -201,7 +212,7 @@ const ChallengePage = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={selectedAnswer === null}
-                  className={`w-full rounded-2xl py-4 font-display font-bold text-lg transition-all ${
+                  className={`w-full rounded-2xl ${ctaPad} font-display font-bold transition-all ${
                     selectedAnswer !== null
                       ? "gradient-energy text-primary-foreground glow-primary"
                       : "bg-muted text-muted-foreground"
@@ -229,10 +240,12 @@ const ChallengePage = () => {
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <CheckCircle2 size={80} className="text-energy mb-4" />
+                  <CheckCircle2 size={feedbackIconSize} className="text-energy mb-4" />
                 </motion.div>
-                <h2 className="font-display text-2xl font-bold mb-2">¡Excelente!</h2>
-                <p className="text-muted-foreground text-sm mb-2">¡Lo clavaste! +25 XP</p>
+                <h2 className={`font-display ${feedbackTitle} font-bold mb-2`}>¡Excelente!</h2>
+                {density.showSubtext && (
+                  <p className="text-muted-foreground text-sm mb-2">¡Lo clavaste! +25 XP</p>
+                )}
               </>
             ) : (
               <>
@@ -241,16 +254,18 @@ const ChallengePage = () => {
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <XCircle size={80} className="text-streak mb-4" />
+                  <XCircle size={feedbackIconSize} className="text-streak mb-4" />
                 </motion.div>
-                <h2 className="font-display text-2xl font-bold mb-2">¡Casi!</h2>
+                <h2 className={`font-display ${feedbackTitle} font-bold mb-2`}>¡Casi!</h2>
                 {correctAnswerLabel && (
                   <p className="text-muted-foreground text-sm mb-1">
                     La respuesta correcta era:{" "}
                     <span className="text-foreground font-medium">{correctAnswerLabel}</span>
                   </p>
                 )}
-                <p className="text-muted-foreground text-xs mb-2">¡Sigue evolucionando! +5 XP</p>
+                {density.showSubtext && (
+                  <p className="text-muted-foreground text-xs mb-2">¡Sigue evolucionando! +5 XP</p>
+                )}
               </>
             )}
 
