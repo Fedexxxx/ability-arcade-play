@@ -6,6 +6,7 @@ import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa from "@/components/Sherpa";
 import { userProfile, superpowers, missions } from "@/data/mockData";
 import { useExplorer } from "@/hooks/useExplorer";
+import { useDensity } from "@/contexts/AgeDensityContext";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
 const greetings = [
