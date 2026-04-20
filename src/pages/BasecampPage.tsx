@@ -78,7 +78,7 @@ const BasecampPage = () => {
           <Tent size={14} />
           <span>Basecamp</span>
         </div>
-        <h1 className="font-display text-3xl leading-tight text-foreground">
+        <h1 className={`font-display ${heroSize} leading-tight text-foreground`}>
           {greeting.split(",")[0]},
           <br />
           <span className="text-gradient-summit">{explorerName}</span>
@@ -108,23 +108,25 @@ const BasecampPage = () => {
             if (activeModule) navigate(`/module/${activeSP.id}/${activeModule.id}`);
             else navigate(`/superpower/${activeSP.id}`);
           }}
-          className="mx-5 w-[calc(100%-2.5rem)] gradient-sunrise text-secondary-foreground rounded-3xl p-5 shadow-summit text-left"
+          className={`mx-5 w-[calc(100%-2.5rem)] gradient-sunrise text-secondary-foreground rounded-3xl ${ctaPad} shadow-summit text-left`}
         >
           <div className="flex items-center justify-between">
             <div className="min-w-0">
               <p className="text-[11px] uppercase tracking-[0.14em] opacity-90 font-bold">Continúa el ascenso</p>
-              <p className="font-display text-xl leading-tight mt-0.5 truncate">{activeSP.title}</p>
-              {activeModule && (
+              <p className={`font-display ${ctaTitle} leading-tight mt-0.5 truncate`}>{activeSP.title}</p>
+              {activeModule && density.showSubtext && (
                 <p className="text-sm opacity-90 mt-1 truncate">→ {activeModule.title}</p>
               )}
             </div>
-            <div className="ml-3 w-12 h-12 rounded-full bg-card/25 backdrop-blur flex items-center justify-center flex-shrink-0">
-              <ArrowRight size={22} />
+            <div className={`ml-3 ${ctaArrow} rounded-full bg-card/25 backdrop-blur flex items-center justify-center flex-shrink-0`}>
+              <ArrowRight size={density.scale === "lg" ? 26 : 22} />
             </div>
           </div>
           <div className="mt-4">
             <ProgressBar value={activeSP.progress} variant="default" size="sm" />
-            <p className="text-[11px] mt-1.5 opacity-90 font-semibold">Altitud {activeSP.progress}% · sigue subiendo</p>
+            {density.showSubtext && (
+              <p className="text-[11px] mt-1.5 opacity-90 font-semibold">Altitud {activeSP.progress}% · sigue subiendo</p>
+            )}
           </div>
         </motion.button>
       )}
@@ -143,8 +145,10 @@ const BasecampPage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Climb del día</p>
-              <p className="font-display text-base leading-tight">{dailyMission.title}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{dailyMission.progress}/{dailyMission.target} pasos</p>
+              <p className={`font-display ${cardTitle} leading-tight`}>{dailyMission.title}</p>
+              {density.showSubtext && (
+                <p className="text-xs text-muted-foreground mt-0.5">{dailyMission.progress}/{dailyMission.target} pasos</p>
+              )}
             </div>
             <span className="text-xs font-bold text-secondary whitespace-nowrap">+{dailyMission.xpReward} XP</span>
           </div>
@@ -190,8 +194,10 @@ const BasecampPage = () => {
                   {sp.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-display text-base truncate">{sp.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{sp.description}</p>
+                  <p className={`font-display ${cardTitle} truncate`}>{sp.title}</p>
+                  {density.showSubtext && (
+                    <p className="text-xs text-muted-foreground truncate">{sp.description}</p>
+                  )}
                   <div className="mt-2">
                     <ProgressBar value={sp.progress} variant="sunrise" size="sm" />
                   </div>
