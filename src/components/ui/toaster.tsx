@@ -1,8 +1,7 @@
-import { forwardRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from "@/components/ui/toast";
 
-const Toaster = forwardRef<HTMLElement>((_props, _ref) => {
+const Toaster = () => {
   const { toasts } = useToast();
 
   return (
@@ -22,8 +21,6 @@ const Toaster = forwardRef<HTMLElement>((_props, _ref) => {
       <ToastViewport />
     </ToastProvider>
   );
-});
-
-Toaster.displayName = "Toaster";
+};
 
 export { Toaster };
