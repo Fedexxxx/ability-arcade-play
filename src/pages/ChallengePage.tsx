@@ -9,10 +9,12 @@ import MatchingChallenge from "@/components/challenges/MatchingChallenge";
 import DragDropChallenge from "@/components/challenges/DragDropChallenge";
 import { superpowers } from "@/data/mockData";
 import { celebrate } from "@/lib/celebrate";
+import { useDensity } from "@/contexts/AgeDensityContext";
 
 const ChallengePage = () => {
   const { spId, modId, chId } = useParams();
   const navigate = useNavigate();
+  const density = useDensity();
   const sp = superpowers.find((s) => s.id === spId);
   const mod = sp?.modules.find((m) => m.id === modId);
   const challenge = mod?.challenges.find((c) => c.id === chId);
