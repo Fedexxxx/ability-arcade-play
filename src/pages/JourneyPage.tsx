@@ -151,7 +151,7 @@ const JourneyPage = () => {
       <section className="px-5 pt-12 pb-2 text-center">
         <div className="inline-flex items-center gap-2 mb-2">
           <MountainIcon size={14} className="text-primary" />
-          <span className="text-[10px] uppercase tracking-[0.18em] font-bold text-primary">Basecamp</span>
+          <span className="text-[10px] uppercase tracking-[0.18em] font-bold text-primary">Campamento</span>
         </div>
         <SherpaSpeech
           mood="encouraging"

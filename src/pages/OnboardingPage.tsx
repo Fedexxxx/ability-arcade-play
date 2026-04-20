@@ -175,7 +175,7 @@ const NameStep = forwardRef<HTMLDivElement, { name: string; setName: (v: string)
         Paso 1 · Tu nombre
       </p>
       <h2 className="font-display text-4xl mt-2">¿Cómo te llamo?</h2>
-      <p className="text-base text-muted-foreground mt-2">Así te saludaré en cada Basecamp.</p>
+      <p className="text-base text-muted-foreground mt-2">Así te saludaré en cada Campamento.</p>
 
       <div className="mt-8">
         <input
@@ -304,7 +304,7 @@ const messageFor = (step: Step, name: string) => {
     case 1: return "Cuéntame, ¿cómo te llamas?";
     case 2: return "Elige al que te acompañará.";
     case 3: return "Así sabré a qué ritmo subir.";
-    case 4: return name ? `¡Vamos, ${name}! El Basecamp te espera.` : "El Basecamp te espera.";
+    case 4: return name ? `¡Vamos, ${name}! El Campamento te espera.` : "El Campamento te espera.";
   }
 };
 
@@ -314,7 +314,7 @@ const ctaLabel = (step: Step, editMode = false) => {
     case 1: return "Continuar";
     case 2: return "Continuar";
     case 3: return "Continuar";
-    case 4: return editMode ? "Guardar cambios" : "Ir al Basecamp";
+    case 4: return editMode ? "Guardar cambios" : "Ir al Campamento";
   }
 };
 
