@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Flame, Tent, ArrowRight, Mountain } from "lucide-react";
+import { Flame, Tent, ArrowRight, Mountain, Sparkles } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa from "@/components/Sherpa";
 import { userProfile, superpowers, missions } from "@/data/mockData";
 import { useExplorer } from "@/hooks/useExplorer";
 import { useDensity } from "@/contexts/AgeDensityContext";
+import { useWallet } from "@/hooks/useWallet";
+import AvatarWithGear from "@/components/AvatarWithGear";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
 const greetings = [
