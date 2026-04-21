@@ -21,6 +21,7 @@ const BasecampPage = () => {
   const navigate = useNavigate();
   const explorer = useExplorer();
   const density = useDensity();
+  const wallet = useWallet();
   const activeSP = superpowers.find((s) => s.status === "in-progress") ?? superpowers.find((s) => s.status === "available");
   const activeModule = activeSP?.modules.find((m) => m.status === "in-progress") ?? activeSP?.modules.find((m) => m.status === "available");
   const dailyMission = missions.find((m) => m.type === "daily" && !m.completed);
@@ -56,21 +57,39 @@ const BasecampPage = () => {
       </div>
 
       <header className="px-5 pt-8 pb-4 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-2xl bg-card border border-border flex items-center justify-center text-xl shadow-terrain">
-          {explorerAvatar}
-        </div>
+        <button
+          onClick={() => navigate("/profile")}
+          aria-label="Ver explorador"
+          className="shrink-0"
+        >
+          <AvatarWithGear
+            avatar={explorerAvatar}
+            className="w-12 h-12"
+            emojiClassName="text-xl"
+          />
+        </button>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
             Nivel {userProfile.level} · Explorador
           </p>
           <ProgressBar value={userProfile.xp} max={userProfile.xpToNext} variant="sunrise" size="sm" />
         </div>
-        <div
-          className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 py-1.5 shadow-terrain"
-          aria-label={`Racha de ${userProfile.streak} días`}
-        >
-          <Flame size={16} className="text-streak" />
-          <span className="text-sm font-bold text-foreground">{userProfile.streak}</span>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={() => navigate("/tienda")}
+            className="flex items-center gap-1 bg-secondary-soft text-secondary rounded-full px-2.5 py-1 shadow-terrain"
+            aria-label={`${wallet.balance} Alticoins, abrir tienda`}
+          >
+            <Sparkles size={13} />
+            <span className="text-xs font-bold">{wallet.balance}</span>
+          </button>
+          <div
+            className="flex items-center gap-1 bg-card border border-border rounded-full px-2.5 py-1 shadow-terrain"
+            aria-label={`Racha de ${userProfile.streak} días`}
+          >
+            <Flame size={13} className="text-streak" />
+            <span className="text-xs font-bold text-foreground">{userProfile.streak}</span>
+          </div>
         </div>
       </header>
 
