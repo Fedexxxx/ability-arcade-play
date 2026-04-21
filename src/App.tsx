@@ -19,6 +19,7 @@ import MissionsPage from "./pages/MissionsPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import MasteryGalleryPage from "./pages/MasteryGalleryPage";
 import ProfilePage from "./pages/ProfilePage";
+import ShopPage from "./pages/ShopPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
                     <Route path="/achievements" element={<AchievementsPage />} />
                     <Route path="/mastery" element={<MasteryGalleryPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/tienda" element={<ShopPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <BottomNav />

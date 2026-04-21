@@ -5,9 +5,11 @@ import { Crown, Sparkles, Star, Zap, Award } from "lucide-react";
 import { superpowers } from "@/data/mockData";
 import { celebrateEpic } from "@/lib/celebrate";
 import { unlockSuperpower } from "@/lib/unlocks";
+import { earn } from "@/lib/wallet";
 
 const XP_PER_CHALLENGE = 25;
 const MASTERY_BONUS = 250;
+const COIN_SUPERPOWER_REWARD = 300;
 
 const SuperpowerVictoryPage = () => {
   const { id } = useParams();
@@ -36,6 +38,12 @@ const SuperpowerVictoryPage = () => {
         superpowerTitle: sp.title,
         category: sp.category,
         icon: sp.icon,
+      });
+      earn({
+        amount: COIN_SUPERPOWER_REWARD,
+        reason: "superpower",
+        sourceId: sp.id,
+        label: `Montaña: ${sp.title}`,
       });
     }
     const t = setTimeout(() => celebrateEpic(), 350);

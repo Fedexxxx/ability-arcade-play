@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, Pencil } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, Pencil, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
@@ -21,22 +21,27 @@ import { useEffect, useState } from "react";
 import Sherpa from "@/components/Sherpa";
 import { useExplorer } from "@/hooks/useExplorer";
 import { clearExplorer } from "@/lib/explorer";
-
-const stats = [
-  { icon: MountainIcon, label: "Montañas",     value: userProfile.superpowersMastered, color: "text-primary" },
-  { icon: Flag,         label: "Checkpoints",  value: userProfile.modulesCompleted,    color: "text-secondary" },
-  { icon: Footprints,   label: "Climbs",       value: userProfile.challengesCompleted, color: "text-accent" },
-  { icon: Compass,      label: "Monedas",      value: userProfile.coins,                color: "text-primary" },
-];
+import { useWallet } from "@/hooks/useWallet";
+import AvatarWithGear from "@/components/AvatarWithGear";
+import { clearWallet } from "@/lib/wallet";
 
 const ExplorerProfilePage = () => {
   const navigate = useNavigate();
   const explorer = useExplorer();
+  const wallet = useWallet();
   const [soundEnabled, setSoundEnabled] = useSoundEnabled();
   const [reducedMotion, setReducedMotion] = useState<boolean>(() => prefersReducedMotion());
 
+  const stats = [
+    { icon: MountainIcon, label: "Montañas",    value: userProfile.superpowersMastered, color: "text-primary" },
+    { icon: Flag,         label: "Checkpoints", value: userProfile.modulesCompleted,    color: "text-secondary" },
+    { icon: Footprints,   label: "Climbs",      value: userProfile.challengesCompleted, color: "text-accent" },
+    { icon: Sparkles,     label: "Alticoins",   value: wallet.balance,                   color: "text-secondary" },
+  ];
+
   const handleReset = () => {
     clearExplorer();
+    clearWallet();
     navigate("/onboarding", { replace: true });
   };
 
@@ -77,9 +82,11 @@ const ExplorerProfilePage = () => {
           <span>Explorador</span>
         </div>
         {explorer ? (
-          <div className="mx-auto w-20 h-20 rounded-full bg-card border-2 border-primary/40 shadow-summit flex items-center justify-center text-4xl">
-            {explorer.avatar}
-          </div>
+          <AvatarWithGear
+            avatar={explorer.avatar}
+            className="mx-auto w-24 h-24"
+            emojiClassName="text-5xl"
+          />
         ) : (
           <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
         )}
@@ -179,6 +186,18 @@ const ExplorerProfilePage = () => {
       >
         <Pencil size={16} />
         Editar explorador
+      </button>
+
+      <button
+        onClick={() => navigate("/tienda")}
+        className="mt-3 w-full bg-card border border-border rounded-2xl py-3.5 font-display text-base text-foreground hover:border-secondary/50 transition-colors flex items-center justify-center gap-2 shadow-terrain"
+      >
+        <ShoppingBag size={16} className="text-secondary" />
+        Tienda del Campamento
+        <span className="ml-1 inline-flex items-center gap-1 text-xs text-secondary font-bold">
+          <Sparkles size={12} />
+          {wallet.balance}
+        </span>
       </button>
 
       <AlertDialog>
