@@ -5,8 +5,10 @@ import { Trophy, Sparkles, Zap, Target } from "lucide-react";
 import { superpowers } from "@/data/mockData";
 import { celebrateBig } from "@/lib/celebrate";
 import { unlockModule } from "@/lib/unlocks";
+import { earn } from "@/lib/wallet";
 
 const XP_PER_CHALLENGE = 25;
+const COIN_MODULE_REWARD = 60;
 
 const ModuleVictoryPage = () => {
   const { spId, modId } = useParams();
@@ -35,6 +37,12 @@ const ModuleVictoryPage = () => {
         superpowerTitle: sp.title,
         category: sp.category,
         icon: sp.icon,
+      });
+      earn({
+        amount: COIN_MODULE_REWARD,
+        reason: "module",
+        sourceId: `${sp.id}:${mod.id}`,
+        label: `Módulo: ${mod.title}`,
       });
     }
     // Slight delay so the user sees the screen first, then celebrates

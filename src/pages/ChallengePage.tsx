@@ -10,6 +10,10 @@ import DragDropChallenge from "@/components/challenges/DragDropChallenge";
 import { superpowers } from "@/data/mockData";
 import { celebrate } from "@/lib/celebrate";
 import { useDensity } from "@/contexts/AgeDensityContext";
+import { earn } from "@/lib/wallet";
+
+const COIN_PER_CHALLENGE = 10;
+const COIN_FAIL_CONSOLATION = 2;
 
 const ChallengePage = () => {
   const { spId, modId, chId } = useParams();
@@ -40,6 +44,26 @@ const ChallengePage = () => {
       celebrate();
     }
   }, [phase, isCorrect]);
+
+  // Award Alticoins on first successful completion of this challenge.
+  useEffect(() => {
+    if (phase !== "feedback" || !challenge || !sp || !mod) return;
+    if (isCorrect) {
+      earn({
+        amount: COIN_PER_CHALLENGE,
+        reason: "challenge",
+        sourceId: `${sp.id}:${mod.id}:${challenge.id}`,
+        label: challenge.title,
+      });
+    } else {
+      earn({
+        amount: COIN_FAIL_CONSOLATION,
+        reason: "challenge",
+        sourceId: `${sp.id}:${mod.id}:${challenge.id}:try`,
+        label: `Intento: ${challenge.title}`,
+      });
+    }
+  }, [phase, isCorrect, challenge, sp, mod]);
 
   if (!sp || !mod || !challenge) {
     return <div className="p-4 text-center text-muted-foreground">Desafío no encontrado</div>;
