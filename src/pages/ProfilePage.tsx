@@ -82,9 +82,11 @@ const ExplorerProfilePage = () => {
           <span>Explorador</span>
         </div>
         {explorer ? (
-          <div className="mx-auto w-20 h-20 rounded-full bg-card border-2 border-primary/40 shadow-summit flex items-center justify-center text-4xl">
-            {explorer.avatar}
-          </div>
+          <AvatarWithGear
+            avatar={explorer.avatar}
+            className="mx-auto w-24 h-24"
+            emojiClassName="text-5xl"
+          />
         ) : (
           <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
         )}
@@ -184,6 +186,18 @@ const ExplorerProfilePage = () => {
       >
         <Pencil size={16} />
         Editar explorador
+      </button>
+
+      <button
+        onClick={() => navigate("/tienda")}
+        className="mt-3 w-full bg-card border border-border rounded-2xl py-3.5 font-display text-base text-foreground hover:border-secondary/50 transition-colors flex items-center justify-center gap-2 shadow-terrain"
+      >
+        <ShoppingBag size={16} className="text-secondary" />
+        Tienda del Campamento
+        <span className="ml-1 inline-flex items-center gap-1 text-xs text-secondary font-bold">
+          <Sparkles size={12} />
+          {wallet.balance}
+        </span>
       </button>
 
       <AlertDialog>
