@@ -310,9 +310,9 @@ const BasecampPage = () => {
       <section className="px-5 mt-8 text-center">
         <Sherpa mood="encouraging" size="md" halo />
         <p className="font-display text-base mt-2 text-foreground">
-          “Un paso a la vez, llegamos lejos.”
+          “{sherpaQuote.quote}”
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">— Sherpa</p>
+        <p className="text-xs text-muted-foreground mt-0.5">— {sherpaQuote.author}</p>
       </section>
     </div>
   );
