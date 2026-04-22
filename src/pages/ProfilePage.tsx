@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, Pencil, ShoppingBag } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, Pencil, ShoppingBag, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
@@ -24,6 +24,7 @@ import { clearExplorer } from "@/lib/explorer";
 import { useWallet } from "@/hooks/useWallet";
 import AvatarWithGear from "@/components/AvatarWithGear";
 import { clearWallet } from "@/lib/wallet";
+import { clearExplorerStyle } from "@/lib/explorerStyle";
 
 const ExplorerProfilePage = () => {
   const navigate = useNavigate();
@@ -42,6 +43,7 @@ const ExplorerProfilePage = () => {
   const handleReset = () => {
     clearExplorer();
     clearWallet();
+    clearExplorerStyle();
     navigate("/onboarding", { replace: true });
   };
 
@@ -198,6 +200,14 @@ const ExplorerProfilePage = () => {
           <Sparkles size={12} />
           {wallet.balance}
         </span>
+      </button>
+
+      <button
+        onClick={() => navigate("/personalizar")}
+        className="mt-3 w-full bg-card border border-border rounded-2xl py-3.5 font-display text-base text-foreground hover:border-primary/50 transition-colors flex items-center justify-center gap-2 shadow-terrain"
+      >
+        <Palette size={16} className="text-primary" />
+        Personalizar explorador
       </button>
 
       <AlertDialog>
