@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
 import { useWallet } from "@/hooks/useWallet";
 import { equip } from "@/lib/wallet";
-import { SHOP_ITEMS, SLOT_META } from "@/lib/shopCatalog";
+import { SHOP_ITEMS } from "@/lib/shopCatalog";
 import {
   AI_HAIRS,
   AI_OUTFITS,
