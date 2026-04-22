@@ -111,11 +111,25 @@ const BasecampPage = () => {
         <div className="flex flex-col items-end gap-1">
           <button
             onClick={() => navigate("/tienda")}
-            className="flex items-center gap-1 bg-secondary-soft text-secondary rounded-full px-2.5 py-1 shadow-terrain"
+            className="relative flex items-center gap-1 bg-secondary-soft text-secondary rounded-full px-2.5 py-1 shadow-terrain"
             aria-label={`${wallet.balance} Alticoins, abrir tienda`}
           >
             <Sparkles size={13} />
             <span className="text-xs font-bold">{wallet.balance}</span>
+            <AnimatePresence>
+              {coinPop !== null && (
+                <motion.span
+                  key={coinPop}
+                  initial={{ opacity: 0, y: 4, scale: 0.8 }}
+                  animate={{ opacity: 1, y: -16, scale: 1 }}
+                  exit={{ opacity: 0, y: -28 }}
+                  transition={{ duration: 0.9 }}
+                  className="pointer-events-none absolute -top-1 right-0 text-[10px] font-bold text-secondary"
+                >
+                  +{coinPop}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
           <motion.div
             initial={milestone ? { scale: 0.9 } : false}
