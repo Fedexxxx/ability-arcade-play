@@ -26,6 +26,7 @@ import AvatarWithGear from "@/components/AvatarWithGear";
 import { clearWallet } from "@/lib/wallet";
 import { clearExplorerStyle } from "@/lib/explorerStyle";
 import { clearTiers } from "@/lib/tiers";
+import { clearAiVariant } from "@/lib/aiAvatarCatalog";
 
 const ExplorerProfilePage = () => {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ const ExplorerProfilePage = () => {
     clearExplorer();
     clearWallet();
     clearExplorerStyle();
+    clearAiVariant();
     clearTiers();
     navigate("/onboarding", { replace: true });
   };
