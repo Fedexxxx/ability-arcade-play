@@ -505,6 +505,9 @@ const CustomizePage = () => {
           )}
         </motion.div>
       </AnimatePresence>
+      ) : (
+        <AiCustomizePanel />
+      )}
 
       <div className="mt-6 flex gap-3">
         <button
