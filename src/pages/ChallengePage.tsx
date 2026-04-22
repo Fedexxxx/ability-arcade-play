@@ -46,6 +46,7 @@ const ChallengePage = () => {
   // itself decides when the user is done and whether the answer is correct.
   const [interactiveCorrect, setInteractiveCorrect] = useState<boolean | null>(null);
   const celebratedRef = useRef(false);
+  const [returningHome, setReturningHome] = useState(false);
 
   const isQuizLike =
     challenge?.type === "quiz" || challenge?.type === "visual";
