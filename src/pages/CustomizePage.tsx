@@ -127,11 +127,17 @@ const CustomizePage = () => {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 rounded-full py-2 text-xs font-bold capitalize ${
+            className={`relative flex-1 rounded-full py-2 text-xs font-bold capitalize ${
               tab === t ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground border border-border"
             }`}
           >
             {t}
+            {touched[t] && (
+              <span
+                className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-secondary"
+                aria-label="Cambios sin restablecer"
+              />
+            )}
           </button>
         ))}
       </div>
