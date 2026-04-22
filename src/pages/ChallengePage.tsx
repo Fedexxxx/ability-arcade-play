@@ -328,20 +328,29 @@ const ChallengePage = () => {
             )}
 
             <div className="w-full mt-8 space-y-3">
-              {!isCorrect && (
+              {isCorrect ? (
                 <button
-                  onClick={retry}
-                  className="w-full border border-primary text-primary rounded-2xl py-3 font-semibold"
+                  onClick={handleNext}
+                  className="w-full gradient-energy text-primary-foreground rounded-2xl py-3 font-display font-bold glow-primary"
                 >
-                  Intentar de Nuevo
+                  Seguir Evolucionando →
                 </button>
+              ) : (
+                <>
+                  <button
+                    onClick={retry}
+                    className="w-full gradient-energy text-primary-foreground rounded-2xl py-3 font-display font-bold glow-primary"
+                  >
+                    Intentar de Nuevo
+                  </button>
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="w-full border border-border text-muted-foreground rounded-2xl py-3 font-semibold"
+                  >
+                    Ir atrás
+                  </button>
+                </>
               )}
-              <button
-                onClick={handleNext}
-                className="w-full gradient-energy text-primary-foreground rounded-2xl py-3 font-display font-bold glow-primary"
-              >
-                Seguir Evolucionando →
-              </button>
             </div>
           </motion.div>
         )}
