@@ -117,7 +117,7 @@ const MountainsPage = () => {
       <SherpaSpeech
         mood="thinking"
         size="sm"
-        message="Cada montaña es un nuevo viaje. Empieza por la que más te llame."
+        message={sherpaMsg}
         className="mb-5"
       />
 
