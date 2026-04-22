@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Lock, Minus, Plus, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useWallet } from "@/hooks/useWallet";
 import { useExplorer } from "@/hooks/useExplorer";
@@ -23,9 +23,23 @@ const ShopPage = () => {
   const wallet = useWallet();
   const explorer = useExplorer();
   const [filter, setFilter] = useState<CosmeticSlot | "all">("all");
-  const [sherpaMsg, setSherpaMsg] = useState(
-    "Cada moneda cuenta. Elige algo que te haga sentir explorador.",
-  );
+  const [sherpaMsg, setSherpaMsg] = useState<string | null>(null);
+
+  // Contextual default Sherpa message — based on wallet state.
+  const ownedCount = wallet.owned.length;
+  const contextualMsg = useMemo(() => {
+    if (ownedCount === 0 && wallet.balance === 0) {
+      return "Conquista cumbres para ganar Alticoins. Vuelve cuando tengas algunas.";
+    }
+    if (ownedCount === 0) {
+      return "Tu primera pieza te espera. Elige con cariño.";
+    }
+    if (wallet.balance === 0) {
+      return "Sin monedas, pero con estilo. Equipa lo que ya es tuyo.";
+    }
+    return "Cada moneda cuenta. Elige algo que te haga sentir explorador.";
+  }, [ownedCount, wallet.balance]);
+  const displayMsg = sherpaMsg ?? contextualMsg;
 
   const visible = useMemo<ShopItem[]>(() => {
     if (filter === "all") return SHOP_ITEMS;
