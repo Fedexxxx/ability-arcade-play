@@ -25,6 +25,7 @@ import { useWallet } from "@/hooks/useWallet";
 import AvatarWithGear from "@/components/AvatarWithGear";
 import { clearWallet } from "@/lib/wallet";
 import { clearExplorerStyle } from "@/lib/explorerStyle";
+import { clearTiers } from "@/lib/tiers";
 
 const ExplorerProfilePage = () => {
   const navigate = useNavigate();
@@ -44,6 +45,7 @@ const ExplorerProfilePage = () => {
     clearExplorer();
     clearWallet();
     clearExplorerStyle();
+    clearTiers();
     navigate("/onboarding", { replace: true });
   };
 
