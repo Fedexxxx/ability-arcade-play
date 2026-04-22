@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Clock, Mountain as MountainIcon, Lock, Star } from "lucide-react";
+import { Clock, Mountain as MountainIcon, Lock, Star, ArrowRight } from "lucide-react";
 import { superpowers, areas, categories } from "@/data/mockData";
+import { mountains } from "@/data/mountains";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { useDensity } from "@/contexts/AgeDensityContext";
 
@@ -18,6 +19,25 @@ const statusBadge = {
   "in-progress": { label: "Subiendo",      className: "bg-secondary-soft text-secondary" },
   completed:     { label: "Conquistada",   className: "bg-accent/30 text-foreground" },
 };
+
+/** A mountain is "Próximamente" when every module is a skeleton stub (byTier === null). */
+const COMING_SOON_IDS = new Set(
+  mountains.filter((m) => m.modules.every((mo) => mo.byTier === null)).map((m) => m.id),
+);
+
+/** A mountain is "partial" if it has playable content but ≥1 stub. */
+const PARTIAL_IDS = new Set(
+  mountains
+    .filter((m) => m.modules.some((mo) => mo.byTier === null) && m.modules.some((mo) => mo.byTier !== null))
+    .map((m) => m.id),
+);
+
+const STATUS_GROUPS: { key: "in-progress" | "available" | "completed" | "locked"; label: string }[] = [
+  { key: "in-progress", label: "En marcha" },
+  { key: "available",   label: "Listas para subir" },
+  { key: "completed",   label: "Conquistadas" },
+  { key: "locked",      label: "Por desbloquear" },
+];
 
 const MountainsPage = () => {
   const [searchParams] = useSearchParams();
