@@ -5,8 +5,13 @@ const KEY = "sherpa.explorerStyle.v1";
 const EVENT = "sherpa:explorer-style-changed";
 
 export type SkinTone = "porcelain" | "honey" | "tan" | "cocoa" | "espresso";
-export type HairStyle = "short" | "wavy" | "bun" | "buzz" | "long";
+export type HairStyle = "short" | "medium" | "long" | "curly" | "wavy" | "bun" | "buzz";
 export type OutfitStyle = "explorer" | "alpine" | "summit" | "trail";
+export type EyeShape = "round" | "almond" | "soft";
+export type EyebrowStyle = "soft" | "thick" | "arched";
+export type AccHat = "none" | "beanie" | "cap" | "explorer-hat";
+export type AccScarf = "none" | "scarf";
+export type AccBackpack = "none" | "day" | "trek";
 
 export interface ExplorerStyle {
   skin: SkinTone;
@@ -16,6 +21,19 @@ export interface ExplorerStyle {
   pantsColor: string;      // hex
   bootsColor: string;      // hex
   outfit: OutfitStyle;
+  // Face
+  eyeShape: EyeShape;
+  eyeColor: string;        // hex
+  eyebrow: EyebrowStyle;
+  freckles: boolean;
+  // Customize-tab accessories (free, independent from shop). Shop gear wins when both set.
+  accHat: AccHat;
+  accHatColor: string;
+  accScarf: AccScarf;
+  accScarfColor: string;
+  accBackpack: AccBackpack;
+  accBackpackColor: string;
+  accGoggles: boolean;
 }
 
 export const SKIN_PALETTE: Record<SkinTone, { base: string; shade: string; label: string }> = {
@@ -66,10 +84,61 @@ export const BOOTS_COLORS: { hex: string; label: string }[] = [
 
 export const HAIR_STYLES: { id: HairStyle; label: string }[] = [
   { id: "short", label: "Corto" },
+  { id: "medium", label: "Medio" },
+  { id: "long",  label: "Largo" },
+  { id: "curly", label: "Rizado" },
   { id: "wavy",  label: "Ondulado" },
   { id: "bun",   label: "Moño" },
   { id: "buzz",  label: "Rapado" },
-  { id: "long",  label: "Largo" },
+];
+
+export const EYE_COLORS: { hex: string; label: string }[] = [
+  { hex: "#3F2614", label: "Café oscuro" },
+  { hex: "#7A4A24", label: "Avellana" },
+  { hex: "#3FB59A", label: "Verde" },
+  { hex: "#3B7CD9", label: "Azul" },
+  { hex: "#6B6F76", label: "Gris" },
+];
+
+export const EYE_SHAPES: { id: EyeShape; label: string }[] = [
+  { id: "round",  label: "Redondos" },
+  { id: "almond", label: "Almendra" },
+  { id: "soft",   label: "Suaves" },
+];
+
+export const EYEBROW_STYLES: { id: EyebrowStyle; label: string }[] = [
+  { id: "soft",   label: "Suaves" },
+  { id: "thick",  label: "Gruesas" },
+  { id: "arched", label: "Arqueadas" },
+];
+
+export const HAT_OPTIONS: { id: AccHat; label: string; emoji: string }[] = [
+  { id: "none",          label: "Ninguno", emoji: "—" },
+  { id: "beanie",        label: "Gorro",   emoji: "🧣" },
+  { id: "cap",           label: "Gorra",   emoji: "🧢" },
+  { id: "explorer-hat",  label: "Sombrero", emoji: "🎩" },
+];
+
+export const SCARF_OPTIONS: { id: AccScarf; label: string }[] = [
+  { id: "none",  label: "Ninguna" },
+  { id: "scarf", label: "Bufanda" },
+];
+
+export const BACKPACK_OPTIONS: { id: AccBackpack; label: string }[] = [
+  { id: "none", label: "Ninguna" },
+  { id: "day",  label: "Diaria" },
+  { id: "trek", label: "Expedición" },
+];
+
+export const ACCESSORY_COLORS: { hex: string; label: string }[] = [
+  { hex: "#B23A48", label: "Rojo" },
+  { hex: "#2F6FE0", label: "Azul" },
+  { hex: "#2EA86F", label: "Verde" },
+  { hex: "#E5C04A", label: "Amarillo" },
+  { hex: "#7A4FD1", label: "Morado" },
+  { hex: "#E0712F", label: "Naranja" },
+  { hex: "#3D3A36", label: "Carbón" },
+  { hex: "#E8F2FA", label: "Nieve" },
 ];
 
 export const OUTFIT_STYLES: { id: OutfitStyle; label: string }[] = [
@@ -87,6 +156,17 @@ export const DEFAULT_STYLE: ExplorerStyle = {
   pantsColor: "#3D3A36",
   bootsColor: "#3F2613",
   outfit: "explorer",
+  eyeShape: "round",
+  eyeColor: "#3F2614",
+  eyebrow: "soft",
+  freckles: false,
+  accHat: "none",
+  accHatColor: "#B23A48",
+  accScarf: "none",
+  accScarfColor: "#B23A48",
+  accBackpack: "none",
+  accBackpackColor: "#2EA86F",
+  accGoggles: false,
 };
 
 /** Pick a fun starter style based on the legacy avatar emoji (onboarding). */

@@ -6,12 +6,17 @@ type: feature
 Visual identity for the explorer is a **layered SVG**, not an emoji. Lives in `src/components/ExplorerSvg.tsx` with `variant: "bust" | "full"`.
 
 Style fields (persisted as `sherpa.explorerStyle.v1`, event `sherpa:explorer-style-changed`, hook `useExplorerStyle`):
-`skin` (5 tones), `hair` (5 styles) + `hairColor`, `jacketColor`, `pantsColor`, `bootsColor`, `outfit`. Defaults in `DEFAULT_STYLE`. Onboarding seeds via `styleFromLegacyAvatar(avatar)`.
+`skin` (5 tones); `hair` (7 styles: short/medium/long/curly/wavy/bun/buzz) + `hairColor`; `jacketColor`, `pantsColor`, `bootsColor`, `outfit`.
+Face: `eyeShape` (round/almond/soft), `eyeColor`, `eyebrow` (soft/thick/arched), `freckles` (bool).
+Free accessories (independent from shop, recolorable): `accHat` (none/beanie/cap/explorer-hat) + `accHatColor`, `accScarf` (none/scarf) + `accScarfColor`, `accBackpack` (none/day/trek) + `accBackpackColor`, `accGoggles` (bool).
+Defaults in `DEFAULT_STYLE`. Onboarding seeds via `styleFromLegacyAvatar(avatar)`.
 
 `AvatarWithGear` is the round-avatar wrapper used everywhere (Campamento header, Profile, Shop preview). It now ignores the legacy `avatar`/`emojiClassName` props (kept for back-compat) and renders `ExplorerSvg` driven by `useExplorerStyle()` + `wallet.equipped`.
 
-Customization page: `/personalizar` (CustomizePage). Tabs: Piel / Pelo / Ropa. Live preview uses `variant="full"`. Changes save instantly via `saveExplorerStyle(patch)`.
+Customization page: `/personalizar` (CustomizePage). Tabs: Cara / Pelo / Ropa / Accesorios with framer-motion AnimatePresence transitions. Live preview uses `variant="full"`. Changes save instantly via `saveExplorerStyle(patch)`.
 
-Shop gear is rendered as **SVG inside ExplorerSvg** (HAT/SCARF/BACKPACK/BOOTS/BADGE renderer maps keyed by item id) — not emoji overlays. New shop items must add a renderer entry to keep the avatar consistent; missing renderers degrade gracefully (item still owned/equipped, just no visual).
+Shop gear is rendered as **SVG inside ExplorerSvg** (HAT/SCARF/BACKPACK/BOOTS/BADGE renderer maps keyed by item id) — not emoji overlays. New shop items must add a renderer entry to keep the avatar consistent; missing renderers degrade gracefully (item still owned/equipped, just no visual). **Shop gear wins over customize-tab accessories** when both are set (hat/scarf/backpack slots).
+
+ExplorerSvg has built-in **idle animation** (random blink every ~4–6s) and a **react-on-change pulse** (subtle scale bounce keyed off the full style hash). Pass `animate={false}` to disable for static contexts. Pixar-inspired soft geometry: rounded torso/pants/arms, ground shadow on `variant="full"`, subtle face shading + nose hint.
 
 Reset: `clearExplorerStyle()` is called alongside `clearExplorer()` and `clearWallet()` on "Reiniciar explorador".

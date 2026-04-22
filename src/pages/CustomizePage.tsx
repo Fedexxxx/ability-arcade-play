@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Check, RotateCcw } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Check, RotateCcw, Sparkles } from "lucide-react";
 import ExplorerSvg from "@/components/ExplorerSvg";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { useExplorerStyle } from "@/hooks/useExplorerStyle";
@@ -9,36 +9,57 @@ import { useWallet } from "@/hooks/useWallet";
 import { getItem, SLOT_META } from "@/lib/shopCatalog";
 import type { CosmeticSlot } from "@/lib/wallet";
 import {
+  ACCESSORY_COLORS,
+  BACKPACK_OPTIONS,
   BOOTS_COLORS,
+  EYE_COLORS,
+  EYE_SHAPES,
+  EYEBROW_STYLES,
   HAIR_COLORS,
   HAIR_STYLES,
+  HAT_OPTIONS,
   JACKET_COLORS,
   PANTS_COLORS,
+  SCARF_OPTIONS,
   SKIN_PALETTE,
   saveExplorerStyle,
+  type AccBackpack,
+  type AccHat,
+  type AccScarf,
+  type EyebrowStyle,
+  type EyeShape,
   type HairStyle,
   type SkinTone,
 } from "@/lib/explorerStyle";
 import { toast } from "@/hooks/use-toast";
 
-const SHERPA_BY_TAB: Record<"piel" | "pelo" | "ropa", string> = {
-  piel: "Elige el tono que más te recuerde a ti.",
+type Tab = "cara" | "pelo" | "ropa" | "accesorios";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "cara", label: "Cara" },
+  { id: "pelo", label: "Pelo" },
+  { id: "ropa", label: "Ropa" },
+  { id: "accesorios", label: "Accesorios" },
+];
+
+const SHERPA_BY_TAB: Record<Tab, string> = {
+  cara: "Tus rasgos te hacen único. Toca para probar.",
   pelo: "Tu pelo, tu estilo. Cambia las veces que quieras.",
   ropa: "Ropa para escalar — los colores son tuyos.",
+  accesorios: "Equipo de explorador para tu aventura.",
 };
 
 const CustomizePage = () => {
   const navigate = useNavigate();
   const style = useExplorerStyle();
   const wallet = useWallet();
-  const [tab, setTab] = useState<"piel" | "pelo" | "ropa">("piel");
-  // Snapshot the style on first mount so "Restablecer" reverts session edits.
+  const [tab, setTab] = useState<Tab>("cara");
   const initialStyle = useRef(style);
-  // Track which tabs have changes this session (for the active dot).
-  const [touched, setTouched] = useState<Record<"piel" | "pelo" | "ropa", boolean>>({
-    piel: false,
+  const [touched, setTouched] = useState<Record<Tab, boolean>>({
+    cara: false,
     pelo: false,
     ropa: false,
+    accesorios: false,
   });
 
   const equippedChips = useMemo(() => {
@@ -61,7 +82,7 @@ const CustomizePage = () => {
 
   const handleReset = () => {
     saveExplorerStyle(initialStyle.current);
-    setTouched({ piel: false, pelo: false, ropa: false });
+    setTouched({ cara: false, pelo: false, ropa: false, accesorios: false });
     toast({ title: "Restablecido", description: "Volviste al estilo inicial." });
   };
 
@@ -77,9 +98,14 @@ const CustomizePage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-card border border-border rounded-3xl p-5 shadow-terrain mb-5 flex flex-col items-center"
       >
-        <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold self-start">
-          Personaliza tu explorador
-        </p>
+        <div className="w-full flex items-center justify-between mb-1">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold">
+            Personaliza tu explorador
+          </p>
+          <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-primary font-bold">
+            <Sparkles size={11} /> En vivo
+          </span>
+        </div>
         <motion.div
           className="w-44 h-72 my-2"
           animate={{ y: [0, -3, 0] }}
@@ -122,17 +148,19 @@ const CustomizePage = () => {
       </motion.section>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-4">
-        {(["piel", "pelo", "ropa"] as const).map((t) => (
+      <div className="grid grid-cols-4 gap-1.5 mb-4">
+        {TABS.map((t) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`relative flex-1 rounded-full py-2 text-xs font-bold capitalize ${
-              tab === t ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground border border-border"
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`relative rounded-full py-2 text-[11px] font-bold capitalize transition-colors ${
+              tab === t.id
+                ? "bg-primary text-primary-foreground"
+                : "bg-card text-muted-foreground border border-border"
             }`}
           >
-            {t}
-            {touched[t] && (
+            {t.label}
+            {touched[t.id] && (
               <span
                 className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-secondary"
                 aria-label="Cambios sin restablecer"
@@ -142,100 +170,261 @@ const CustomizePage = () => {
         ))}
       </div>
 
-      {tab === "piel" && (
-        <Section title="Tono de piel">
-          <div className="grid grid-cols-5 gap-2">
-            {(Object.keys(SKIN_PALETTE) as SkinTone[]).map((id) => (
-              <SwatchButton
-                key={id}
-                color={SKIN_PALETTE[id].base}
-                active={style.skin === id}
-                onClick={() => update({ skin: id })}
-                label={SKIN_PALETTE[id].label}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18 }}
+        >
+          {tab === "cara" && (
+            <>
+              <Section title="Tono de piel">
+                <div className="grid grid-cols-5 gap-2">
+                  {(Object.keys(SKIN_PALETTE) as SkinTone[]).map((id) => (
+                    <SwatchButton
+                      key={id}
+                      color={SKIN_PALETTE[id].base}
+                      active={style.skin === id}
+                      onClick={() => update({ skin: id })}
+                      label={SKIN_PALETTE[id].label}
+                    />
+                  ))}
+                </div>
+              </Section>
 
-      {tab === "pelo" && (
-        <>
-          <Section title="Estilo">
-            <div className="grid grid-cols-3 gap-2">
-              {HAIR_STYLES.map((h) => (
-                <button
-                  key={h.id}
-                  onClick={() => update({ hair: h.id as HairStyle })}
-                  className={`rounded-2xl border py-2 text-xs font-bold ${
-                    style.hair === h.id
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card text-foreground border-border"
-                  }`}
-                >
-                  {h.label}
-                </button>
-              ))}
-            </div>
-          </Section>
-          <Section title="Color de pelo">
-            <div className="grid grid-cols-8 gap-2">
-              {HAIR_COLORS.map((c) => (
-                <SwatchButton
-                  key={c.id}
-                  color={c.hex}
-                  active={style.hairColor === c.hex}
-                  onClick={() => update({ hairColor: c.hex })}
-                  label={c.label}
-                />
-              ))}
-            </div>
-          </Section>
-        </>
-      )}
+              <Section title="Forma de ojos">
+                <div className="grid grid-cols-3 gap-2">
+                  {EYE_SHAPES.map((s) => (
+                    <ChipButton
+                      key={s.id}
+                      active={style.eyeShape === s.id}
+                      onClick={() => update({ eyeShape: s.id as EyeShape })}
+                    >
+                      {s.label}
+                    </ChipButton>
+                  ))}
+                </div>
+              </Section>
 
-      {tab === "ropa" && (
-        <>
-          <Section title="Chaqueta">
-            <div className="grid grid-cols-8 gap-2">
-              {JACKET_COLORS.map((c) => (
-                <SwatchButton
-                  key={c.hex}
-                  color={c.hex}
-                  active={style.jacketColor === c.hex}
-                  onClick={() => update({ jacketColor: c.hex })}
-                  label={c.label}
-                />
-              ))}
-            </div>
-          </Section>
-          <Section title="Pantalones">
-            <div className="grid grid-cols-6 gap-2">
-              {PANTS_COLORS.map((c) => (
-                <SwatchButton
-                  key={c.hex}
-                  color={c.hex}
-                  active={style.pantsColor === c.hex}
-                  onClick={() => update({ pantsColor: c.hex })}
-                  label={c.label}
-                />
-              ))}
-            </div>
-          </Section>
-          <Section title="Botas">
-            <div className="grid grid-cols-4 gap-2">
-              {BOOTS_COLORS.map((c) => (
-                <SwatchButton
-                  key={c.hex}
-                  color={c.hex}
-                  active={style.bootsColor === c.hex}
-                  onClick={() => update({ bootsColor: c.hex })}
-                  label={c.label}
-                />
-              ))}
-            </div>
-          </Section>
-        </>
-      )}
+              <Section title="Color de ojos">
+                <div className="grid grid-cols-5 gap-2">
+                  {EYE_COLORS.map((c) => (
+                    <SwatchButton
+                      key={c.hex}
+                      color={c.hex}
+                      active={style.eyeColor === c.hex}
+                      onClick={() => update({ eyeColor: c.hex })}
+                      label={c.label}
+                    />
+                  ))}
+                </div>
+              </Section>
+
+              <Section title="Cejas">
+                <div className="grid grid-cols-3 gap-2">
+                  {EYEBROW_STYLES.map((s) => (
+                    <ChipButton
+                      key={s.id}
+                      active={style.eyebrow === s.id}
+                      onClick={() => update({ eyebrow: s.id as EyebrowStyle })}
+                    >
+                      {s.label}
+                    </ChipButton>
+                  ))}
+                </div>
+              </Section>
+
+              <Section title="Pecas">
+                <div className="grid grid-cols-2 gap-2">
+                  <ChipButton active={!style.freckles} onClick={() => update({ freckles: false })}>
+                    Sin pecas
+                  </ChipButton>
+                  <ChipButton active={style.freckles} onClick={() => update({ freckles: true })}>
+                    Con pecas
+                  </ChipButton>
+                </div>
+              </Section>
+            </>
+          )}
+
+          {tab === "pelo" && (
+            <>
+              <Section title="Estilo">
+                <div className="grid grid-cols-3 gap-2">
+                  {HAIR_STYLES.map((h) => (
+                    <ChipButton
+                      key={h.id}
+                      active={style.hair === h.id}
+                      onClick={() => update({ hair: h.id as HairStyle })}
+                    >
+                      {h.label}
+                    </ChipButton>
+                  ))}
+                </div>
+              </Section>
+              <Section title="Color de pelo">
+                <div className="grid grid-cols-8 gap-2">
+                  {HAIR_COLORS.map((c) => (
+                    <SwatchButton
+                      key={c.id}
+                      color={c.hex}
+                      active={style.hairColor === c.hex}
+                      onClick={() => update({ hairColor: c.hex })}
+                      label={c.label}
+                    />
+                  ))}
+                </div>
+              </Section>
+            </>
+          )}
+
+          {tab === "ropa" && (
+            <>
+              <Section title="Chaqueta">
+                <div className="grid grid-cols-8 gap-2">
+                  {JACKET_COLORS.map((c) => (
+                    <SwatchButton
+                      key={c.hex}
+                      color={c.hex}
+                      active={style.jacketColor === c.hex}
+                      onClick={() => update({ jacketColor: c.hex })}
+                      label={c.label}
+                    />
+                  ))}
+                </div>
+              </Section>
+              <Section title="Pantalones">
+                <div className="grid grid-cols-6 gap-2">
+                  {PANTS_COLORS.map((c) => (
+                    <SwatchButton
+                      key={c.hex}
+                      color={c.hex}
+                      active={style.pantsColor === c.hex}
+                      onClick={() => update({ pantsColor: c.hex })}
+                      label={c.label}
+                    />
+                  ))}
+                </div>
+              </Section>
+              <Section title="Botas">
+                <div className="grid grid-cols-4 gap-2">
+                  {BOOTS_COLORS.map((c) => (
+                    <SwatchButton
+                      key={c.hex}
+                      color={c.hex}
+                      active={style.bootsColor === c.hex}
+                      onClick={() => update({ bootsColor: c.hex })}
+                      label={c.label}
+                    />
+                  ))}
+                </div>
+              </Section>
+            </>
+          )}
+
+          {tab === "accesorios" && (
+            <>
+              <p className="text-[11px] text-muted-foreground mb-3">
+                Estos accesorios están incluidos. El equipo de la tienda tiene prioridad si lo llevas puesto.
+              </p>
+
+              <Section title="Sombrero">
+                <div className="grid grid-cols-4 gap-2 mb-2">
+                  {HAT_OPTIONS.map((h) => (
+                    <ChipButton
+                      key={h.id}
+                      active={style.accHat === h.id}
+                      onClick={() => update({ accHat: h.id as AccHat })}
+                    >
+                      {h.label}
+                    </ChipButton>
+                  ))}
+                </div>
+                {style.accHat !== "none" && (
+                  <div className="grid grid-cols-8 gap-2">
+                    {ACCESSORY_COLORS.map((c) => (
+                      <SwatchButton
+                        key={c.hex}
+                        color={c.hex}
+                        active={style.accHatColor === c.hex}
+                        onClick={() => update({ accHatColor: c.hex })}
+                        label={c.label}
+                      />
+                    ))}
+                  </div>
+                )}
+              </Section>
+
+              <Section title="Bufanda">
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  {SCARF_OPTIONS.map((s) => (
+                    <ChipButton
+                      key={s.id}
+                      active={style.accScarf === s.id}
+                      onClick={() => update({ accScarf: s.id as AccScarf })}
+                    >
+                      {s.label}
+                    </ChipButton>
+                  ))}
+                </div>
+                {style.accScarf !== "none" && (
+                  <div className="grid grid-cols-8 gap-2">
+                    {ACCESSORY_COLORS.map((c) => (
+                      <SwatchButton
+                        key={c.hex}
+                        color={c.hex}
+                        active={style.accScarfColor === c.hex}
+                        onClick={() => update({ accScarfColor: c.hex })}
+                        label={c.label}
+                      />
+                    ))}
+                  </div>
+                )}
+              </Section>
+
+              <Section title="Mochila">
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  {BACKPACK_OPTIONS.map((b) => (
+                    <ChipButton
+                      key={b.id}
+                      active={style.accBackpack === b.id}
+                      onClick={() => update({ accBackpack: b.id as AccBackpack })}
+                    >
+                      {b.label}
+                    </ChipButton>
+                  ))}
+                </div>
+                {style.accBackpack !== "none" && (
+                  <div className="grid grid-cols-8 gap-2">
+                    {ACCESSORY_COLORS.map((c) => (
+                      <SwatchButton
+                        key={c.hex}
+                        color={c.hex}
+                        active={style.accBackpackColor === c.hex}
+                        onClick={() => update({ accBackpackColor: c.hex })}
+                        label={c.label}
+                      />
+                    ))}
+                  </div>
+                )}
+              </Section>
+
+              <Section title="Gafas de aventura">
+                <div className="grid grid-cols-2 gap-2">
+                  <ChipButton active={!style.accGoggles} onClick={() => update({ accGoggles: false })}>
+                    Sin gafas
+                  </ChipButton>
+                  <ChipButton active={style.accGoggles} onClick={() => update({ accGoggles: true })}>
+                    Con gafas
+                  </ChipButton>
+                </div>
+              </Section>
+            </>
+          )}
+        </motion.div>
+      </AnimatePresence>
 
       <div className="mt-6 flex gap-3">
         <button
@@ -286,6 +475,27 @@ const SwatchButton = ({
     }`}
     style={{ backgroundColor: color }}
   />
+);
+
+const ChipButton = ({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <button
+    onClick={onClick}
+    className={`rounded-2xl border py-2 text-xs font-bold transition-colors ${
+      active
+        ? "bg-primary text-primary-foreground border-primary"
+        : "bg-card text-foreground border-border"
+    }`}
+  >
+    {children}
+  </button>
 );
 
 export default CustomizePage;
