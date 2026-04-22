@@ -344,8 +344,8 @@ const ChallengePage = () => {
                     Intentar de Nuevo
                   </button>
                   <button
-                    onClick={() => navigate(-1)}
-                    className="w-full border border-border text-muted-foreground rounded-2xl py-3 font-semibold"
+                    onClick={() => navigate("/")}
+                    className="w-full text-xs text-muted-foreground py-1.5 font-medium hover:text-foreground transition-colors"
                   >
                     Ir atrás
                   </button>
