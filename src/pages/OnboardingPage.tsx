@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Mountain, Check } from "lucide-react";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa, { type SherpaMood } from "@/components/Sherpa";
 import { AGE_BANDS, AVATAR_CHOICES, saveExplorer, type AgeBand } from "@/lib/explorer";
+import { saveExplorerStyle, styleFromLegacyAvatar } from "@/lib/explorerStyle";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
 /** Optional state passed via navigate("/onboarding", { state: { editMode, prefill } }). */
@@ -47,6 +48,8 @@ const OnboardingPage = () => {
     if (step === 4) {
       if (!ageBand || !avatar || !name.trim()) return;
       saveExplorer({ name: name.trim(), avatar, ageBand });
+      // Seed a starter visual identity for the layered SVG explorer.
+      saveExplorerStyle(styleFromLegacyAvatar(avatar));
       // Edit mode returns to the profile so the user sees the updated card.
       navigate(editMode ? "/profile" : "/", { replace: true });
       return;
