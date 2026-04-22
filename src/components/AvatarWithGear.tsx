@@ -1,86 +1,47 @@
 import { useWallet } from "@/hooks/useWallet";
-import { getItem } from "@/lib/shopCatalog";
+import { useExplorerStyle } from "@/hooks/useExplorerStyle";
+import ExplorerSvg from "@/components/ExplorerSvg";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  /** Base emoji avatar */
-  avatar: string;
+  /** Legacy: kept for back-compat with existing callers. Ignored — visual identity now comes from ExplorerStyle. */
+  avatar?: string;
   /** Tailwind size classes for the round container */
   className?: string;
-  /** Avatar emoji size class (e.g. text-4xl) */
+  /** Legacy: ignored. */
   emojiClassName?: string;
-  /** Show equipped accessory overlays (badge, hat, scarf). Defaults to true. */
+  /** Show equipped accessory overlays. Defaults to true. */
   showGear?: boolean;
+  /** 'bust' (default) for round avatars; 'full' for full-body preview. */
+  variant?: "bust" | "full";
 }
 
 /**
- * Round avatar that overlays the explorer's equipped cosmetics.
- * MVP: hat sits on top, badge on top-right, scarf on bottom-left,
- * backpack on bottom-right. Boots are shown in the shop preview only.
+ * Round avatar that renders the layered SVG explorer with equipped cosmetics.
+ * Drop-in replacement for the legacy emoji avatar — identity is now driven
+ * by `useExplorerStyle()` so changes propagate to every surface instantly.
  */
 const AvatarWithGear = ({
-  avatar,
   className = "w-20 h-20",
-  emojiClassName = "text-4xl",
   showGear = true,
+  variant = "bust",
 }: Props) => {
   const wallet = useWallet();
-  const eq = wallet.equipped;
-
-  const glyph = (slot: keyof typeof eq) => {
-    const id = eq[slot];
-    if (!id) return null;
-    return getItem(id)?.glyph ?? null;
-  };
-
-  const hat = showGear ? glyph("hat") : null;
-  const scarf = showGear ? glyph("scarf") : null;
-  const backpack = showGear ? glyph("backpack") : null;
-  const badge = showGear ? glyph("badge") : null;
+  const style = useExplorerStyle();
 
   return (
     <div
       className={cn(
-        "relative rounded-full bg-card border-2 border-primary/40 shadow-summit flex items-center justify-center",
+        "relative rounded-full bg-card border-2 border-primary/40 shadow-summit overflow-hidden flex items-center justify-center",
         className,
       )}
     >
-      <span className={emojiClassName} aria-hidden>
-        {avatar}
-      </span>
-
-      {hat && (
-        <span
-          aria-hidden
-          className="absolute -top-3 left-1/2 -translate-x-1/2 text-xl drop-shadow-md"
-        >
-          {hat}
-        </span>
-      )}
-      {badge && (
-        <span
-          aria-hidden
-          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-card border border-border shadow-terrain flex items-center justify-center text-xs"
-        >
-          {badge}
-        </span>
-      )}
-      {scarf && (
-        <span
-          aria-hidden
-          className="absolute -bottom-1 -left-1 text-lg drop-shadow"
-        >
-          {scarf}
-        </span>
-      )}
-      {backpack && (
-        <span
-          aria-hidden
-          className="absolute -bottom-1 -right-1 text-lg drop-shadow"
-        >
-          {backpack}
-        </span>
-      )}
+      <ExplorerSvg
+        style={style}
+        gear={showGear ? wallet.equipped : {}}
+        variant={variant}
+        className="w-full h-full"
+      />
     </div>
   );
 };
