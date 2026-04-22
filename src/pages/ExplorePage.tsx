@@ -258,6 +258,33 @@ const MountainsPage = () => {
           </section>
         ))}
       </div>
+
+      {/* Empty state — no mountains match the active filter */}
+      {filtered.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-2 bg-card border border-dashed border-border rounded-3xl p-6 text-center"
+        >
+          <div className="w-14 h-14 rounded-2xl gradient-sky flex items-center justify-center mx-auto mb-3">
+            <MountainIcon size={28} className="text-primary" />
+          </div>
+          <h3 className={`font-display ${cardTitle} mb-1`}>
+            No hay montañas en “{activeCategory}”
+          </h3>
+          {density.showSubtext && (
+            <p className="text-xs text-muted-foreground mb-4">
+              Estamos preparando nuevas cumbres para esta categoría. Mientras tanto, explora todas tus montañas.
+            </p>
+          )}
+          <button
+            onClick={() => setActiveCategory("Todas")}
+            className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-bold active:scale-[0.98] transition-transform"
+          >
+            Ver todas las montañas →
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 };
