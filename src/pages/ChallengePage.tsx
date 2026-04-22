@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import ProgressBar from "@/components/ProgressBar";
 import QuizChallenge from "@/components/challenges/QuizChallenge";
 import VisualChallenge from "@/components/challenges/VisualChallenge";
