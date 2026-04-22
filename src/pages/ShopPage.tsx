@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Lock, Minus, Plus, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useWallet } from "@/hooks/useWallet";
 import { useExplorer } from "@/hooks/useExplorer";
@@ -23,14 +23,36 @@ const ShopPage = () => {
   const wallet = useWallet();
   const explorer = useExplorer();
   const [filter, setFilter] = useState<CosmeticSlot | "all">("all");
-  const [sherpaMsg, setSherpaMsg] = useState(
-    "Cada moneda cuenta. Elige algo que te haga sentir explorador.",
-  );
+  const [sherpaMsg, setSherpaMsg] = useState<string | null>(null);
+
+  // Contextual default Sherpa message — based on wallet state.
+  const ownedCount = wallet.owned.length;
+  const contextualMsg = useMemo(() => {
+    if (ownedCount === 0 && wallet.balance === 0) {
+      return "Conquista cumbres para ganar Alticoins. Vuelve cuando tengas algunas.";
+    }
+    if (ownedCount === 0) {
+      return "Tu primera pieza te espera. Elige con cariño.";
+    }
+    if (wallet.balance === 0) {
+      return "Sin monedas, pero con estilo. Equipa lo que ya es tuyo.";
+    }
+    return "Cada moneda cuenta. Elige algo que te haga sentir explorador.";
+  }, [ownedCount, wallet.balance]);
+  const displayMsg = sherpaMsg ?? contextualMsg;
 
   const visible = useMemo<ShopItem[]>(() => {
     if (filter === "all") return SHOP_ITEMS;
     return SHOP_ITEMS.filter((i) => i.slot === filter);
   }, [filter]);
+
+  // Cheapest unaffordable item among visible — used for the "Te faltan N" nudge.
+  const cheapestUnaffordableId = useMemo(() => {
+    const candidates = visible
+      .filter((i) => !wallet.owned.includes(i.id) && i.price > wallet.balance)
+      .sort((a, b) => a.price - b.price);
+    return candidates[0]?.id ?? null;
+  }, [visible, wallet.owned, wallet.balance]);
 
   const handleBuy = (item: ShopItem) => {
     const result = buy({
@@ -101,7 +123,7 @@ const ShopPage = () => {
           </div>
         </div>
         <div className="mt-4">
-          <SherpaSpeech mood="encouraging" size="sm" message={sherpaMsg} />
+          <SherpaSpeech mood="encouraging" size="sm" message={displayMsg} />
         </div>
       </motion.section>
 
@@ -131,6 +153,9 @@ const ShopPage = () => {
           const equipped = wallet.equipped[item.slot] === item.id;
           const affordable = wallet.balance >= item.price;
           const meta = RARITY_META[item.rarity];
+          const showAffordRing = !owned && affordable;
+          const isCheapestUnaffordable = !owned && !affordable && item.id === cheapestUnaffordableId;
+          const missing = Math.max(0, item.price - wallet.balance);
 
           return (
             <motion.div
@@ -138,19 +163,31 @@ const ShopPage = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
-              className={`relative bg-card border border-border rounded-3xl p-4 shadow-terrain flex flex-col ${meta.ring}`}
+              className={`relative bg-card border border-border rounded-3xl p-4 shadow-terrain flex flex-col ${meta.ring} ${
+                showAffordRing ? "ring-offset-2 ring-offset-background" : ""
+              }`}
+              style={
+                showAffordRing
+                  ? { boxShadow: "0 0 0 2px hsl(var(--secondary) / 0.5), 0 8px 18px -10px hsl(var(--secondary) / 0.5)" }
+                  : undefined
+              }
             >
+              {owned && (
+                <div className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-terrain">
+                  <Check size={10} /> Tuyo
+                </div>
+              )}
               <div
                 className={`absolute top-3 right-3 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${meta.chip}`}
               >
                 {meta.label}
               </div>
 
-              <div className="h-16 flex items-center justify-center text-5xl mb-2">
+              <div className="h-16 flex items-center justify-center text-5xl mb-2 mt-2">
                 {item.glyph}
               </div>
               <p className="font-display text-sm leading-tight">{item.name}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 min-h-[2rem]">
+              <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">
                 {item.description}
               </p>
 
@@ -161,34 +198,41 @@ const ShopPage = () => {
                     className={`w-full rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 ${
                       equipped
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
+                        : "bg-card text-foreground border border-primary/40"
                     }`}
                   >
-                    <Check size={14} />
-                    {equipped ? "Equipado" : "Equipar"}
+                    {equipped ? <Minus size={14} /> : <Plus size={14} />}
+                    {equipped ? "Quitar" : "Equipar"}
                   </button>
                 ) : (
-                  <button
-                    onClick={() => handleBuy(item)}
-                    disabled={!affordable}
-                    className={`w-full rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 ${
-                      affordable
-                        ? "gradient-sunrise text-secondary-foreground shadow-summit"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {affordable ? (
-                      <>
-                        <Sparkles size={14} />
-                        {item.price}
-                      </>
-                    ) : (
-                      <>
-                        <Lock size={12} />
-                        {item.price}
-                      </>
+                  <>
+                    <button
+                      onClick={() => handleBuy(item)}
+                      disabled={!affordable}
+                      className={`w-full rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 ${
+                        affordable
+                          ? "gradient-sunrise text-secondary-foreground shadow-summit"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {affordable ? (
+                        <>
+                          <Sparkles size={14} />
+                          {item.price}
+                        </>
+                      ) : (
+                        <>
+                          <Lock size={12} />
+                          {item.price}
+                        </>
+                      )}
+                    </button>
+                    {isCheapestUnaffordable && (
+                      <p className="mt-1.5 text-center text-[10px] font-semibold text-secondary">
+                        Te faltan {missing} 🌟
+                      </p>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </motion.div>

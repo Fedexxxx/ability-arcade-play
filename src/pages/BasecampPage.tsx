@@ -1,6 +1,7 @@
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Flame, Tent, ArrowRight, Mountain, Sparkles } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Flame, Tent, ArrowRight, Mountain, Sparkles, Calendar, Compass } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa from "@/components/Sherpa";
@@ -17,11 +18,42 @@ const greetings = [
   "Hoy avanzamos",
 ];
 
+// Rotating Sherpa quotes — picked deterministically by streak so the
+// quote stays stable across re-renders within the same day.
+const SHERPA_QUOTES = [
+  { quote: "Un paso a la vez, llegamos lejos.", author: "Sherpa" },
+  { quote: "La cumbre se conquista por la mañana.", author: "Sherpa" },
+  { quote: "Cada respiro es un metro más.", author: "Sherpa" },
+  { quote: "El que sube despacio, sube seguro.", author: "Sherpa" },
+  { quote: "La montaña recompensa al constante.", author: "Sherpa" },
+  { quote: "Tu mejor récord es el de mañana.", author: "Sherpa" },
+];
+
+/** Streak milestone — returns the ring class + emoji label, or null. */
+function streakMilestone(streak: number): { ring: string; label: string } | null {
+  if (streak >= 30) return { ring: "ring-2 ring-streak shadow-summit", label: `🔥 ${streak} días` };
+  if (streak >= 14) return { ring: "ring-2 ring-secondary", label: `🔥 ${streak} días` };
+  if (streak >= 7)  return { ring: "ring-2 ring-primary", label: `🔥 ${streak} días` };
+  if (streak >= 3)  return { ring: "ring-1 ring-streak/60", label: `🔥 ${streak}` };
+  return null;
+}
+
 const BasecampPage = () => {
   const navigate = useNavigate();
   const explorer = useExplorer();
   const density = useDensity();
   const wallet = useWallet();
+  const prevBalance = useRef(wallet.balance);
+  const [coinPop, setCoinPop] = useState<number | null>(null);
+  useEffect(() => {
+    const delta = wallet.balance - prevBalance.current;
+    prevBalance.current = wallet.balance;
+    if (delta > 0) {
+      setCoinPop(delta);
+      const t = window.setTimeout(() => setCoinPop(null), 1400);
+      return () => window.clearTimeout(t);
+    }
+  }, [wallet.balance]);
   const activeSP = superpowers.find((s) => s.status === "in-progress") ?? superpowers.find((s) => s.status === "available");
   const activeModule = activeSP?.modules.find((m) => m.status === "in-progress") ?? activeSP?.modules.find((m) => m.status === "available");
   const dailyMission = missions.find((m) => m.type === "daily" && !m.completed);
@@ -29,6 +61,8 @@ const BasecampPage = () => {
   const explorerName = explorer?.name ?? userProfile.name;
   const explorerAvatar = explorer?.avatar ?? userProfile.avatar;
   const greeting = greetings[Math.floor(userProfile.streak) % greetings.length];
+  const milestone = streakMilestone(userProfile.streak);
+  const sherpaQuote = SHERPA_QUOTES[userProfile.streak % SHERPA_QUOTES.length];
 
   // Density-tuned class fragments
   const heroSize = density.scale === "lg" ? "text-4xl" : density.scale === "md" ? "text-3xl" : "text-2xl";
@@ -77,19 +111,40 @@ const BasecampPage = () => {
         <div className="flex flex-col items-end gap-1">
           <button
             onClick={() => navigate("/tienda")}
-            className="flex items-center gap-1 bg-secondary-soft text-secondary rounded-full px-2.5 py-1 shadow-terrain"
+            className="relative flex items-center gap-1 bg-secondary-soft text-secondary rounded-full px-2.5 py-1 shadow-terrain"
             aria-label={`${wallet.balance} Alticoins, abrir tienda`}
           >
             <Sparkles size={13} />
             <span className="text-xs font-bold">{wallet.balance}</span>
+            <AnimatePresence>
+              {coinPop !== null && (
+                <motion.span
+                  key={coinPop}
+                  initial={{ opacity: 0, y: 4, scale: 0.8 }}
+                  animate={{ opacity: 1, y: -16, scale: 1 }}
+                  exit={{ opacity: 0, y: -28 }}
+                  transition={{ duration: 0.9 }}
+                  className="pointer-events-none absolute -top-1 right-0 text-[10px] font-bold text-secondary"
+                >
+                  +{coinPop}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
-          <div
-            className="flex items-center gap-1 bg-card border border-border rounded-full px-2.5 py-1 shadow-terrain"
+          <motion.div
+            initial={milestone ? { scale: 0.9 } : false}
+            animate={milestone ? { scale: 1 } : undefined}
+            transition={{ type: "spring", stiffness: 260, damping: 18 }}
+            className={`flex items-center gap-1 bg-card border border-border rounded-full px-2.5 py-1 shadow-terrain ${
+              milestone?.ring ?? ""
+            }`}
             aria-label={`Racha de ${userProfile.streak} días`}
           >
             <Flame size={13} className="text-streak" />
-            <span className="text-xs font-bold text-foreground">{userProfile.streak}</span>
-          </div>
+            <span className="text-xs font-bold text-foreground">
+              {milestone ? milestone.label : userProfile.streak}
+            </span>
+          </motion.div>
         </div>
       </header>
 
@@ -119,7 +174,7 @@ const BasecampPage = () => {
       </section>
 
       {/* Primary action — continue the climb */}
-      {activeSP && (
+      {activeSP ? (
         <motion.button
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -150,10 +205,32 @@ const BasecampPage = () => {
             )}
           </div>
         </motion.button>
+      ) : (
+        <motion.button
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate("/explore")}
+          className={`mx-5 w-[calc(100%-2.5rem)] bg-card border-2 border-dashed border-primary/40 text-foreground rounded-3xl ${ctaPad} shadow-terrain text-left`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-primary font-bold">Empieza tu aventura</p>
+              <p className={`font-display ${ctaTitle} leading-tight mt-0.5`}>Elige tu primera montaña</p>
+              {density.showSubtext && (
+                <p className="text-sm text-muted-foreground mt-1">Cada cima empieza con un paso.</p>
+              )}
+            </div>
+            <div className={`ml-3 ${ctaArrow} rounded-full gradient-sky flex items-center justify-center flex-shrink-0`}>
+              <Compass size={density.scale === "lg" ? 26 : 22} />
+            </div>
+          </div>
+        </motion.button>
       )}
 
       {/* Today's small climb */}
-      {dailyMission && (
+      {dailyMission ? (
         <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -177,24 +254,45 @@ const BasecampPage = () => {
             <ProgressBar value={dailyMission.progress} max={dailyMission.target} variant="sunrise" size="sm" />
           </div>
         </motion.section>
+      ) : (
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mx-5 mt-4 bg-card/60 border border-dashed border-border rounded-3xl p-4 shadow-terrain"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-muted flex items-center justify-center">
+              <Calendar size={20} className="text-muted-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Climb del día</p>
+              <p className={`font-display ${cardTitle} leading-tight text-foreground`}>Sin misión hoy</p>
+              {density.showSubtext && (
+                <p className="text-xs text-muted-foreground mt-0.5">Vuelve mañana por tu nuevo Climb.</p>
+              )}
+            </div>
+          </div>
+        </motion.section>
       )}
 
       {/* Mountains preview */}
       <section className="px-5 mt-6">
-        <div className="flex items-end justify-between mb-3">
+        <button
+          onClick={() => navigate("/explore")}
+          className="w-full flex items-end justify-between mb-3 text-left active:opacity-70 transition-opacity"
+          aria-label="Ver todas las montañas"
+        >
           <div>
             <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
               Tus montañas
             </p>
             <h2 className="font-display text-xl">Elige tu próximo ascenso</h2>
           </div>
-          <button
-            onClick={() => navigate("/explore")}
-            className="text-xs font-bold text-primary"
-          >
+          <span className="text-xs font-bold text-primary py-2 pl-3">
             Ver todas →
-          </button>
-        </div>
+          </span>
+        </button>
 
         <div className="space-y-3">
           {superpowers.slice(0, 3).map((sp, i) => {
@@ -238,9 +336,9 @@ const BasecampPage = () => {
       <section className="px-5 mt-8 text-center">
         <Sherpa mood="encouraging" size="md" halo />
         <p className="font-display text-base mt-2 text-foreground">
-          “Un paso a la vez, llegamos lejos.”
+          “{sherpaQuote.quote}”
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">— Sherpa</p>
+        <p className="text-xs text-muted-foreground mt-0.5">— {sherpaQuote.author}</p>
       </section>
     </div>
   );
