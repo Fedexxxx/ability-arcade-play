@@ -237,15 +237,24 @@ const CustomizePage = () => {
         </>
       )}
 
-      <button
-        onClick={() => {
-          toast({ title: "¡Listo!", description: "Tu explorador está al día." });
-          navigate(-1);
-        }}
-        className="mt-6 w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3 font-bold flex items-center justify-center gap-2 shadow-summit"
-      >
-        <Check size={16} /> Guardar y volver
-      </button>
+      <div className="mt-6 flex gap-3">
+        <button
+          onClick={handleReset}
+          className="flex-1 bg-card border border-border text-foreground rounded-2xl py-3 font-bold flex items-center justify-center gap-2"
+          aria-label="Restablecer al estilo inicial"
+        >
+          <RotateCcw size={16} /> Restablecer
+        </button>
+        <button
+          onClick={() => {
+            toast({ title: "¡Listo!", description: "Tu explorador está al día." });
+            navigate(-1);
+          }}
+          className="flex-[1.2] gradient-sunrise text-secondary-foreground rounded-2xl py-3 font-bold flex items-center justify-center gap-2 shadow-summit"
+        >
+          <Check size={16} /> Listo
+        </button>
+      </div>
     </div>
   );
 };
