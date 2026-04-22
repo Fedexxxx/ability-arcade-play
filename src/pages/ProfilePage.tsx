@@ -37,7 +37,7 @@ const ExplorerProfilePage = () => {
   const stats = [
     { icon: MountainIcon, label: "Montañas",    value: userProfile.superpowersMastered, color: "text-primary" },
     { icon: Flag,         label: "Checkpoints", value: userProfile.modulesCompleted,    color: "text-secondary" },
-    { icon: Footprints,   label: "Climbs",      value: userProfile.challengesCompleted, color: "text-accent" },
+    { icon: Footprints,   label: "Ascensos",    value: userProfile.challengesCompleted, color: "text-accent" },
     { icon: Sparkles,     label: "Alticoins",   value: wallet.balance,                   color: "text-secondary" },
   ];
 
