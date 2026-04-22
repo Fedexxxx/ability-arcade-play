@@ -67,22 +67,25 @@ const ModulePage = () => {
     intent: "pin" | "unpin",
     nextTier: Tier,
     prevSnapshot: { tier: Tier; pinned: boolean },
+    isRetry = false,
   ) => {
     if (!spId || !modId) return;
     try {
       if (intent === "pin") {
         setModuleTier(spId, modId, nextTier);
-        const count = countFor(nextTier);
-        toast.success(`Fijado en ${TIER_LABEL[nextTier]}`, {
-          description: `${retosLabel(count)} en este nivel`,
-        });
       } else {
         unpinModuleTier(spId, modId);
-        const count = countFor(nextTier);
-        toast.success(`Auto · ${TIER_LABEL[nextTier]}`, {
-          description: `Adaptativo activado · ${retosLabel(count)}`,
-        });
       }
+      const count = countFor(nextTier);
+      const title =
+        intent === "pin"
+          ? `${isRetry ? "Guardado tras reintentar · " : ""}Fijado en ${TIER_LABEL[nextTier]}`
+          : `${isRetry ? "Guardado tras reintentar · " : ""}Auto · ${TIER_LABEL[nextTier]}`;
+      const description =
+        intent === "pin"
+          ? `${retosLabel(count)} en este nivel`
+          : `Adaptativo activado · ${retosLabel(count)}`;
+      toast.success(title, { description });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "No se pudo guardar tu preferencia.";
@@ -93,12 +96,15 @@ const ModulePage = () => {
       const kept = prevSnapshot.pinned
         ? `Fijado en ${TIER_LABEL[prevSnapshot.tier]}`
         : `Auto · ${TIER_LABEL[prevSnapshot.tier]}`;
-      toast.error(`No se pudo guardar: ${attempted}`, {
+      const errorTitle = isRetry
+        ? `Reintento fallido: ${attempted}`
+        : `No se pudo guardar: ${attempted}`;
+      toast.error(errorTitle, {
         description: `${message} Sigues en ${kept}.`,
         duration: 10000,
         action: {
-          label: "Reintentar",
-          onClick: () => applyTierChange(intent, nextTier, prevSnapshot),
+          label: isRetry ? "Reintentar de nuevo" : "Reintentar",
+          onClick: () => applyTierChange(intent, nextTier, prevSnapshot, true),
         },
         cancel: {
           label: `Mantener ${TIER_LABEL[prevSnapshot.tier]}`,
