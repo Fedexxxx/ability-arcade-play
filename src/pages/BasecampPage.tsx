@@ -43,6 +43,17 @@ const BasecampPage = () => {
   const explorer = useExplorer();
   const density = useDensity();
   const wallet = useWallet();
+  const prevBalance = useRef(wallet.balance);
+  const [coinPop, setCoinPop] = useState<number | null>(null);
+  useEffect(() => {
+    const delta = wallet.balance - prevBalance.current;
+    prevBalance.current = wallet.balance;
+    if (delta > 0) {
+      setCoinPop(delta);
+      const t = window.setTimeout(() => setCoinPop(null), 1400);
+      return () => window.clearTimeout(t);
+    }
+  }, [wallet.balance]);
   const activeSP = superpowers.find((s) => s.status === "in-progress") ?? superpowers.find((s) => s.status === "available");
   const activeModule = activeSP?.modules.find((m) => m.status === "in-progress") ?? activeSP?.modules.find((m) => m.status === "available");
   const dailyMission = missions.find((m) => m.type === "daily" && !m.completed);
