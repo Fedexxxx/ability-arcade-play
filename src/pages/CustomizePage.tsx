@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Check, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, RotateCcw, Sparkles, Wand2 } from "lucide-react";
 import ExplorerSvg from "@/components/ExplorerSvg";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { useExplorerStyle } from "@/hooks/useExplorerStyle";
@@ -32,6 +32,19 @@ import {
   type SkinTone,
 } from "@/lib/explorerStyle";
 import { toast } from "@/hooks/use-toast";
+import { useAvatarMode } from "@/hooks/useAvatarMode";
+import { setAvatarMode } from "@/lib/avatarMode";
+import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
+import {
+  AI_HAIRS,
+  AI_OUTFITS,
+  AI_SKINS,
+  resolveAiAvatarUrl,
+  saveAiVariant,
+  type AiHair,
+  type AiOutfit,
+  type AiSkin,
+} from "@/lib/aiAvatarCatalog";
 
 type Tab = "cara" | "pelo" | "ropa" | "accesorios";
 
