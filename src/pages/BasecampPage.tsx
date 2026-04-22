@@ -49,6 +49,8 @@ const BasecampPage = () => {
   const explorerName = explorer?.name ?? userProfile.name;
   const explorerAvatar = explorer?.avatar ?? userProfile.avatar;
   const greeting = greetings[Math.floor(userProfile.streak) % greetings.length];
+  const milestone = streakMilestone(userProfile.streak);
+  const sherpaQuote = SHERPA_QUOTES[userProfile.streak % SHERPA_QUOTES.length];
 
   // Density-tuned class fragments
   const heroSize = density.scale === "lg" ? "text-4xl" : density.scale === "md" ? "text-3xl" : "text-2xl";
@@ -103,13 +105,20 @@ const BasecampPage = () => {
             <Sparkles size={13} />
             <span className="text-xs font-bold">{wallet.balance}</span>
           </button>
-          <div
-            className="flex items-center gap-1 bg-card border border-border rounded-full px-2.5 py-1 shadow-terrain"
+          <motion.div
+            initial={milestone ? { scale: 0.9 } : false}
+            animate={milestone ? { scale: 1 } : undefined}
+            transition={{ type: "spring", stiffness: 260, damping: 18 }}
+            className={`flex items-center gap-1 bg-card border border-border rounded-full px-2.5 py-1 shadow-terrain ${
+              milestone?.ring ?? ""
+            }`}
             aria-label={`Racha de ${userProfile.streak} días`}
           >
             <Flame size={13} className="text-streak" />
-            <span className="text-xs font-bold text-foreground">{userProfile.streak}</span>
-          </div>
+            <span className="text-xs font-bold text-foreground">
+              {milestone ? milestone.label : userProfile.streak}
+            </span>
+          </motion.div>
         </div>
       </header>
 
