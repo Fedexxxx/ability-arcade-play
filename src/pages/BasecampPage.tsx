@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Flame, Tent, ArrowRight, Mountain, Sparkles } from "lucide-react";
+import { Flame, Tent, ArrowRight, Mountain, Sparkles, Calendar, Compass } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import Sherpa from "@/components/Sherpa";
@@ -16,6 +16,26 @@ const greetings = [
   "A subir",
   "Hoy avanzamos",
 ];
+
+// Rotating Sherpa quotes — picked deterministically by streak so the
+// quote stays stable across re-renders within the same day.
+const SHERPA_QUOTES = [
+  { quote: "Un paso a la vez, llegamos lejos.", author: "Sherpa" },
+  { quote: "La cumbre se conquista por la mañana.", author: "Sherpa" },
+  { quote: "Cada respiro es un metro más.", author: "Sherpa" },
+  { quote: "El que sube despacio, sube seguro.", author: "Sherpa" },
+  { quote: "La montaña recompensa al constante.", author: "Sherpa" },
+  { quote: "Tu mejor récord es el de mañana.", author: "Sherpa" },
+];
+
+/** Streak milestone — returns the ring class + emoji label, or null. */
+function streakMilestone(streak: number): { ring: string; label: string } | null {
+  if (streak >= 30) return { ring: "ring-2 ring-streak shadow-summit", label: `🔥 ${streak} días` };
+  if (streak >= 14) return { ring: "ring-2 ring-secondary", label: `🔥 ${streak} días` };
+  if (streak >= 7)  return { ring: "ring-2 ring-primary", label: `🔥 ${streak} días` };
+  if (streak >= 3)  return { ring: "ring-1 ring-streak/60", label: `🔥 ${streak}` };
+  return null;
+}
 
 const BasecampPage = () => {
   const navigate = useNavigate();
