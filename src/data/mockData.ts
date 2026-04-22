@@ -171,7 +171,10 @@ const d = (
 // =====================================================
 // THE MOUNTAINS — three age-appropriate climbs (4–10)
 // =====================================================
-export const superpowers: Superpower[] = [
+// Legacy seed — kept private. The exported `superpowers` is now derived from
+// the slice-3 catalog in `./mountains.ts`, which carries 6 ranges × 5
+// checkpoints with three difficulty tiers per module.
+const _legacySuperpowers: Superpower[] = [
 
   // ============ MOUNTAIN 1 — LETRAS PEAK ============
   {
