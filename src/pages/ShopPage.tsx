@@ -93,10 +93,10 @@ const ShopPage = () => {
     <div className="min-h-screen pb-28 px-5 pt-6 max-w-lg mx-auto">
       <button
         onClick={() => navigate(-1)}
-        className="text-muted-foreground mb-3"
+        className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mb-3 text-sm font-bold"
         aria-label="Volver"
       >
-        <ArrowLeft size={22} />
+        <ArrowLeft size={18} /> Ir atrás
       </button>
 
       {/* Header — preview + balance */}
