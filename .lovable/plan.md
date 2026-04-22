@@ -1,89 +1,118 @@
 
 
-## Polish pass: Explore · Shop · Customize · Basecamp
+## Prototipo "Opción D" — explorador IA pre-renderizado detrás de un toggle A/B
 
-Four small, independent improvements across the four pages you flagged. Each can be shipped on its own — pick all, some, or reorder.
+Mantenemos el `ExplorerSvg` actual como **versión A (default)** en toda la app. Agregamos una **versión B (IA pre-renderizada)** visible sólo cuando el usuario activa un toggle, y sólo en las superficies del flujo de personalización.
 
----
+### Alcance (qué SÍ y qué NO cambia)
 
-### 1) Mountains catalog / Explore page (`src/pages/ExplorePage.tsx`)
+**Sí cambia:**
+- Página `/personalizar` (preview grande + selección de variantes B).
+- Avatar redondo en `/perfil` (header) — refleja la elección del usuario.
 
-Current state: chips filter by category, cards list every superpower with status badge + progress. Solid, but flat — no sense of which mountain is *yours right now*, and locked items lack a "what unlocks me" hint.
-
-**Polish:**
-- **Pinned "Subiendo ahora" card on top** when there's an `in-progress` mountain — slightly larger, sunrise gradient border, "Continuar ascenso" CTA. Makes the page actionable on first glance.
-- **Group by status** within the active filter: `Subiendo` → `Listas` → `Conquistadas` → `Bloqueadas`, with a tiny section label between groups (matches the Sherpa metaphor: "lo que tienes en marcha", "lo que te espera").
-- **Lock hint** on locked cards: small line "Termina X para desbloquear" instead of just dimming.
-- **Skeleton "Próximamente" badge** for mountains whose modules are all `byTier === null`, so the catalog doesn't promise content that isn't there.
-- **Sherpa message becomes contextual**: switches based on whether the user has 0, 1, or several mountains in progress.
+**No cambia:**
+- Basecamp, Shop, todas las demás superficies usan `ExplorerSvg` (versión A) siempre. Es un prototipo, no una migración.
+- El modelo `explorerStyle` actual y el gear de la tienda — siguen funcionando para A.
 
 ---
 
-### 2) Alticoins / Shop flow (`src/pages/ShopPage.tsx` + small tweaks to `BasecampPage`)
+### Cómo funciona el toggle A/B
 
-Current state: balance chip, slot filters, 2-col grid, equip/buy buttons. Works, but a few rough edges:
-- `min-h-[2rem]` description box leaves visible whitespace under short names.
-- The "Equipado" state on a card and "Equipar" on owned items look almost identical (both use `bg-muted` vs `bg-primary`) — easy to miss.
-- No visible "owned" marker in the grid; you only learn it by trying to buy.
-- No empty state per slot filter (none right now, but worth guarding).
+Nuevo switch en la parte superior de `/personalizar`:
 
-**Polish:**
-- **Owned ribbon** — small corner badge (`✓ Tuyo`) on every owned card, independent of equipped state.
-- **Equip toggle clarity** — when equipped, show "Quitar" with a minus icon; when owned-not-equipped, show "Equipar" with a plus. Makes the toggle direction obvious.
-- **Affordability ring** — items the user *can* afford get a subtle gradient-sunrise ring; locked-by-price items stay neutral. Pairs well with the existing rarity ring.
-- **"Casi lo tienes" nudge** — for the cheapest unaffordable item, show "Te faltan N" under the price button.
-- **Top of page**: replace the static Sherpa line with a contextual one (first visit, after first purchase, when wallet is empty, etc.).
-- **Basecamp integration**: the Alticoins chip in Basecamp header gets a subtle `+N` pop animation when wallet balance increases (uses existing `useWallet`).
+```text
+[ Clásico (SVG) ]  ←→  [ Nuevo (IA) ]   ← toggle persistido
+```
+
+- Estado guardado en `localStorage` como `sherpa.avatarMode` (`"svg" | "ai"`), default `"svg"`.
+- Hook nuevo `useAvatarMode()` análogo a `useExplorerStyle`.
+- `AvatarWithGear` lee el modo: si `ai` y existe una variante guardada para el usuario, renderiza `<img>`; si no, fallback a `ExplorerSvg`.
 
 ---
 
-### 3) Explorer customization (`src/pages/CustomizePage.tsx`)
+### Sistema de variantes IA (set acotado pre-renderizado)
 
-Current state: live SVG preview, 3 tabs (piel/pelo/ropa), color swatches, "Guardar y volver" CTA. Functional, but:
-- Every change auto-saves, yet the CTA says "Guardar y volver" — implies unsaved state that doesn't exist.
-- No way to undo a misclick (e.g. picked the wrong skin tone).
-- Tabs lose track of which one has changes.
-- The preview doesn't show the equipped gear from the Shop in a visible way (gear is rendered but not labelled, so the connection isn't obvious).
+Generamos **un set finito** de PNGs con `google/gemini-2.5-flash-image` (Nano Banana). Combinatoria intencionalmente chica para que el prototipo sea manejable:
 
-**Polish:**
-- **Rename CTA to "Listo"** (since changes are already saved) and give it a secondary "Restablecer" button that reverts to the style on entry. We snapshot `style` in a ref on mount and `saveExplorerStyle(snapshot)` on reset.
-- **Active tab dot** — small dot on tab labels you've touched this session, so the user sees what they've changed.
-- **"Mi equipo" mini-row under preview** showing the equipped Shop items as small chips, with a "Cambiar en la tienda →" link. Bridges Customize ↔ Shop.
-- **Sherpa contextual messages** per tab: "Elige el tono que más te recuerde a ti" / "Tu pelo, tu estilo" / "Ropa para escalar".
-- **Subtle preview animation** — explorer does a tiny bob/breathe loop so the preview feels alive (uses existing framer-motion).
+```text
+4 outfits  ×  4 tonos de piel  ×  3 peinados  =  48 imágenes (bust)
+                                              +  48 imágenes (full-body)
+                                              =  96 PNGs total
+```
 
----
+Cada imagen se nombra de forma determinista, p.ej.:
+`avatar/ai/v1/bust__outfit-explorer__skin-honey__hair-short.png`
 
-### 4) Basecamp layout (`src/pages/BasecampPage.tsx`)
+Slots de personalización en modo IA (UI simplificada):
+- **Outfit**: explorador / alpino / cumbre / sendero (4)
+- **Piel**: porcelana / miel / cacao / espresso (4)
+- **Pelo**: corto / medio / largo (3)
 
-Current state: backdrop image, header with avatar/level/streak/coins, Sherpa, big CTA, daily mission, mountains preview, Sherpa quote. Dense but well-structured. Issues spotted:
-- **Empty-state gap**: if there's no `activeSP`, the entire continue-CTA disappears with nothing in its place — page feels broken.
-- **Daily mission card** disappears entirely when `dailyMission` is undefined; same problem.
-- Header shows level/XP/streak/coins but **streak doesn't celebrate milestones** (3, 7, 30 days look identical).
-- The Sherpa quote at the bottom is decorative but always identical — wasted real estate.
-
-**Polish:**
-- **"Empieza tu primera montaña" CTA** when `activeSP` is null, pointing to `/explore`. Mirror styling of the active CTA.
-- **"Sin misión hoy" placeholder** when `dailyMission` is undefined: small card "Vuelve mañana por tu Climb del día" with a subtle calendar glyph. Keeps the rhythm of the page.
-- **Streak milestone halo** — when `streak` hits 3/7/14/30, the streak chip gets a colored ring + tiny "🔥 3 días" label expansion. Pure visual, no logic change.
-- **Rotate the Sherpa quote** — small array of 5–6 climbing quotes, pick one based on `userProfile.streak` (deterministic, no flicker on re-render).
-- **"Ver todas →" affordance**: also make the entire "Tus montañas" header tappable, not just the link. Larger touch target.
+Accesorios y gear de tienda quedan fuera del prototipo IA (claramente comunicado en la UI: *"Versión beta — sin accesorios todavía"*).
 
 ---
 
-## Suggested order
+### Generación de las imágenes (one-shot script)
 
-1. **Basecamp** empty states (real bug — page can look broken). 
-2. **Shop** owned/equip clarity (easiest win, daily-use surface). 
-3. **Explore** group-by-status + active pin. 
-4. **Customize** snapshot/reset + equipped chips.
+Script Node ejecutado **una sola vez** durante el build del prototipo (no en runtime):
 
-## Technical notes
+1. Lee la matriz de combinaciones (48 entradas).
+2. Por cada una, llama al gateway con un prompt estructurado:
+   ```text
+   Pixar-style 3D character portrait, friendly young mountain explorer,
+   neutral gender, soft warm lighting, clean studio background (transparent),
+   {outfit description}, {skin tone}, {hair style and natural color},
+   subtle smile, slight forward lean, full-body / bust framing,
+   consistent character across set, square format.
+   ```
+3. Guarda el PNG en `public/avatar/ai/v1/<nombre>.png`.
+4. Para mantener consistencia entre variantes, la **primera** imagen se usa como `image_url` de referencia en las siguientes llamadas (edit mode).
 
-- All changes are presentational — no schema, hook, or routing changes.
-- Reuses existing primitives: `useWallet`, `useExplorer`, `useDensity`, `SherpaSpeech`, `AvatarWithGear`, `gradient-sunrise`, `shadow-summit`.
-- Density (`useDensity`) must be respected on every new element (font size, padding, optional subtext) — same pattern already in these files.
-- Basecamp streak halo & coin-pop use framer-motion `animate` props, no new deps.
-- Customize "snapshot on mount" stored in a `useRef`; reset just calls `saveExplorerStyle(snapshot.current)`.
-- No memory updates needed — none of this contradicts existing rules.
+El script vive en `scripts/generate-ai-avatars.mjs` (no se ejecuta en producción, sólo on-demand).
+
+---
+
+### Cambios en código (resumen)
+
+| Archivo | Cambio |
+|---|---|
+| `src/lib/avatarMode.ts` *(nuevo)* | `getAvatarMode()`, `setAvatarMode()`, evento `sherpa:avatar-mode-changed`. |
+| `src/hooks/useAvatarMode.ts` *(nuevo)* | Hook análogo a `useExplorerStyle`. |
+| `src/lib/aiAvatarCatalog.ts` *(nuevo)* | Mapa `(outfit, skin, hair) → ruta PNG`. Helper `resolveAiAvatarUrl(style, variant)`. |
+| `src/components/AvatarWithGear.tsx` | Lee `useAvatarMode()`. Si `ai`, renderiza `<img src={resolveAiAvatarUrl(...)}>` con fallback a `ExplorerSvg`. |
+| `src/pages/CustomizePage.tsx` | Toggle A/B arriba. Si modo `ai`: muestra preview `<img>` grande + 3 grids de selección (Outfit / Piel / Pelo). Si modo `svg`: tabs actuales sin cambios. Banner: *"Beta — sin accesorios"*. |
+| `scripts/generate-ai-avatars.mjs` *(nuevo)* | Script de generación one-shot. |
+| `public/avatar/ai/v1/*.png` *(nuevos)* | 96 assets generados. |
+| `.lovable/memory/features/explorer-style.md` | Nota corta sobre el toggle y el catálogo IA. |
+
+---
+
+### Flujo del usuario
+
+1. Va a `/personalizar`.
+2. Ve toggle arriba: **Clásico** (default) | **Nuevo (IA)**.
+3. Toca **Nuevo (IA)** → preview cambia a render IA, tabs se reemplazan por 3 grids simplificados.
+4. Selecciona outfit/piel/pelo → preview actualiza al instante (cambia el `<img>`).
+5. Al volver a `/perfil`, el avatar redondo del header también se ve en versión IA.
+6. En Basecamp/Shop sigue viendo el SVG actual (alcance limitado del prototipo).
+7. Puede volver a **Clásico** en cualquier momento sin perder su estilo SVG.
+
+---
+
+### Consideraciones técnicas
+
+- **Peso**: 96 PNGs ≈ 8–15 MB total. Se sirven desde `/public` con cache largo. Aceptable para prototipo.
+- **Sin animaciones live** en modo IA (sin blink/breathing). Compensamos con un fade-in suave al cambiar variante.
+- **Persistencia**: variante IA elegida se guarda en `sherpa.aiAvatarVariant.v1` (separado del `explorerStyle` SVG, para no contaminar el modelo existente).
+- **Reset de explorador**: limpia ambos (`explorerStyle` y `aiAvatarVariant`), pero **no** el `avatarMode` (preferencia de UI).
+- **Costo de generación**: ~96 llamadas a Nano Banana, una sola vez. No hay generación en runtime.
+- **Accesorios y gear de tienda en modo IA**: explícitamente fuera de alcance. La sección "Mi equipo" se oculta cuando `mode === "ai"`.
+
+---
+
+### Lo que necesito confirmar antes de implementar
+
+1. **¿OK con la combinatoria 4×4×3 = 48 variantes?** Si querés más diversidad puedo subir a 5×5×4 = 100 (200 PNGs total), o achicar a 3×3×3 = 27 si preferís más liviano.
+2. **¿OK que el modo IA no soporte accesorios ni gear de tienda en este prototipo?** Es la única forma realista de hacer Opción D sin generación en runtime.
+3. **¿Estilo del prompt: "Pixar-style 3D" o "ilustración 2D estilizada"?** Cambia bastante el resultado final.
 
