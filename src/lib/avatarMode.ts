@@ -1,29 +1,17 @@
-// Avatar rendering mode toggle (A/B prototype):
-//   "svg" — current layered ExplorerSvg (default, used everywhere)
-//   "ai"  — pre-rendered AI PNGs (only honored on /personalizar and /perfil header)
+// Avatar rendering mode — locked to AI Pixar style.
+// The classic SVG mode was removed; this module is kept as a thin shim
+// so existing imports (useAvatarMode, AVATAR_MODE_EVENT) keep compiling.
 
-const KEY = "sherpa.avatarMode";
 const EVENT = "sherpa:avatar-mode-changed";
 
-export type AvatarMode = "svg" | "ai";
+export type AvatarMode = "ai";
 
 export function getAvatarMode(): AvatarMode {
-  if (typeof window === "undefined") return "svg";
-  try {
-    const v = window.localStorage.getItem(KEY);
-    return v === "ai" ? "ai" : "svg";
-  } catch {
-    return "svg";
-  }
+  return "ai";
 }
 
-export function setAvatarMode(mode: AvatarMode) {
-  try {
-    window.localStorage.setItem(KEY, mode);
-    window.dispatchEvent(new CustomEvent(EVENT));
-  } catch {
-    // ignore
-  }
+export function setAvatarMode(_mode: AvatarMode) {
+  // no-op — mode is locked to "ai"
 }
 
 export const AVATAR_MODE_EVENT = EVENT;
