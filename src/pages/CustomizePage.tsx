@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, RotateCcw } from "lucide-react";
 import ExplorerSvg from "@/components/ExplorerSvg";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { useExplorerStyle } from "@/hooks/useExplorerStyle";
