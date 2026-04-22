@@ -345,7 +345,12 @@ const ChallengePage = () => {
                     Intentar de Nuevo
                   </button>
                   <button
-                    onClick={() => navigate("/")}
+                    onClick={() => {
+                      toast("Volviendo al Campamento", {
+                        description: "Puedes retomar este reto cuando quieras.",
+                      });
+                      navigate("/");
+                    }}
                     className="w-full text-xs text-muted-foreground py-1.5 font-medium hover:text-foreground transition-colors"
                   >
                     Ir atrás
