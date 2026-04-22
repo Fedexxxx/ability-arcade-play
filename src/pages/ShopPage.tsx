@@ -285,6 +285,7 @@ const ShopPage = () => {
           );
         })}
       </div>
+      )}
     </div>
   );
 };
