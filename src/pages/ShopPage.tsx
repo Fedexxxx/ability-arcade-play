@@ -18,11 +18,21 @@ import { celebrate } from "@/lib/celebrate";
 
 const SLOT_ORDER: CosmeticSlot[] = ["hat", "scarf", "backpack", "boots", "badge"];
 
+type StatusFilter = "all" | "available" | "owned" | "equipped";
+
+const STATUS_META: Record<StatusFilter, { label: string; emoji: string }> = {
+  all:       { label: "Todos",      emoji: "🗂️" },
+  available: { label: "Disponible", emoji: "🪙" },
+  owned:     { label: "Comprado",   emoji: "✅" },
+  equipped:  { label: "Equipado",   emoji: "⭐" },
+};
+
 const ShopPage = () => {
   const navigate = useNavigate();
   const wallet = useWallet();
   const explorer = useExplorer();
   const [filter, setFilter] = useState<CosmeticSlot | "all">("all");
+  const [status, setStatus] = useState<StatusFilter>("all");
   const [sherpaMsg, setSherpaMsg] = useState<string | null>(null);
 
   // Contextual default Sherpa message — based on wallet state.
@@ -42,9 +52,23 @@ const ShopPage = () => {
   const displayMsg = sherpaMsg ?? contextualMsg;
 
   const visible = useMemo<ShopItem[]>(() => {
-    if (filter === "all") return SHOP_ITEMS;
-    return SHOP_ITEMS.filter((i) => i.slot === filter);
-  }, [filter]);
+    return SHOP_ITEMS.filter((i) => {
+      if (filter !== "all" && i.slot !== filter) return false;
+      const isOwned = wallet.owned.includes(i.id);
+      const isEquipped = wallet.equipped[i.slot] === i.id;
+      const isAffordable = wallet.balance >= i.price;
+      switch (status) {
+        case "available":
+          return !isOwned && isAffordable;
+        case "owned":
+          return isOwned;
+        case "equipped":
+          return isEquipped;
+        default:
+          return true;
+      }
+    });
+  }, [filter, status, wallet.owned, wallet.equipped, wallet.balance]);
 
   // Cheapest unaffordable item among visible — used for the "Te faltan N" nudge.
   const cheapestUnaffordableId = useMemo(() => {
@@ -127,6 +151,19 @@ const ShopPage = () => {
         </div>
       </motion.section>
 
+      {/* Status filter */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 mb-2">
+        {(Object.keys(STATUS_META) as StatusFilter[]).map((s) => (
+          <FilterChip
+            key={s}
+            label={STATUS_META[s].label}
+            emoji={STATUS_META[s].emoji}
+            active={status === s}
+            onClick={() => setStatus(s)}
+          />
+        ))}
+      </div>
+
       {/* Slot filter */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 mb-4">
         <FilterChip
@@ -147,6 +184,15 @@ const ShopPage = () => {
       </div>
 
       {/* Items grid */}
+      {visible.length === 0 ? (
+        <div className="bg-card border border-border rounded-3xl p-6 text-center shadow-terrain">
+          <p className="text-3xl mb-2">🔍</p>
+          <p className="font-display text-base">Nada por aquí todavía</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Prueba con otro filtro o sigue conquistando cumbres.
+          </p>
+        </div>
+      ) : (
       <div className="grid grid-cols-2 gap-3">
         {visible.map((item, i) => {
           const owned = wallet.owned.includes(item.id);
@@ -239,6 +285,7 @@ const ShopPage = () => {
           );
         })}
       </div>
+      )}
     </div>
   );
 };
