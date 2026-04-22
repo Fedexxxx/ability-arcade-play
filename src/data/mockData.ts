@@ -539,3 +539,36 @@ export const achievements: Achievement[] = [
   { id: "a6", title: "Explorador veterano", description: "Conquista 3 montañas distintas.",
     category: "exploración", icon: "🧭", unlocked: false },
 ];
+
+// =====================================================
+// Slice-3 derived catalog
+// `superpowers` is the public, legacy-compatible view of the new
+// mountains catalog. Each module exposes its `inicial` tier as the
+// default `challenges[]` so legacy pages keep rendering. Pages that
+// care about adaptive difficulty use `findChallenge()` from
+// `./mountains.ts` directly to pick the correct tier set.
+// =====================================================
+import { mountains as _mountains, type Mountain } from "./mountains";
+
+export const superpowers: Superpower[] = _mountains.map((mn: Mountain) => ({
+  id: mn.id,
+  title: mn.title,
+  description: mn.description,
+  category: mn.category,
+  icon: mn.icon,
+  color: mn.color,
+  duration: mn.duration,
+  difficulty: mn.difficulty,
+  rewards: mn.rewards,
+  progress: mn.progress,
+  status: mn.status,
+  modules: mn.modules.map((mo) => ({
+    id: mo.id,
+    title: mo.title,
+    description: mo.description,
+    completion: mo.completion,
+    status: mo.status,
+    isBoss: mo.isBoss,
+    challenges: mo.challenges,
+  })),
+}));
