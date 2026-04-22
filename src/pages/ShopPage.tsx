@@ -123,7 +123,7 @@ const ShopPage = () => {
           </div>
         </div>
         <div className="mt-4">
-          <SherpaSpeech mood="encouraging" size="sm" message={sherpaMsg} />
+          <SherpaSpeech mood="encouraging" size="sm" message={displayMsg} />
         </div>
       </motion.section>
 
