@@ -56,21 +56,76 @@ const ModulePage = () => {
   const cardTitle = density.scale === "lg" ? "text-base" : density.scale === "md" ? "text-sm" : "text-sm";
   const cardIcon = density.scale === "lg" ? "w-11 h-11" : density.scale === "md" ? "w-8 h-8" : "w-7 h-7";
 
-  const handleTierChange = (next: Tier) => {
+  const countFor = (t: Tier) =>
+    tieredModule ? getActiveChallenges(tieredModule, t).length : challenges.length;
+
+  const retosLabel = (n: number) => `${n} ${n === 1 ? "reto activo" : "retos activos"}`;
+
+  // Centralized writer: applies the requested change, surfaces errors via
+  // toast, and offers Retry / Revert actions that restore the prior state.
+  const applyTierChange = (
+    intent: "pin" | "unpin",
+    nextTier: Tier,
+    prevSnapshot: { tier: Tier; pinned: boolean },
+  ) => {
     if (!spId || !modId) return;
-    if (next === tier && pinned) {
-      unpinModuleTier(spId, modId);
-      const count = tieredModule ? getActiveChallenges(tieredModule, next).length : challenges.length;
-      toast.success(`Auto · ${TIER_LABEL[next]}`, {
-        description: `Adaptativo activado · ${count} ${count === 1 ? "reto activo" : "retos activos"}`,
-      });
-    } else {
-      setModuleTier(spId, modId, next);
-      const count = tieredModule ? getActiveChallenges(tieredModule, next).length : challenges.length;
-      toast.success(`Fijado en ${TIER_LABEL[next]}`, {
-        description: `${count} ${count === 1 ? "reto activo" : "retos activos"} en este nivel`,
+    try {
+      if (intent === "pin") {
+        setModuleTier(spId, modId, nextTier);
+        const count = countFor(nextTier);
+        toast.success(`Fijado en ${TIER_LABEL[nextTier]}`, {
+          description: `${retosLabel(count)} en este nivel`,
+        });
+      } else {
+        unpinModuleTier(spId, modId);
+        const count = countFor(nextTier);
+        toast.success(`Auto · ${TIER_LABEL[nextTier]}`, {
+          description: `Adaptativo activado · ${retosLabel(count)}`,
+        });
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "No se pudo guardar tu preferencia.";
+      toast.error("No se pudo guardar el nivel", {
+        description: message,
+        duration: 10000,
+        action: {
+          label: "Reintentar",
+          onClick: () => applyTierChange(intent, nextTier, prevSnapshot),
+        },
+        cancel: {
+          label: `Volver a ${TIER_LABEL[prevSnapshot.tier]}`,
+          onClick: () => {
+            // Restore prior state. Use a fresh try/catch so a second failure
+            // also surfaces, but without further retry chaining.
+            try {
+              if (prevSnapshot.pinned) {
+                setModuleTier(spId, modId, prevSnapshot.tier);
+              } else {
+                unpinModuleTier(spId, modId);
+              }
+            } catch {
+              toast.error("Tampoco pudimos restaurar el nivel anterior.");
+            }
+          },
+        },
       });
     }
+  };
+
+  const handleTierChange = (next: Tier) => {
+    if (!spId || !modId) return;
+    const snapshot = { tier, pinned };
+    if (next === tier && pinned) {
+      applyTierChange("unpin", next, snapshot);
+    } else {
+      applyTierChange("pin", next, snapshot);
+    }
+  };
+
+  const handleUnpin = () => {
+    if (!spId || !modId) return;
+    applyTierChange("unpin", tier, { tier, pinned });
   };
 
   return (
@@ -95,16 +150,7 @@ const ModulePage = () => {
               </div>
               {pinned ? (
                 <button
-                  onClick={() => {
-                    if (!spId || !modId) return;
-                    unpinModuleTier(spId, modId);
-                    const count = tieredModule
-                      ? getActiveChallenges(tieredModule, tier).length
-                      : challenges.length;
-                    toast.success(`Auto · ${TIER_LABEL[tier]}`, {
-                      description: `Adaptativo activado · ${count} ${count === 1 ? "reto activo" : "retos activos"}`,
-                    });
-                  }}
+                  onClick={handleUnpin}
                   className="flex items-center gap-1 text-[10px] font-bold text-primary"
                   aria-label="Quitar fijado y dejar que se adapte"
                 >

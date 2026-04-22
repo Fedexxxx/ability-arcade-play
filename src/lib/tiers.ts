@@ -70,12 +70,11 @@ function read(): TiersState {
 }
 
 function write(state: TiersState) {
-  try {
-    window.localStorage.setItem(KEY, JSON.stringify(state));
-    window.dispatchEvent(new CustomEvent(TIER_EVENT));
-  } catch {
-    // ignore
-  }
+  // Throws if persistence fails (e.g. storage quota, disabled storage,
+  // private mode). Callers that mutate user-visible settings should catch
+  // and surface the error so the UI can offer a retry.
+  window.localStorage.setItem(KEY, JSON.stringify(state));
+  window.dispatchEvent(new CustomEvent(TIER_EVENT));
 }
 
 function moduleKey(mountainId: string, moduleId: string) {
@@ -170,11 +169,19 @@ export function recordChallengeResult(
     pinned: prev.pinned,
     recent: changed ? [] : recent,
   };
-  write(state);
+  try {
+    write(state);
+  } catch {
+    // Best-effort: a failed persistence here shouldn't block challenge feedback.
+  }
 
   return { tier: nextTier, changed, previous: prev.tier };
 }
 
 export function clearTiers() {
-  write({ modules: {} });
+  try {
+    write({ modules: {} });
+  } catch {
+    // Best-effort cleanup.
+  }
 }
