@@ -32,9 +32,37 @@ const CustomizePage = () => {
   const style = useExplorerStyle();
   const wallet = useWallet();
   const [tab, setTab] = useState<"piel" | "pelo" | "ropa">("piel");
+  // Snapshot the style on first mount so "Restablecer" reverts session edits.
+  const initialStyle = useRef(style);
+  // Track which tabs have changes this session (for the active dot).
+  const [touched, setTouched] = useState<Record<"piel" | "pelo" | "ropa", boolean>>({
+    piel: false,
+    pelo: false,
+    ropa: false,
+  });
+
+  const equippedChips = useMemo(() => {
+    const slots: CosmeticSlot[] = ["hat", "scarf", "backpack", "boots", "badge"];
+    return slots
+      .map((slot) => {
+        const id = wallet.equipped[slot];
+        if (!id) return null;
+        const item = getItem(id);
+        if (!item) return null;
+        return { slot, glyph: item.glyph, name: item.name };
+      })
+      .filter((x): x is { slot: CosmeticSlot; glyph: string; name: string } => x !== null);
+  }, [wallet.equipped]);
 
   const update = (patch: Parameters<typeof saveExplorerStyle>[0]) => {
     saveExplorerStyle(patch);
+    setTouched((t) => ({ ...t, [tab]: true }));
+  };
+
+  const handleReset = () => {
+    saveExplorerStyle(initialStyle.current);
+    setTouched({ piel: false, pelo: false, ropa: false });
+    toast({ title: "Restablecido", description: "Volviste al estilo inicial." });
   };
 
   return (
