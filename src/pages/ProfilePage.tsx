@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, Pencil, ShoppingBag, Palette } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, ShoppingBag, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
@@ -47,23 +47,6 @@ const ExplorerProfilePage = () => {
     clearExplorerStyle();
     clearTiers();
     navigate("/onboarding", { replace: true });
-  };
-
-  const handleEdit = () => {
-    if (!explorer) {
-      navigate("/onboarding");
-      return;
-    }
-    navigate("/onboarding", {
-      state: {
-        editMode: true,
-        prefill: {
-          name: explorer.name,
-          avatar: explorer.avatar,
-          ageBand: explorer.ageBand,
-        },
-      },
-    });
   };
 
   useEffect(() => {
@@ -185,11 +168,11 @@ const ExplorerProfilePage = () => {
       </section>
 
       <button
-        onClick={handleEdit}
+        onClick={() => navigate("/personalizar")}
         className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-display text-base shadow-summit flex items-center justify-center gap-2"
       >
-        <Pencil size={16} />
-        Editar explorador
+        <Palette size={16} />
+        Personalizar explorador
       </button>
 
       <button
@@ -204,39 +187,33 @@ const ExplorerProfilePage = () => {
         </span>
       </button>
 
-      <button
-        onClick={() => navigate("/personalizar")}
-        className="mt-3 w-full bg-card border border-border rounded-2xl py-3.5 font-display text-base text-foreground hover:border-primary/50 transition-colors flex items-center justify-center gap-2 shadow-terrain"
-      >
-        <Palette size={16} className="text-primary" />
-        Personalizar explorador
-      </button>
-
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <button className="mt-3 w-full bg-card border border-border rounded-2xl py-3.5 font-display text-base text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors flex items-center justify-center gap-2 shadow-terrain">
-            <RotateCcw size={16} />
-            Reiniciar explorador
-          </button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Empezar el ascenso de nuevo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Borraré tu nombre, tu insignia y tu altitud. Volverás al inicio del sendero para crear un nuevo explorador.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Seguir escalando</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleReset}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Sí, reiniciar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <div className="mt-8 pt-4 border-t border-border/60 flex justify-center">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1.5 py-2 px-3 rounded-lg">
+              <RotateCcw size={12} />
+              Reiniciar explorador
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Empezar el ascenso de nuevo?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Borraré tu nombre, tu insignia y tu altitud. Volverás al inicio del sendero para crear un nuevo explorador. Esta acción no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Seguir escalando</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleReset}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Sí, reiniciar todo
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 };
