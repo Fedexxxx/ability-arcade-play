@@ -581,4 +581,70 @@ const ChipButton = ({
   </button>
 );
 
+const AiCustomizePanel = () => {
+  const v = useAiAvatarVariant();
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18 }}
+    >
+      <div className="bg-secondary/10 border border-secondary/30 text-foreground rounded-2xl p-3 mb-5 text-xs">
+        <strong className="font-bold">Modo beta IA.</strong> Set acotado de 48 variantes pre-renderizadas.
+        Sin accesorios ni equipo de la tienda todavía.
+      </div>
+
+      <Section title="Outfit">
+        <div className="grid grid-cols-2 gap-2">
+          {AI_OUTFITS.map((o) => (
+            <button
+              key={o.id}
+              onClick={() => saveAiVariant({ outfit: o.id as AiOutfit })}
+              className={`text-left rounded-2xl border p-3 transition-colors ${
+                v.outfit === o.id
+                  ? "bg-primary/10 border-primary text-foreground"
+                  : "bg-card border-border text-foreground"
+              }`}
+            >
+              <p className="text-sm font-bold">{o.label}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{o.desc}</p>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Tono de piel">
+        <div className="grid grid-cols-4 gap-2">
+          {AI_SKINS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => saveAiVariant({ skin: s.id as AiSkin })}
+              aria-label={s.label}
+              title={s.label}
+              className={`aspect-square rounded-full border-2 transition-transform ${
+                v.skin === s.id ? "border-primary scale-110 shadow-summit" : "border-border"
+              }`}
+              style={{ backgroundColor: s.swatch }}
+            />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Pelo">
+        <div className="grid grid-cols-3 gap-2">
+          {AI_HAIRS.map((h) => (
+            <ChipButton
+              key={h.id}
+              active={v.hair === h.id}
+              onClick={() => saveAiVariant({ hair: h.id as AiHair })}
+            >
+              {h.label}
+            </ChipButton>
+          ))}
+        </div>
+      </Section>
+    </motion.div>
+  );
+};
+
 export default CustomizePage;
