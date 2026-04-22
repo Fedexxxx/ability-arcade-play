@@ -153,6 +153,9 @@ const ShopPage = () => {
           const equipped = wallet.equipped[item.slot] === item.id;
           const affordable = wallet.balance >= item.price;
           const meta = RARITY_META[item.rarity];
+          const showAffordRing = !owned && affordable;
+          const isCheapestUnaffordable = !owned && !affordable && item.id === cheapestUnaffordableId;
+          const missing = Math.max(0, item.price - wallet.balance);
 
           return (
             <motion.div
@@ -160,19 +163,31 @@ const ShopPage = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
-              className={`relative bg-card border border-border rounded-3xl p-4 shadow-terrain flex flex-col ${meta.ring}`}
+              className={`relative bg-card border border-border rounded-3xl p-4 shadow-terrain flex flex-col ${meta.ring} ${
+                showAffordRing ? "ring-offset-2 ring-offset-background" : ""
+              }`}
+              style={
+                showAffordRing
+                  ? { boxShadow: "0 0 0 2px hsl(var(--secondary) / 0.5), 0 8px 18px -10px hsl(var(--secondary) / 0.5)" }
+                  : undefined
+              }
             >
+              {owned && (
+                <div className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-terrain">
+                  <Check size={10} /> Tuyo
+                </div>
+              )}
               <div
                 className={`absolute top-3 right-3 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${meta.chip}`}
               >
                 {meta.label}
               </div>
 
-              <div className="h-16 flex items-center justify-center text-5xl mb-2">
+              <div className="h-16 flex items-center justify-center text-5xl mb-2 mt-2">
                 {item.glyph}
               </div>
               <p className="font-display text-sm leading-tight">{item.name}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 min-h-[2rem]">
+              <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">
                 {item.description}
               </p>
 
@@ -183,34 +198,41 @@ const ShopPage = () => {
                     className={`w-full rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 ${
                       equipped
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
+                        : "bg-card text-foreground border border-primary/40"
                     }`}
                   >
-                    <Check size={14} />
-                    {equipped ? "Equipado" : "Equipar"}
+                    {equipped ? <Minus size={14} /> : <Plus size={14} />}
+                    {equipped ? "Quitar" : "Equipar"}
                   </button>
                 ) : (
-                  <button
-                    onClick={() => handleBuy(item)}
-                    disabled={!affordable}
-                    className={`w-full rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 ${
-                      affordable
-                        ? "gradient-sunrise text-secondary-foreground shadow-summit"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {affordable ? (
-                      <>
-                        <Sparkles size={14} />
-                        {item.price}
-                      </>
-                    ) : (
-                      <>
-                        <Lock size={12} />
-                        {item.price}
-                      </>
+                  <>
+                    <button
+                      onClick={() => handleBuy(item)}
+                      disabled={!affordable}
+                      className={`w-full rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 ${
+                        affordable
+                          ? "gradient-sunrise text-secondary-foreground shadow-summit"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {affordable ? (
+                        <>
+                          <Sparkles size={14} />
+                          {item.price}
+                        </>
+                      ) : (
+                        <>
+                          <Lock size={12} />
+                          {item.price}
+                        </>
+                      )}
+                    </button>
+                    {isCheapestUnaffordable && (
+                      <p className="mt-1.5 text-center text-[10px] font-semibold text-secondary">
+                        Te faltan {missing} 🌟
+                      </p>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </motion.div>
