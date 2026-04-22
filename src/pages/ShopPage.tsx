@@ -52,9 +52,23 @@ const ShopPage = () => {
   const displayMsg = sherpaMsg ?? contextualMsg;
 
   const visible = useMemo<ShopItem[]>(() => {
-    if (filter === "all") return SHOP_ITEMS;
-    return SHOP_ITEMS.filter((i) => i.slot === filter);
-  }, [filter]);
+    return SHOP_ITEMS.filter((i) => {
+      if (filter !== "all" && i.slot !== filter) return false;
+      const isOwned = wallet.owned.includes(i.id);
+      const isEquipped = wallet.equipped[i.slot] === i.id;
+      const isAffordable = wallet.balance >= i.price;
+      switch (status) {
+        case "available":
+          return !isOwned && isAffordable;
+        case "owned":
+          return isOwned;
+        case "equipped":
+          return isEquipped;
+        default:
+          return true;
+      }
+    });
+  }, [filter, status, wallet.owned, wallet.equipped, wallet.balance]);
 
   // Cheapest unaffordable item among visible — used for the "Te faltan N" nudge.
   const cheapestUnaffordableId = useMemo(() => {
