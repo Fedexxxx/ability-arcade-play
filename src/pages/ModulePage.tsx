@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, CheckCircle2, Lock, Clock, Sparkles, Pin, PinOff } from "lucide-react";
+import { toast } from "sonner";
 import ProgressBar from "@/components/ProgressBar";
 import { superpowers } from "@/data/mockData";
 import { useDensity } from "@/contexts/AgeDensityContext";
@@ -59,8 +60,16 @@ const ModulePage = () => {
     if (!spId || !modId) return;
     if (next === tier && pinned) {
       unpinModuleTier(spId, modId);
+      const count = tieredModule ? getActiveChallenges(tieredModule, next).length : challenges.length;
+      toast.success(`Auto · ${TIER_LABEL[next]}`, {
+        description: `Adaptativo activado · ${count} ${count === 1 ? "reto activo" : "retos activos"}`,
+      });
     } else {
       setModuleTier(spId, modId, next);
+      const count = tieredModule ? getActiveChallenges(tieredModule, next).length : challenges.length;
+      toast.success(`Fijado en ${TIER_LABEL[next]}`, {
+        description: `${count} ${count === 1 ? "reto activo" : "retos activos"} en este nivel`,
+      });
     }
   };
 
