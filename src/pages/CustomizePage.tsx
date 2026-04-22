@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Check, Lock, Plus, RotateCcw, Sparkles, Minus } from "lucide-react";
+import { ArrowLeft, Check, Lock, Minus, Plus, RotateCcw, Sparkles, Store } from "lucide-react";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { toast } from "@/hooks/use-toast";
 import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
@@ -193,3 +193,81 @@ const AiCustomizePanel = () => {
 };
 
 export default CustomizePage;
+
+const AccessoriesSection = () => {
+  const navigate = useNavigate();
+  const wallet = useWallet();
+  const owned = SHOP_ITEMS.filter((i) => wallet.owned.includes(i.id));
+  const lockedCount = SHOP_ITEMS.length - owned.length;
+
+  return (
+    <Section title="Accesorios desbloqueados">
+      {owned.length === 0 ? (
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-sm text-muted-foreground mb-3">
+            Aún no tienes accesorios. Gana Alticoins en cumbres y consigue tu primer equipo.
+          </p>
+          <button
+            onClick={() => navigate("/shop")}
+            className="inline-flex items-center gap-1.5 gradient-sunrise text-secondary-foreground rounded-xl px-4 py-2 text-xs font-bold shadow-summit"
+          >
+            <Store size={14} /> Visitar tienda
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 gap-2">
+            {owned.map((item) => {
+              const isEquipped = wallet.equipped[item.slot] === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => equip(item.slot, isEquipped ? null : item.id)}
+                  aria-label={`${isEquipped ? "Quitar" : "Equipar"} ${item.name}`}
+                  className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-colors ${
+                    isEquipped
+                      ? "bg-primary/10 border-primary"
+                      : "bg-card border-border"
+                  }`}
+                >
+                  <span className="text-2xl leading-none" aria-hidden>
+                    {item.glyph}
+                  </span>
+                  <span className="text-[10px] font-bold text-foreground line-clamp-1 text-center w-full">
+                    {item.name}
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                      isEquipped ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {isEquipped ? (
+                      <>
+                        <Minus size={9} /> Quitar
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={9} /> Equipar
+                      </>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {lockedCount > 0 && (
+            <button
+              onClick={() => navigate("/shop")}
+              className="mt-3 w-full inline-flex items-center justify-center gap-1.5 bg-card border border-dashed border-border text-muted-foreground hover:text-foreground rounded-2xl py-2 text-xs font-bold transition-colors"
+            >
+              <Lock size={12} /> {lockedCount} accesorios más en la tienda
+            </button>
+          )}
+          <p className="mt-2 text-[10px] text-muted-foreground text-center">
+            Los accesorios aún no se muestran sobre el avatar IA — beta.
+          </p>
+        </>
+      )}
+    </Section>
+  );
+};
