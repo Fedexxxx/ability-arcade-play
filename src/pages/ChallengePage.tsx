@@ -208,8 +208,7 @@ const ChallengePage = () => {
       <div className="flex items-center gap-3 mb-4">
         <button
           onClick={() => navigate(-1)}
-          disabled={returningHome}
-          className="text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-muted-foreground"
           aria-label="Cerrar"
         >
           <X size={22} />
@@ -222,12 +221,7 @@ const ChallengePage = () => {
         </span>
       </div>
 
-      <div
-        className={`flex-1 flex flex-col transition-opacity ${
-          returningHome ? "opacity-60 pointer-events-none" : ""
-        }`}
-        aria-disabled={returningHome}
-      >
+      <div className="flex-1 flex flex-col">
       <AnimatePresence mode="wait">
         {/* Learn Phase */}
         {phase === "learn" && challenge.concept && (
