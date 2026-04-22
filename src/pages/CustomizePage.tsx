@@ -224,7 +224,8 @@ const CustomizePage = () => {
         )}
       </motion.section>
 
-      {/* Tabs */}
+      {/* Tabs (SVG mode only) */}
+      {mode === "svg" && (
       <div className="grid grid-cols-4 gap-1.5 mb-4">
         {TABS.map((t) => (
           <button
@@ -246,7 +247,9 @@ const CustomizePage = () => {
           </button>
         ))}
       </div>
+      )}
 
+      {mode === "svg" ? (
       <AnimatePresence mode="wait">
         <motion.div
           key={tab}
