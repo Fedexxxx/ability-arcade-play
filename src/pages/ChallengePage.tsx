@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import ProgressBar from "@/components/ProgressBar";
 import QuizChallenge from "@/components/challenges/QuizChallenge";
 import VisualChallenge from "@/components/challenges/VisualChallenge";
@@ -344,7 +345,12 @@ const ChallengePage = () => {
                     Intentar de Nuevo
                   </button>
                   <button
-                    onClick={() => navigate("/")}
+                    onClick={() => {
+                      toast("Volviendo al Campamento", {
+                        description: "Puedes retomar este reto cuando quieras.",
+                      });
+                      navigate("/");
+                    }}
                     className="w-full text-xs text-muted-foreground py-1.5 font-medium hover:text-foreground transition-colors"
                   >
                     Ir atrás
