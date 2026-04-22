@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, RotateCcw, Sparkles } from "lucide-react";
 import ExplorerSvg from "@/components/ExplorerSvg";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { useExplorerStyle } from "@/hooks/useExplorerStyle";
 import { useWallet } from "@/hooks/useWallet";
+import { getItem, SLOT_META } from "@/lib/shopCatalog";
+import type { CosmeticSlot } from "@/lib/wallet";
 import {
   BOOTS_COLORS,
   HAIR_COLORS,
@@ -18,6 +20,12 @@ import {
   type SkinTone,
 } from "@/lib/explorerStyle";
 import { toast } from "@/hooks/use-toast";
+
+const SHERPA_BY_TAB: Record<"piel" | "pelo" | "ropa", string> = {
+  piel: "Elige el tono que más te recuerde a ti.",
+  pelo: "Tu pelo, tu estilo. Cambia las veces que quieras.",
+  ropa: "Ropa para escalar — los colores son tuyos.",
+};
 
 const CustomizePage = () => {
   const navigate = useNavigate();
