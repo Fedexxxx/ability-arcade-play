@@ -347,21 +347,26 @@ const ChallengePage = () => {
                   <button
                     onClick={() => {
                       const currentPath = `/challenge/${spId}/${modId}/${chId}`;
-                      const timer = window.setTimeout(() => {
-                        navigate("/");
-                      }, 4000);
-                      toast("Volviendo al Campamento", {
+                      let undone = false;
+                      const navTimer = window.setTimeout(() => {
+                        if (!undone) navigate("/");
+                      }, 2000);
+                      const toastId = toast("Volviendo al Campamento", {
                         description: "Puedes retomar este reto cuando quieras.",
-                        duration: 4000,
+                        duration: 2000,
                         action: {
                           label: "Deshacer",
                           onClick: () => {
-                            window.clearTimeout(timer);
+                            undone = true;
+                            window.clearTimeout(navTimer);
                             navigate(currentPath, { replace: true });
                             toast.success("Sigues en el reto");
                           },
                         },
                       });
+                      // After 2s: dismiss the toast so the Deshacer action
+                      // disappears and the toast becomes inactive.
+                      window.setTimeout(() => toast.dismiss(toastId), 2000);
                     }}
                     className="w-full text-xs text-muted-foreground py-1.5 font-medium hover:text-foreground transition-colors"
                   >
