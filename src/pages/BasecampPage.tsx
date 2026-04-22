@@ -148,7 +148,7 @@ const BasecampPage = () => {
       </section>
 
       {/* Primary action — continue the climb */}
-      {activeSP && (
+      {activeSP ? (
         <motion.button
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -177,6 +177,28 @@ const BasecampPage = () => {
             {density.showSubtext && (
               <p className="text-[11px] mt-1.5 opacity-90 font-semibold">Altitud {activeSP.progress}% · sigue subiendo</p>
             )}
+          </div>
+        </motion.button>
+      ) : (
+        <motion.button
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate("/explore")}
+          className={`mx-5 w-[calc(100%-2.5rem)] bg-card border-2 border-dashed border-primary/40 text-foreground rounded-3xl ${ctaPad} shadow-terrain text-left`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-primary font-bold">Empieza tu aventura</p>
+              <p className={`font-display ${ctaTitle} leading-tight mt-0.5`}>Elige tu primera montaña</p>
+              {density.showSubtext && (
+                <p className="text-sm text-muted-foreground mt-1">Cada cima empieza con un paso.</p>
+              )}
+            </div>
+            <div className={`ml-3 ${ctaArrow} rounded-full gradient-sky flex items-center justify-center flex-shrink-0`}>
+              <Compass size={density.scale === "lg" ? 26 : 22} />
+            </div>
           </div>
         </motion.button>
       )}
