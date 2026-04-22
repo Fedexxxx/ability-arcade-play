@@ -5,8 +5,13 @@ const KEY = "sherpa.explorerStyle.v1";
 const EVENT = "sherpa:explorer-style-changed";
 
 export type SkinTone = "porcelain" | "honey" | "tan" | "cocoa" | "espresso";
-export type HairStyle = "short" | "wavy" | "bun" | "buzz" | "long";
+export type HairStyle = "short" | "medium" | "long" | "curly" | "wavy" | "bun" | "buzz";
 export type OutfitStyle = "explorer" | "alpine" | "summit" | "trail";
+export type EyeShape = "round" | "almond" | "soft";
+export type EyebrowStyle = "soft" | "thick" | "arched";
+export type AccHat = "none" | "beanie" | "cap" | "explorer-hat";
+export type AccScarf = "none" | "scarf";
+export type AccBackpack = "none" | "day" | "trek";
 
 export interface ExplorerStyle {
   skin: SkinTone;
@@ -16,6 +21,19 @@ export interface ExplorerStyle {
   pantsColor: string;      // hex
   bootsColor: string;      // hex
   outfit: OutfitStyle;
+  // Face
+  eyeShape: EyeShape;
+  eyeColor: string;        // hex
+  eyebrow: EyebrowStyle;
+  freckles: boolean;
+  // Customize-tab accessories (free, independent from shop). Shop gear wins when both set.
+  accHat: AccHat;
+  accHatColor: string;
+  accScarf: AccScarf;
+  accScarfColor: string;
+  accBackpack: AccBackpack;
+  accBackpackColor: string;
+  accGoggles: boolean;
 }
 
 export const SKIN_PALETTE: Record<SkinTone, { base: string; shade: string; label: string }> = {
