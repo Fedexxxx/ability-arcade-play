@@ -68,6 +68,40 @@ const MountainsPage = () => {
       ? superpowers
       : superpowers.filter((s) => s.category === activeCategory);
 
+  // Pinned mountain — the one currently in progress (across the whole catalog,
+  // not just the active filter, so the user always sees their climb).
+  const pinnedSP = superpowers.find((s) => s.status === "in-progress") ?? null;
+
+  // Group filtered list by status, excluding the pinned card to avoid duplication.
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof filtered>();
+    for (const sp of filtered) {
+      if (pinnedSP && sp.id === pinnedSP.id) continue;
+      const arr = map.get(sp.status) ?? [];
+      arr.push(sp);
+      map.set(sp.status, arr);
+    }
+    return STATUS_GROUPS.map((g) => ({ ...g, items: map.get(g.key) ?? [] })).filter((g) => g.items.length > 0);
+  }, [filtered, pinnedSP]);
+
+  // First locked mountain (in catalog order) — used as a hint on every locked card.
+  const lockedHint = useMemo(() => {
+    const idx = superpowers.findIndex((s) => s.status === "locked");
+    if (idx <= 0) return null;
+    const prev = superpowers[idx - 1];
+    return prev?.title ?? null;
+  }, []);
+
+  // Contextual Sherpa message based on user state.
+  const inProgressCount = superpowers.filter((s) => s.status === "in-progress").length;
+  const completedCount = superpowers.filter((s) => s.status === "completed").length;
+  const sherpaMsg =
+    inProgressCount === 0 && completedCount === 0
+      ? "Cada montaña es un nuevo viaje. Empieza por la que más te llame."
+      : inProgressCount > 0
+      ? "Sigamos con lo que tienes en marcha — y cuando vuelvas, hay más cumbres esperándote."
+      : "¡Lo conquistaste! Es momento de elegir la próxima cima.";
+
   return (
     <div className="min-h-screen pb-28 px-5 pt-8 max-w-lg mx-auto">
       <header className="mb-5">
