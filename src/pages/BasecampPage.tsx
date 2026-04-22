@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Flame, Tent, ArrowRight, Mountain, Sparkles, Calendar, Compass } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import SherpaSpeech from "@/components/SherpaSpeech";
