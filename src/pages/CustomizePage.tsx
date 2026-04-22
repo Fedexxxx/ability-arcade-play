@@ -208,7 +208,7 @@ const AccessoriesSection = () => {
             Aún no tienes accesorios. Gana Alticoins en cumbres y consigue tu primer equipo.
           </p>
           <button
-            onClick={() => navigate("/shop")}
+            onClick={() => navigate("/tienda")}
             className="inline-flex items-center gap-1.5 gradient-sunrise text-secondary-foreground rounded-xl px-4 py-2 text-xs font-bold shadow-summit"
           >
             <Store size={14} /> Visitar tienda
@@ -257,7 +257,7 @@ const AccessoriesSection = () => {
           </div>
           {lockedCount > 0 && (
             <button
-              onClick={() => navigate("/shop")}
+              onClick={() => navigate("/tienda")}
               className="mt-3 w-full inline-flex items-center justify-center gap-1.5 bg-card border border-dashed border-border text-muted-foreground hover:text-foreground rounded-2xl py-2 text-xs font-bold transition-colors"
             >
               <Lock size={12} /> {lockedCount} accesorios más en la tienda
