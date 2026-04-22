@@ -204,7 +204,7 @@ const BasecampPage = () => {
       )}
 
       {/* Today's small climb */}
-      {dailyMission && (
+      {dailyMission ? (
         <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -226,6 +226,26 @@ const BasecampPage = () => {
           </div>
           <div className="mt-3">
             <ProgressBar value={dailyMission.progress} max={dailyMission.target} variant="sunrise" size="sm" />
+          </div>
+        </motion.section>
+      ) : (
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mx-5 mt-4 bg-card/60 border border-dashed border-border rounded-3xl p-4 shadow-terrain"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-muted flex items-center justify-center">
+              <Calendar size={20} className="text-muted-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Climb del día</p>
+              <p className={`font-display ${cardTitle} leading-tight text-foreground`}>Sin misión hoy</p>
+              {density.showSubtext && (
+                <p className="text-xs text-muted-foreground mt-0.5">Vuelve mañana por tu nuevo Climb.</p>
+              )}
+            </div>
           </div>
         </motion.section>
       )}
