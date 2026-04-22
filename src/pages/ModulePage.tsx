@@ -1,9 +1,19 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Lock, Clock } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Lock, Clock, Sparkles, Pin, PinOff } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import { superpowers } from "@/data/mockData";
 import { useDensity } from "@/contexts/AgeDensityContext";
+import { findTieredModule, getActiveChallenges, isSkeleton } from "@/data/mountains";
+import { useTier } from "@/hooks/useTier";
+import {
+  TIER_LABEL,
+  TIER_HINT,
+  TIER_ORDER,
+  setModuleTier,
+  unpinModuleTier,
+  type Tier,
+} from "@/lib/tiers";
 
 const typeLabels: Record<string, string> = {
   quiz: "quiz",
@@ -23,15 +33,36 @@ const ModulePage = () => {
   const { spId, modId } = useParams();
   const navigate = useNavigate();
   const density = useDensity();
-  const sp = superpowers.find((s) => s.id === spId);
-  const mod = sp?.modules.find((m) => m.id === modId);
+  const tieredFound = findTieredModule(spId, modId);
+  const sp = tieredFound?.mountain ?? superpowers.find((s) => s.id === spId);
+  const tieredModule = tieredFound?.module;
+  const legacyMod = sp?.modules.find((m) => m.id === modId);
+  const { tier, pinned } = useTier(spId, modId);
 
-  if (!sp || !mod) return <div className="p-4 text-center text-muted-foreground">No encontrado</div>;
+  if (!sp || (!tieredModule && !legacyMod))
+    return <div className="p-4 text-center text-muted-foreground">No encontrado</div>;
+
+  const skeleton = tieredModule ? isSkeleton(tieredModule) : false;
+  const challenges = tieredModule
+    ? getActiveChallenges(tieredModule, tier)
+    : legacyMod?.challenges ?? [];
+  const mod = tieredModule
+    ? { ...tieredModule, challenges }
+    : legacyMod!;
 
   const heroTitle = density.scale === "lg" ? "text-2xl" : density.scale === "md" ? "text-xl" : "text-lg";
   const cardPad = density.scale === "lg" ? "p-4" : density.scale === "md" ? "p-3.5" : "p-3";
   const cardTitle = density.scale === "lg" ? "text-base" : density.scale === "md" ? "text-sm" : "text-sm";
   const cardIcon = density.scale === "lg" ? "w-11 h-11" : density.scale === "md" ? "w-8 h-8" : "w-7 h-7";
+
+  const handleTierChange = (next: Tier) => {
+    if (!spId || !modId) return;
+    if (next === tier && pinned) {
+      unpinModuleTier(spId, modId);
+    } else {
+      setModuleTier(spId, modId, next);
+    }
+  };
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-4 max-w-lg mx-auto">
@@ -45,12 +76,68 @@ const ModulePage = () => {
           <p className="text-sm text-muted-foreground mb-4">{mod.description}</p>
         )}
 
+        {/* Tier selector — adaptive default with manual override */}
+        {!skeleton && (
+          <div className="mb-5 bg-card border border-border rounded-2xl p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold">
+                <Sparkles size={12} className="text-secondary" />
+                <span>Nivel del ascenso</span>
+              </div>
+              {pinned ? (
+                <button
+                  onClick={() => spId && modId && unpinModuleTier(spId, modId)}
+                  className="flex items-center gap-1 text-[10px] font-bold text-primary"
+                  aria-label="Quitar fijado y dejar que se adapte"
+                >
+                  <PinOff size={11} /> Auto
+                </button>
+              ) : (
+                <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                  <Pin size={11} /> Adaptativo
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {TIER_ORDER.map((t) => {
+                const active = tier === t;
+                return (
+                  <button
+                    key={t}
+                    onClick={() => handleTierChange(t)}
+                    className={`rounded-xl px-2 py-2 text-center transition-colors border ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-foreground border-border"
+                    }`}
+                  >
+                    <p className="text-xs font-bold leading-none">{TIER_LABEL[t]}</p>
+                    <p className={`text-[10px] mt-1 ${active ? "opacity-90" : "text-muted-foreground"}`}>
+                      {TIER_HINT[t]}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="mb-6">
           <ProgressBar value={mod.completion} variant="energy" size="md" showLabel />
         </div>
 
+        {skeleton ? (
+          <div className="bg-card border border-dashed border-border rounded-2xl p-6 text-center">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold mb-2">
+              Próximamente
+            </p>
+            <p className="text-sm text-foreground">
+              Este checkpoint está reservado en el mapa. Estará listo en una próxima expedición.
+            </p>
+          </div>
+        ) : (
         <div className="space-y-2">
-          {mod.challenges.map((ch, i) => (
+          {challenges.map((ch, i) => (
             <motion.div
               key={ch.id}
               initial={{ opacity: 0, x: -10 }}
@@ -89,6 +176,7 @@ const ModulePage = () => {
             </motion.div>
           ))}
         </div>
+        )}
       </motion.div>
     </div>
   );

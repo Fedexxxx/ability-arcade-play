@@ -4,6 +4,7 @@ import { ArrowLeft, Lock, Swords, CheckCircle2 } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import { superpowers } from "@/data/mockData";
 import { useDensity } from "@/contexts/AgeDensityContext";
+import { findMountain, isSkeleton } from "@/data/mountains";
 
 const statusIcon = {
   locked: <Lock size={16} className="text-muted-foreground" />,
@@ -16,7 +17,11 @@ const SuperpowerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const density = useDensity();
-  const sp = superpowers.find((s) => s.id === id);
+  const mountain = findMountain(id);
+  const sp = mountain ?? superpowers.find((s) => s.id === id);
+  const skeletonByMod: Record<string, boolean> = mountain
+    ? Object.fromEntries(mountain.modules.map((m) => [m.id, isSkeleton(m)]))
+    : {};
 
   if (!sp) return <div className="p-4 text-center text-muted-foreground">No encontrado</div>;
 
@@ -72,7 +77,14 @@ const SuperpowerPage = () => {
                   </div>
                 )}
                 <div className="flex-1">
-                  <h3 className={`font-display font-semibold ${modTitle}`}>{mod.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className={`font-display font-semibold ${modTitle}`}>{mod.title}</h3>
+                    {skeletonByMod[mod.id] && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold uppercase tracking-wider">
+                        Próximamente
+                      </span>
+                    )}
+                  </div>
                   {density.showSubtext && (
                     <p className="text-[10px] text-muted-foreground">
                       {mod.challenges.length} desafíos

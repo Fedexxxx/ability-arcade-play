@@ -17,6 +17,7 @@ Explorer is a **layered SVG** (`src/components/ExplorerSvg.tsx`) driven by `useE
 ## Memories
 - [Alticoin economy](mem://features/alticoin-economy) — Earn rates, shop, cosmetic slots, persistence keys for the reward system
 - [Explorer visual identity](mem://features/explorer-style) — Layered SVG explorer, style persistence, customization page, gear renderers
+- [Mountains catalog & adaptive tiers](mem://features/mountains-catalog) — 6×5 mountains catalog, per-module adaptive Inicial/Avanzado/Experto with manual override
 - [Visual Direction](mem://style/visual-direction) — Age-adaptive, minimalist and futuristic UI rules (legacy, partial)
 - [Navigation Structure](mem://ux/navigation-structure) — 5-tab bar and Home screen layout requirements (legacy)
 - [Gamification & Tone](mem://ux/gamification-and-tone) — Mechanics and UX writing constraints (no generic CTAs)

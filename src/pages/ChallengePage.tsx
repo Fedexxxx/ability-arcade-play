@@ -11,6 +11,10 @@ import { superpowers } from "@/data/mockData";
 import { celebrate } from "@/lib/celebrate";
 import { useDensity } from "@/contexts/AgeDensityContext";
 import { earn } from "@/lib/wallet";
+import { findTieredModule, getActiveChallenges } from "@/data/mountains";
+import { recordChallengeResult } from "@/lib/tiers";
+import { useTier } from "@/hooks/useTier";
+import { useExplorer } from "@/hooks/useExplorer";
 
 const COIN_PER_CHALLENGE = 10;
 const COIN_FAIL_CONSOLATION = 2;
@@ -19,9 +23,20 @@ const ChallengePage = () => {
   const { spId, modId, chId } = useParams();
   const navigate = useNavigate();
   const density = useDensity();
-  const sp = superpowers.find((s) => s.id === spId);
-  const mod = sp?.modules.find((m) => m.id === modId);
-  const challenge = mod?.challenges.find((c) => c.id === chId);
+  const explorer = useExplorer();
+  const { tier } = useTier(spId, modId);
+
+  // Tier-aware lookup: pull challenges for the current tier from the new
+  // mountains catalog, with a graceful fallback to the legacy seed array.
+  const tiered = findTieredModule(spId, modId);
+  const tierChallenges = tiered ? getActiveChallenges(tiered.module, tier) : [];
+  const sp = tiered ? tiered.mountain : superpowers.find((s) => s.id === spId);
+  const mod = tiered
+    ? { ...tiered.module, challenges: tierChallenges }
+    : sp?.modules.find((m) => m.id === modId);
+  const challenge =
+    tierChallenges.find((c) => c.id === chId) ??
+    mod?.challenges.find((c) => c.id === chId);
 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -48,6 +63,10 @@ const ChallengePage = () => {
   // Award Alticoins on first successful completion of this challenge.
   useEffect(() => {
     if (phase !== "feedback" || !challenge || !sp || !mod) return;
+    // Feed the adaptive engine — promotes/demotes the module's tier
+    // based on rolling per-module accuracy. Idempotent per render via
+    // celebratedRef gating already handled by the ledger dedup below
+    // (we still want to record retries, so guard with submitted-once).
     if (isCorrect) {
       earn({
         amount: COIN_PER_CHALLENGE,
@@ -64,6 +83,17 @@ const ChallengePage = () => {
       });
     }
   }, [phase, isCorrect, challenge, sp, mod]);
+
+  // Record per-module accuracy for the adaptive tier engine — once per
+  // challenge submission. Uses a ref so retries on the same challenge
+  // also count (a fresh retry resets `accuracyRecordedRef`).
+  const accuracyRecordedRef = useRef(false);
+  useEffect(() => {
+    if (phase !== "feedback" || !sp || !mod) return;
+    if (accuracyRecordedRef.current) return;
+    accuracyRecordedRef.current = true;
+    recordChallengeResult(sp.id, mod.id, explorer?.ageBand, isCorrect);
+  }, [phase, isCorrect, sp, mod, explorer?.ageBand]);
 
   if (!sp || !mod || !challenge) {
     return <div className="p-4 text-center text-muted-foreground">Desafío no encontrado</div>;
@@ -83,14 +113,16 @@ const ChallengePage = () => {
   };
 
   const handleNext = () => {
-    const idx = mod.challenges.findIndex((c) => c.id === chId);
-    const next = mod.challenges[idx + 1];
+    const list = tierChallenges.length ? tierChallenges : mod.challenges;
+    const idx = list.findIndex((c) => c.id === chId);
+    const next = list[idx + 1];
     if (next && next.status !== "locked") {
       navigate(`/challenge/${spId}/${modId}/${next.id}`, { replace: true });
       setSelectedAnswer(null);
       setSubmitted(false);
       setInteractiveCorrect(null);
       celebratedRef.current = false;
+      accuracyRecordedRef.current = false;
       setPhase("learn");
     } else {
       // Last challenge of the module → victory screen
@@ -103,11 +135,13 @@ const ChallengePage = () => {
     setSubmitted(false);
     setInteractiveCorrect(null);
     celebratedRef.current = false;
+    accuracyRecordedRef.current = false;
     setPhase("interact");
   };
 
-  const chIdx = mod.challenges.findIndex((c) => c.id === chId);
-  const progressPct = ((chIdx + (submitted ? 1 : 0)) / mod.challenges.length) * 100;
+  const list = tierChallenges.length ? tierChallenges : mod.challenges;
+  const chIdx = list.findIndex((c) => c.id === chId);
+  const progressPct = ((chIdx + (submitted ? 1 : 0)) / list.length) * 100;
 
   const correctAnswerLabel = (() => {
     if (challenge.type === "quiz") return challenge.options?.[challenge.correctAnswer!];
@@ -177,7 +211,7 @@ const ChallengePage = () => {
           <ProgressBar value={progressPct} variant="energy" size="sm" />
         </div>
         <span className="text-xs text-muted-foreground">
-          {chIdx + 1}/{mod.challenges.length}
+          {chIdx + 1}/{list.length}
         </span>
       </div>
 
