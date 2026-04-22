@@ -206,7 +206,12 @@ const ChallengePage = () => {
     <div className="min-h-screen px-4 pt-4 pb-8 max-w-lg mx-auto flex flex-col">
       {/* Top bar */}
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate(-1)} className="text-muted-foreground" aria-label="Cerrar">
+        <button
+          onClick={() => navigate(-1)}
+          disabled={returningHome}
+          className="text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Cerrar"
+        >
           <X size={22} />
         </button>
         <div className="flex-1">
@@ -217,6 +222,12 @@ const ChallengePage = () => {
         </span>
       </div>
 
+      <div
+        className={`flex-1 flex flex-col transition-opacity ${
+          returningHome ? "opacity-60 pointer-events-none" : ""
+        }`}
+        aria-disabled={returningHome}
+      >
       <AnimatePresence mode="wait">
         {/* Learn Phase */}
         {phase === "learn" && challenge.concept && (
@@ -383,6 +394,7 @@ const ChallengePage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 };
