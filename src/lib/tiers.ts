@@ -169,11 +169,19 @@ export function recordChallengeResult(
     pinned: prev.pinned,
     recent: changed ? [] : recent,
   };
-  write(state);
+  try {
+    write(state);
+  } catch {
+    // Best-effort: a failed persistence here shouldn't block challenge feedback.
+  }
 
   return { tier: nextTier, changed, previous: prev.tier };
 }
 
 export function clearTiers() {
-  write({ modules: {} });
+  try {
+    write({ modules: {} });
+  } catch {
+    // Best-effort cleanup.
+  }
 }
