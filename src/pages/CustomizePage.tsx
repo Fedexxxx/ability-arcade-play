@@ -80,10 +80,45 @@ const CustomizePage = () => {
         <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold self-start">
           Personaliza tu explorador
         </p>
-        <div className="w-44 h-72 my-2">
+        <motion.div
+          className="w-44 h-72 my-2"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+        >
           <ExplorerSvg style={style} gear={wallet.equipped} variant="full" className="w-full h-full" />
+        </motion.div>
+        <SherpaSpeech mood="encouraging" size="sm" message={SHERPA_BY_TAB[tab]} />
+
+        {/* Mi equipo — chips of equipped Shop gear */}
+        <div className="w-full mt-4 pt-4 border-t border-border">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Mi equipo</p>
+            <button
+              onClick={() => navigate("/tienda")}
+              className="text-[10px] font-bold text-primary"
+            >
+              Cambiar en la tienda →
+            </button>
+          </div>
+          {equippedChips.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Aún no llevas equipo de la tienda. Conquista cumbres para conseguir Alticoins.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {equippedChips.map((chip) => (
+                <span
+                  key={chip.slot}
+                  className="inline-flex items-center gap-1 bg-muted text-foreground rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                  title={`${SLOT_META[chip.slot].label}: ${chip.name}`}
+                >
+                  <span aria-hidden>{chip.glyph}</span>
+                  <span className="truncate max-w-[7rem]">{chip.name}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-        <SherpaSpeech mood="encouraging" size="sm" message="Hazlo tuyo. Cada cambio se guarda al instante." />
       </motion.section>
 
       {/* Tabs */}
