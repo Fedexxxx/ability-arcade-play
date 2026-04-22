@@ -346,10 +346,22 @@ const ChallengePage = () => {
                   </button>
                   <button
                     onClick={() => {
+                      const currentPath = `/challenge/${spId}/${modId}/${chId}`;
+                      const timer = window.setTimeout(() => {
+                        navigate("/");
+                      }, 4000);
                       toast("Volviendo al Campamento", {
                         description: "Puedes retomar este reto cuando quieras.",
+                        duration: 4000,
+                        action: {
+                          label: "Deshacer",
+                          onClick: () => {
+                            window.clearTimeout(timer);
+                            navigate(currentPath, { replace: true });
+                            toast.success("Sigues en el reto");
+                          },
+                        },
                       });
-                      navigate("/");
                     }}
                     className="w-full text-xs text-muted-foreground py-1.5 font-medium hover:text-foreground transition-colors"
                   >
