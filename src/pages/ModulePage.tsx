@@ -95,7 +95,16 @@ const ModulePage = () => {
               </div>
               {pinned ? (
                 <button
-                  onClick={() => spId && modId && unpinModuleTier(spId, modId)}
+                  onClick={() => {
+                    if (!spId || !modId) return;
+                    unpinModuleTier(spId, modId);
+                    const count = tieredModule
+                      ? getActiveChallenges(tieredModule, tier).length
+                      : challenges.length;
+                    toast.success(`Auto · ${TIER_LABEL[tier]}`, {
+                      description: `Adaptativo activado · ${count} ${count === 1 ? "reto activo" : "retos activos"}`,
+                    });
+                  }}
                   className="flex items-center gap-1 text-[10px] font-bold text-primary"
                   aria-label="Quitar fijado y dejar que se adapte"
                 >
