@@ -394,6 +394,7 @@ const ChallengePage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 };
