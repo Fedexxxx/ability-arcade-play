@@ -86,27 +86,26 @@ const ModulePage = () => {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "No se pudo guardar tu preferencia.";
-      toast.error("No se pudo guardar el nivel", {
-        description: message,
+      const attempted =
+        intent === "pin"
+          ? `Fijar en ${TIER_LABEL[nextTier]}`
+          : `Auto · ${TIER_LABEL[nextTier]}`;
+      const kept = prevSnapshot.pinned
+        ? `Fijado en ${TIER_LABEL[prevSnapshot.tier]}`
+        : `Auto · ${TIER_LABEL[prevSnapshot.tier]}`;
+      toast.error(`No se pudo guardar: ${attempted}`, {
+        description: `${message} Sigues en ${kept}.`,
         duration: 10000,
         action: {
           label: "Reintentar",
           onClick: () => applyTierChange(intent, nextTier, prevSnapshot),
         },
         cancel: {
-          label: `Volver a ${TIER_LABEL[prevSnapshot.tier]}`,
+          label: `Mantener ${TIER_LABEL[prevSnapshot.tier]}`,
           onClick: () => {
-            // Restore prior state. Use a fresh try/catch so a second failure
-            // also surfaces, but without further retry chaining.
-            try {
-              if (prevSnapshot.pinned) {
-                setModuleTier(spId, modId, prevSnapshot.tier);
-              } else {
-                unpinModuleTier(spId, modId);
-              }
-            } catch {
-              toast.error("Tampoco pudimos restaurar el nivel anterior.");
-            }
+            // No-op: the failed write never mutated storage, so the previous
+            // tier is what's still shown. The button just lets the user
+            // dismiss the error and confirm the kept selection.
           },
         },
       });
