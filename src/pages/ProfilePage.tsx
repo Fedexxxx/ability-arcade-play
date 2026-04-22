@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, Pencil, ShoppingBag, Palette } from "lucide-react";
+import { Flag, Footprints, Mountain as MountainIcon, Compass, Volume2, VolumeX, Sparkles, RotateCcw, ShoppingBag, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProgressBar from "@/components/ProgressBar";
 import { Switch } from "@/components/ui/switch";
@@ -47,23 +47,6 @@ const ExplorerProfilePage = () => {
     clearExplorerStyle();
     clearTiers();
     navigate("/onboarding", { replace: true });
-  };
-
-  const handleEdit = () => {
-    if (!explorer) {
-      navigate("/onboarding");
-      return;
-    }
-    navigate("/onboarding", {
-      state: {
-        editMode: true,
-        prefill: {
-          name: explorer.name,
-          avatar: explorer.avatar,
-          ageBand: explorer.ageBand,
-        },
-      },
-    });
   };
 
   useEffect(() => {
