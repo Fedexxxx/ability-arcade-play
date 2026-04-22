@@ -1,10 +1,13 @@
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Check, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Lock, Plus, RotateCcw, Sparkles, Minus } from "lucide-react";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { toast } from "@/hooks/use-toast";
 import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
+import { useWallet } from "@/hooks/useWallet";
+import { equip } from "@/lib/wallet";
+import { SHOP_ITEMS, SLOT_META } from "@/lib/shopCatalog";
 import {
   AI_HAIRS,
   AI_OUTFITS,
