@@ -46,6 +46,7 @@ const ChallengePage = () => {
   // itself decides when the user is done and whether the answer is correct.
   const [interactiveCorrect, setInteractiveCorrect] = useState<boolean | null>(null);
   const celebratedRef = useRef(false);
+  const [returningHome, setReturningHome] = useState(false);
 
   const isQuizLike =
     challenge?.type === "quiz" || challenge?.type === "visual";
@@ -346,6 +347,8 @@ const ChallengePage = () => {
                   </button>
                   <button
                     onClick={() => {
+                      if (returningHome) return;
+                      setReturningHome(true);
                       const currentPath = `/challenge/${spId}/${modId}/${chId}`;
                       let undone = false;
                       const navTimer = window.setTimeout(() => {
@@ -361,6 +364,7 @@ const ChallengePage = () => {
                             window.clearTimeout(navTimer);
                             navigate(currentPath, { replace: true });
                             toast.success("Sigues en el reto");
+                            setReturningHome(false);
                           },
                         },
                       });
@@ -368,9 +372,10 @@ const ChallengePage = () => {
                       // disappears and the toast becomes inactive.
                       window.setTimeout(() => toast.dismiss(toastId), 2000);
                     }}
-                    className="w-full text-xs text-muted-foreground py-1.5 font-medium hover:text-foreground transition-colors"
+                    disabled={returningHome}
+                    className="w-full text-xs text-muted-foreground py-1.5 font-medium hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-muted-foreground"
                   >
-                    Ir atrás
+                    {returningHome ? "Volviendo…" : "Ir atrás"}
                   </button>
                 </>
               )}
