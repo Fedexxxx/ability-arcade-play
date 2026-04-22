@@ -151,6 +151,19 @@ const ShopPage = () => {
         </div>
       </motion.section>
 
+      {/* Status filter */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 mb-2">
+        {(Object.keys(STATUS_META) as StatusFilter[]).map((s) => (
+          <FilterChip
+            key={s}
+            label={STATUS_META[s].label}
+            emoji={STATUS_META[s].emoji}
+            active={status === s}
+            onClick={() => setStatus(s)}
+          />
+        ))}
+      </div>
+
       {/* Slot filter */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 mb-4">
         <FilterChip
@@ -171,6 +184,15 @@ const ShopPage = () => {
       </div>
 
       {/* Items grid */}
+      {visible.length === 0 ? (
+        <div className="bg-card border border-border rounded-3xl p-6 text-center shadow-terrain">
+          <p className="text-3xl mb-2">🔍</p>
+          <p className="font-display text-base">Nada por aquí todavía</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Prueba con otro filtro o sigue conquistando cumbres.
+          </p>
+        </div>
+      ) : (
       <div className="grid grid-cols-2 gap-3">
         {visible.map((item, i) => {
           const owned = wallet.owned.includes(item.id);
