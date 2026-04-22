@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Check, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, RotateCcw, Sparkles, Wand2 } from "lucide-react";
 import ExplorerSvg from "@/components/ExplorerSvg";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { useExplorerStyle } from "@/hooks/useExplorerStyle";
@@ -32,6 +32,19 @@ import {
   type SkinTone,
 } from "@/lib/explorerStyle";
 import { toast } from "@/hooks/use-toast";
+import { useAvatarMode } from "@/hooks/useAvatarMode";
+import { setAvatarMode } from "@/lib/avatarMode";
+import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
+import {
+  AI_HAIRS,
+  AI_OUTFITS,
+  AI_SKINS,
+  resolveAiAvatarUrl,
+  saveAiVariant,
+  type AiHair,
+  type AiOutfit,
+  type AiSkin,
+} from "@/lib/aiAvatarCatalog";
 
 type Tab = "cara" | "pelo" | "ropa" | "accesorios";
 
@@ -53,6 +66,8 @@ const CustomizePage = () => {
   const navigate = useNavigate();
   const style = useExplorerStyle();
   const wallet = useWallet();
+  const mode = useAvatarMode();
+  const aiVariant = useAiAvatarVariant();
   const [tab, setTab] = useState<Tab>("cara");
   const initialStyle = useRef(style);
   const [touched, setTouched] = useState<Record<Tab, boolean>>({
@@ -92,6 +107,41 @@ const CustomizePage = () => {
         <ArrowLeft size={22} />
       </button>
 
+      {/* A/B mode toggle */}
+      <div
+        role="tablist"
+        aria-label="Modo de avatar"
+        className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-2xl mb-4"
+      >
+        <button
+          role="tab"
+          aria-selected={mode === "svg"}
+          onClick={() => setAvatarMode("svg")}
+          className={`rounded-xl py-2 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${
+            mode === "svg"
+              ? "bg-card text-foreground shadow-terrain"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Sparkles size={13} /> Clásico (SVG)
+        </button>
+        <button
+          role="tab"
+          aria-selected={mode === "ai"}
+          onClick={() => setAvatarMode("ai")}
+          className={`rounded-xl py-2 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${
+            mode === "ai"
+              ? "bg-card text-foreground shadow-terrain"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Wand2 size={13} /> Nuevo (IA)
+          <span className="ml-1 text-[9px] uppercase tracking-wider bg-secondary text-secondary-foreground rounded-full px-1.5 py-0.5">
+            beta
+          </span>
+        </button>
+      </div>
+
       {/* Live preview */}
       <motion.section
         initial={{ opacity: 0, y: 8 }}
@@ -106,16 +156,42 @@ const CustomizePage = () => {
             <Sparkles size={11} /> En vivo
           </span>
         </div>
-        <motion.div
-          className="w-44 h-72 my-2"
-          animate={{ y: [0, -3, 0] }}
-          transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ExplorerSvg style={style} gear={wallet.equipped} variant="full" className="w-full h-full" />
-        </motion.div>
-        <SherpaSpeech mood="encouraging" size="sm" message={SHERPA_BY_TAB[tab]} />
+        {mode === "svg" ? (
+          <motion.div
+            className="w-44 h-72 my-2"
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ExplorerSvg style={style} gear={wallet.equipped} variant="full" className="w-full h-full" />
+          </motion.div>
+        ) : (
+          <div className="w-56 h-72 my-2 flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={`${aiVariant.outfit}-${aiVariant.skin}-${aiVariant.hair}`}
+                src={resolveAiAvatarUrl(aiVariant, "full")}
+                alt="Avatar IA"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.22 }}
+                className="w-full h-full object-contain"
+              />
+            </AnimatePresence>
+          </div>
+        )}
+        <SherpaSpeech
+          mood="encouraging"
+          size="sm"
+          message={
+            mode === "ai"
+              ? "Versión beta — sin accesorios todavía."
+              : SHERPA_BY_TAB[tab]
+          }
+        />
 
-        {/* Mi equipo — chips of equipped Shop gear */}
+        {/* Mi equipo — chips of equipped Shop gear (hidden in AI mode) */}
+        {mode === "svg" && (
         <div className="w-full mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Mi equipo</p>
@@ -145,9 +221,11 @@ const CustomizePage = () => {
             </div>
           )}
         </div>
+        )}
       </motion.section>
 
-      {/* Tabs */}
+      {/* Tabs (SVG mode only) */}
+      {mode === "svg" && (
       <div className="grid grid-cols-4 gap-1.5 mb-4">
         {TABS.map((t) => (
           <button
@@ -169,7 +247,9 @@ const CustomizePage = () => {
           </button>
         ))}
       </div>
+      )}
 
+      {mode === "svg" ? (
       <AnimatePresence mode="wait">
         <motion.div
           key={tab}
@@ -425,6 +505,9 @@ const CustomizePage = () => {
           )}
         </motion.div>
       </AnimatePresence>
+      ) : (
+        <AiCustomizePanel />
+      )}
 
       <div className="mt-6 flex gap-3">
         <button
@@ -497,5 +580,71 @@ const ChipButton = ({
     {children}
   </button>
 );
+
+const AiCustomizePanel = () => {
+  const v = useAiAvatarVariant();
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18 }}
+    >
+      <div className="bg-secondary/10 border border-secondary/30 text-foreground rounded-2xl p-3 mb-5 text-xs">
+        <strong className="font-bold">Modo beta IA.</strong> Set acotado de 48 variantes pre-renderizadas.
+        Sin accesorios ni equipo de la tienda todavía.
+      </div>
+
+      <Section title="Outfit">
+        <div className="grid grid-cols-2 gap-2">
+          {AI_OUTFITS.map((o) => (
+            <button
+              key={o.id}
+              onClick={() => saveAiVariant({ outfit: o.id as AiOutfit })}
+              className={`text-left rounded-2xl border p-3 transition-colors ${
+                v.outfit === o.id
+                  ? "bg-primary/10 border-primary text-foreground"
+                  : "bg-card border-border text-foreground"
+              }`}
+            >
+              <p className="text-sm font-bold">{o.label}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{o.desc}</p>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Tono de piel">
+        <div className="grid grid-cols-4 gap-2">
+          {AI_SKINS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => saveAiVariant({ skin: s.id as AiSkin })}
+              aria-label={s.label}
+              title={s.label}
+              className={`aspect-square rounded-full border-2 transition-transform ${
+                v.skin === s.id ? "border-primary scale-110 shadow-summit" : "border-border"
+              }`}
+              style={{ backgroundColor: s.swatch }}
+            />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Pelo">
+        <div className="grid grid-cols-3 gap-2">
+          {AI_HAIRS.map((h) => (
+            <ChipButton
+              key={h.id}
+              active={v.hair === h.id}
+              onClick={() => saveAiVariant({ hair: h.id as AiHair })}
+            >
+              {h.label}
+            </ChipButton>
+          ))}
+        </div>
+      </Section>
+    </motion.div>
+  );
+};
 
 export default CustomizePage;
