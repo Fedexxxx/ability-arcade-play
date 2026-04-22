@@ -186,6 +186,8 @@ const AiCustomizePanel = () => {
           ))}
         </div>
       </Section>
+
+      <AccessoriesSection />
     </motion.div>
   );
 };
