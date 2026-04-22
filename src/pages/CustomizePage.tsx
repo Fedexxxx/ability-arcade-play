@@ -1,46 +1,18 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Check, RotateCcw, Sparkles, Wand2 } from "lucide-react";
-import ExplorerSvg from "@/components/ExplorerSvg";
+import { ArrowLeft, Check, RotateCcw, Sparkles } from "lucide-react";
 import SherpaSpeech from "@/components/SherpaSpeech";
-import { useExplorerStyle } from "@/hooks/useExplorerStyle";
-import { useWallet } from "@/hooks/useWallet";
-import { getItem, SLOT_META } from "@/lib/shopCatalog";
-import type { CosmeticSlot } from "@/lib/wallet";
-import {
-  ACCESSORY_COLORS,
-  BACKPACK_OPTIONS,
-  BOOTS_COLORS,
-  EYE_COLORS,
-  EYE_SHAPES,
-  EYEBROW_STYLES,
-  HAIR_COLORS,
-  HAIR_STYLES,
-  HAT_OPTIONS,
-  JACKET_COLORS,
-  PANTS_COLORS,
-  SCARF_OPTIONS,
-  SKIN_PALETTE,
-  saveExplorerStyle,
-  type AccBackpack,
-  type AccHat,
-  type AccScarf,
-  type EyebrowStyle,
-  type EyeShape,
-  type HairStyle,
-  type SkinTone,
-} from "@/lib/explorerStyle";
 import { toast } from "@/hooks/use-toast";
-import { useAvatarMode } from "@/hooks/useAvatarMode";
-import { setAvatarMode } from "@/lib/avatarMode";
 import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
 import {
   AI_HAIRS,
   AI_OUTFITS,
   AI_SKINS,
+  DEFAULT_AI_VARIANT,
   resolveAiAvatarUrl,
   saveAiVariant,
+  type AiAvatarVariant,
   type AiHair,
   type AiOutfit,
   type AiSkin,
