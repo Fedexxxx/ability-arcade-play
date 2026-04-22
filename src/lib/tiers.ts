@@ -70,12 +70,11 @@ function read(): TiersState {
 }
 
 function write(state: TiersState) {
-  try {
-    window.localStorage.setItem(KEY, JSON.stringify(state));
-    window.dispatchEvent(new CustomEvent(TIER_EVENT));
-  } catch {
-    // ignore
-  }
+  // Throws if persistence fails (e.g. storage quota, disabled storage,
+  // private mode). Callers that mutate user-visible settings should catch
+  // and surface the error so the UI can offer a retry.
+  window.localStorage.setItem(KEY, JSON.stringify(state));
+  window.dispatchEvent(new CustomEvent(TIER_EVENT));
 }
 
 function moduleKey(mountainId: string, moduleId: string) {
