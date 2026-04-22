@@ -252,20 +252,21 @@ const BasecampPage = () => {
 
       {/* Mountains preview */}
       <section className="px-5 mt-6">
-        <div className="flex items-end justify-between mb-3">
+        <button
+          onClick={() => navigate("/explore")}
+          className="w-full flex items-end justify-between mb-3 text-left active:opacity-70 transition-opacity"
+          aria-label="Ver todas las montañas"
+        >
           <div>
             <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
               Tus montañas
             </p>
             <h2 className="font-display text-xl">Elige tu próximo ascenso</h2>
           </div>
-          <button
-            onClick={() => navigate("/explore")}
-            className="text-xs font-bold text-primary"
-          >
+          <span className="text-xs font-bold text-primary py-2 pl-3">
             Ver todas →
-          </button>
-        </div>
+          </span>
+        </button>
 
         <div className="space-y-3">
           {superpowers.slice(0, 3).map((sp, i) => {
