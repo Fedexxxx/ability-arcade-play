@@ -18,11 +18,21 @@ import { celebrate } from "@/lib/celebrate";
 
 const SLOT_ORDER: CosmeticSlot[] = ["hat", "scarf", "backpack", "boots", "badge"];
 
+type StatusFilter = "all" | "available" | "owned" | "equipped";
+
+const STATUS_META: Record<StatusFilter, { label: string; emoji: string }> = {
+  all:       { label: "Todos",      emoji: "🗂️" },
+  available: { label: "Disponible", emoji: "🪙" },
+  owned:     { label: "Comprado",   emoji: "✅" },
+  equipped:  { label: "Equipado",   emoji: "⭐" },
+};
+
 const ShopPage = () => {
   const navigate = useNavigate();
   const wallet = useWallet();
   const explorer = useExplorer();
   const [filter, setFilter] = useState<CosmeticSlot | "all">("all");
+  const [status, setStatus] = useState<StatusFilter>("all");
   const [sherpaMsg, setSherpaMsg] = useState<string | null>(null);
 
   // Contextual default Sherpa message — based on wallet state.
