@@ -46,6 +46,14 @@ const ShopPage = () => {
     return SHOP_ITEMS.filter((i) => i.slot === filter);
   }, [filter]);
 
+  // Cheapest unaffordable item among visible — used for the "Te faltan N" nudge.
+  const cheapestUnaffordableId = useMemo(() => {
+    const candidates = visible
+      .filter((i) => !wallet.owned.includes(i.id) && i.price > wallet.balance)
+      .sort((a, b) => a.price - b.price);
+    return candidates[0]?.id ?? null;
+  }, [visible, wallet.owned, wallet.balance]);
+
   const handleBuy = (item: ShopItem) => {
     const result = buy({
       itemId: item.id,
