@@ -1,26 +1,33 @@
-import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
-import { resolveAiAvatarUrl } from "@/lib/aiAvatarCatalog";
+import ExplorerSvg from "@/components/ExplorerSvg";
+import { useExplorerStyle } from "@/hooks/useExplorerStyle";
+import { useWallet } from "@/hooks/useWallet";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  /** Legacy: kept for back-compat with existing callers. Ignored — identity comes from the AI avatar variant. */
+  /** Legacy: kept for back-compat with existing callers. */
   avatar?: string;
   /** Tailwind size classes for the round container */
   className?: string;
   /** Legacy: ignored. */
   emojiClassName?: string;
-  /** Legacy: ignored — AI mode does not support gear overlays. */
+  /** Show purchased gear from wallet on top. Defaults to true. */
   showGear?: boolean;
   /** 'bust' (default) for round avatars; 'full' for full-body preview. */
   variant?: "bust" | "full";
 }
 
 /**
- * Round avatar that renders the AI Pixar-style explorer for the current variant.
- * Identity is driven by `useAiAvatarVariant()` so changes propagate everywhere.
+ * Round avatar that renders the customizable SVG explorer with equipped gear
+ * from the wallet. Identity is driven by `useExplorerStyle()` so changes
+ * propagate everywhere.
  */
-const AvatarWithGear = ({ className = "w-20 h-20", variant = "bust" }: Props) => {
-  const aiVariant = useAiAvatarVariant();
+const AvatarWithGear = ({
+  className = "w-20 h-20",
+  variant = "bust",
+  showGear = true,
+}: Props) => {
+  const style = useExplorerStyle();
+  const wallet = useWallet();
 
   return (
     <div
@@ -29,14 +36,11 @@ const AvatarWithGear = ({ className = "w-20 h-20", variant = "bust" }: Props) =>
         className,
       )}
     >
-      <img
-        src={resolveAiAvatarUrl(aiVariant, variant)}
-        alt="Tu explorador"
-        className="w-full h-full object-cover"
-        loading="lazy"
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).style.display = "none";
-        }}
+      <ExplorerSvg
+        style={style}
+        gear={showGear ? wallet.equipped : {}}
+        variant={variant}
+        className="w-full h-full"
       />
     </div>
   );
