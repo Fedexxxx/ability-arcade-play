@@ -11,7 +11,6 @@ import { useUiPrefs } from "@/hooks/useUiPrefs";
 import { equip } from "@/lib/wallet";
 import { SHOP_ITEMS, SLOT_META } from "@/lib/shopCatalog";
 import {
-  AI_HAIRS,
   AI_OUTFITS,
   AI_SKINS,
   DEFAULT_AI_VARIANT,
@@ -196,29 +195,9 @@ const AiCustomizePanel = () => {
               active={ui.hairType === h.id}
               onClick={() => {
                 writeUiPrefs({ hairType: h.id });
-                // Map to the closest AI hair length so the base image shifts a bit.
+                // Each type maps 1:1 to a real AI render so the image actually changes.
                 saveAiVariant({ hair: h.aiHair });
               }}
-            >
-              {h.label}
-            </ChipButton>
-          ))}
-        </div>
-        {(ui.hairType === "ondulado" || ui.hairType === "rizado" || ui.hairType === "calvo" || ui.hairColor !== DEFAULT_UI_PREFS.hairColor) && (
-          <p className="mt-2 text-[10px] text-muted-foreground leading-snug">
-            El color y algunos tipos de pelo aún no se reflejan en la imagen IA — pronto.
-          </p>
-        )}
-      </Section>
-
-      {/* Largo del pelo (IA) — el atributo real que sí cambia la imagen */}
-      <Section title="Largo del pelo (imagen IA)">
-        <div className="grid grid-cols-3 gap-2">
-          {AI_HAIRS.map((h) => (
-            <ChipButton
-              key={h.id}
-              active={v.hair === h.id}
-              onClick={() => saveAiVariant({ hair: h.id as AiHair })}
             >
               {h.label}
             </ChipButton>
