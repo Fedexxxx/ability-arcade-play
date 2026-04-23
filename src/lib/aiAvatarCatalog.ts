@@ -10,11 +10,13 @@ const EVENT = "sherpa:ai-avatar-variant-changed";
 export type AiOutfit = "explorer" | "alpine" | "summit" | "trail";
 export type AiSkin = "porcelain" | "honey" | "cocoa" | "espresso";
 export type AiHair = "short" | "medium" | "long";
+export type AiHairColor = "black" | "brown" | "amber" | "copper";
 
 export interface AiAvatarVariant {
   outfit: AiOutfit;
   skin: AiSkin;
   hair: AiHair;
+  hairColor: AiHairColor;
 }
 
 export const AI_OUTFITS: { id: AiOutfit; label: string; desc: string }[] = [
@@ -37,18 +39,26 @@ export const AI_HAIRS: { id: AiHair; label: string }[] = [
   { id: "long",   label: "Largo" },
 ];
 
+export const AI_HAIR_COLORS: { id: AiHairColor; label: string; swatch: string }[] = [
+  { id: "black", label: "Cuervo", swatch: "#1F1A18" },
+  { id: "brown", label: "Castaño", swatch: "#3A2418" },
+  { id: "amber", label: "Miel", swatch: "#9C6A2A" },
+  { id: "copper", label: "Cobre", swatch: "#D6622B" },
+];
+
 export const DEFAULT_AI_VARIANT: AiAvatarVariant = {
   outfit: "explorer",
   skin: "honey",
   hair: "short",
+  hairColor: "brown",
 };
 
 export function fileNameFor(variant: AiAvatarVariant, frame: "bust" | "full"): string {
-  return `${frame}__outfit-${variant.outfit}__skin-${variant.skin}__hair-${variant.hair}.png`;
+  return `${frame}__outfit-${variant.outfit}__skin-${variant.skin}__hair-${variant.hair}__hairColor-${variant.hairColor}.png`;
 }
 
 export function resolveAiAvatarUrl(variant: AiAvatarVariant, frame: "bust" | "full"): string {
-  return `/avatar/ai/v1/${fileNameFor(variant, frame)}`;
+  return `/avatar/ai/v2/${fileNameFor(variant, frame)}`;
 }
 
 export function getAiVariant(): AiAvatarVariant {
