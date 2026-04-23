@@ -188,6 +188,8 @@ with ThreadPoolExecutor(max_workers=8) as ex:
 
 remaining = len(jobs) - (ok + skip + err + stopped)
 print(f"\nDONE  ok={ok} skip={skip} stopped={stopped} err={err} remaining={remaining}")
+print(f"429 budget used: retries={_RL_TOTAL_RETRIES} wait={_RL_TOTAL_WAIT:.1f}s "
+      f"(caps: retries={RL_GLOBAL_MAX_RETRIES or 'unlimited'}, wait={RL_GLOBAL_MAX_WAIT or 'unlimited'}s)")
 if STOP.is_set():
   print("Resume hint: top up Lovable AI credits, then run `python scripts/generate-ai-avatars.py` again.")
   sys.exit(2)  # distinct exit code so callers can detect a credit-block stop
