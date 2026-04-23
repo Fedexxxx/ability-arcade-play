@@ -5,7 +5,7 @@ each in 'bust' and 'full' framing => 384 PNGs into public/avatar/ai/v2/.
 Uses google/gemini-2.5-flash-image via Lovable AI Gateway.
 Concurrency via threads. Skips files that already exist for resumability.
 """
-import os, sys, json, base64, time, re
+import os, sys, json, base64, time, re, random
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Event
@@ -20,6 +20,13 @@ MODEL = "google/gemini-2.5-flash-image"
 # Other in-flight workers exit fast so the script can finish cleanly and be
 # re-run later to resume from where it left off (existing files are skipped).
 STOP = Event()
+
+# Backoff config for 429 (rate limit) — exponential with jitter, capped so a
+# stuck job can't keep consuming credits/time forever.
+RL_BASE_DELAY = 4.0      # seconds, first retry baseline
+RL_MAX_DELAY = 60.0      # seconds, cap per individual sleep
+RL_MAX_TOTAL_WAIT = 180.0  # seconds, cumulative cap per job before giving up
+RL_MAX_RETRIES = 6       # hard cap on 429 retries per job
 
 OUTFITS = {
   "explorer": "bright sherpa-orange technical jacket, classic adventurer scarf, brown hiking boots, small day backpack",
@@ -80,10 +87,31 @@ def gen(outfit_id, skin_id, hair_id, hair_color_id, frame):
   for attempt in range(3):
     if STOP.is_set():
       return fname, "stopped"
+    rl_retries = 0
+    rl_total_wait = 0.0
     try:
-      r = requests.post(API, headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"}, json=body, timeout=120)
-      if r.status_code == 429:
-        time.sleep(8 * (attempt + 1)); continue
+      while True:
+        r = requests.post(API, headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"}, json=body, timeout=120)
+        if r.status_code != 429:
+          break
+        # Rate limited: exponential backoff with jitter, respect Retry-After if present.
+        if rl_retries >= RL_MAX_RETRIES or rl_total_wait >= RL_MAX_TOTAL_WAIT:
+          return fname, f"ERR-429-giveup-after-{rl_retries}-retries-{int(rl_total_wait)}s"
+        retry_after = r.headers.get("Retry-After")
+        if retry_after and retry_after.isdigit():
+          delay = min(float(retry_after), RL_MAX_DELAY)
+        else:
+          delay = min(RL_BASE_DELAY * (2 ** rl_retries), RL_MAX_DELAY)
+          delay = delay * (0.7 + random.random() * 0.6)  # ±30% jitter
+        remaining_budget = RL_MAX_TOTAL_WAIT - rl_total_wait
+        delay = min(delay, remaining_budget)
+        if STOP.is_set():
+          return fname, "stopped"
+        time.sleep(delay)
+        rl_total_wait += delay
+        rl_retries += 1
+        if STOP.is_set():
+          return fname, "stopped"
       if r.status_code == 402:
         STOP.set()
         return fname, "ERR-402-credits"
