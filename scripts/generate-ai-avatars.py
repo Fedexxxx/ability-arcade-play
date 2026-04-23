@@ -23,10 +23,44 @@ STOP = Event()
 
 # Backoff config for 429 (rate limit) — exponential with jitter, capped so a
 # stuck job can't keep consuming credits/time forever.
-RL_BASE_DELAY = 4.0      # seconds, first retry baseline
-RL_MAX_DELAY = 60.0      # seconds, cap per individual sleep
-RL_MAX_TOTAL_WAIT = 180.0  # seconds, cumulative cap per job before giving up
-RL_MAX_RETRIES = 6       # hard cap on 429 retries per job
+# All values are tunable via env vars so you can adjust without editing code.
+def _envf(name, default):
+  try: return float(os.environ.get(name, default))
+  except ValueError: return default
+def _envi(name, default):
+  try: return int(os.environ.get(name, default))
+  except ValueError: return default
+
+# Per-job caps
+RL_BASE_DELAY = _envf("RL_BASE_DELAY", 4.0)            # first retry baseline (s)
+RL_MAX_DELAY = _envf("RL_MAX_DELAY", 60.0)             # cap per individual sleep (s)
+RL_MAX_TOTAL_WAIT = _envf("RL_MAX_TOTAL_WAIT", 180.0)  # cumulative cap per job (s)
+RL_MAX_RETRIES = _envi("RL_MAX_RETRIES", 6)            # hard cap on 429 retries per job
+
+# Global (across all jobs) 429 retry budget — once exhausted, no further 429
+# retries are attempted by any worker; jobs hitting 429 short-circuit instead.
+RL_GLOBAL_MAX_RETRIES = _envi("RL_GLOBAL_MAX_RETRIES", 0)   # 0 = unlimited
+RL_GLOBAL_MAX_WAIT = _envf("RL_GLOBAL_MAX_WAIT", 0.0)       # seconds, 0 = unlimited
+
+# Shared counters for the global budget (thread-safe via Lock).
+from threading import Lock
+_RL_LOCK = Lock()
+_RL_TOTAL_RETRIES = 0
+_RL_TOTAL_WAIT = 0.0
+
+def _rl_budget_exhausted():
+  with _RL_LOCK:
+    if RL_GLOBAL_MAX_RETRIES and _RL_TOTAL_RETRIES >= RL_GLOBAL_MAX_RETRIES:
+      return True
+    if RL_GLOBAL_MAX_WAIT and _RL_TOTAL_WAIT >= RL_GLOBAL_MAX_WAIT:
+      return True
+    return False
+
+def _rl_budget_charge(delay):
+  global _RL_TOTAL_RETRIES, _RL_TOTAL_WAIT
+  with _RL_LOCK:
+    _RL_TOTAL_RETRIES += 1
+    _RL_TOTAL_WAIT += delay
 
 OUTFITS = {
   "explorer": "bright sherpa-orange technical jacket, classic adventurer scarf, brown hiking boots, small day backpack",
