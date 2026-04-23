@@ -143,6 +143,16 @@ def gen(outfit_id, skin_id, hair_id, hair_color_id, frame):
         delay = min(delay, remaining_budget)
         if STOP.is_set():
           return fname, "stopped"
+        # Live log: show remaining 429 budget (global + per-job) before sleeping.
+        with _RL_LOCK:
+          g_retries_left = ("∞" if not RL_GLOBAL_MAX_RETRIES
+                            else max(0, RL_GLOBAL_MAX_RETRIES - _RL_TOTAL_RETRIES))
+          g_wait_left = ("∞" if not RL_GLOBAL_MAX_WAIT
+                         else f"{max(0.0, RL_GLOBAL_MAX_WAIT - _RL_TOTAL_WAIT):.1f}s")
+        print(f"  429 retry {rl_retries+1}/{RL_MAX_RETRIES} sleep={delay:.1f}s "
+              f"job_wait={rl_total_wait:.1f}/{RL_MAX_TOTAL_WAIT:.0f}s "
+              f"global_left: retries={g_retries_left} wait={g_wait_left} "
+              f"({fname})", flush=True)
         time.sleep(delay)
         rl_total_wait += delay
         rl_retries += 1
