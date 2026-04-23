@@ -61,6 +61,65 @@ export function resolveAiAvatarUrl(variant: AiAvatarVariant, frame: "bust" | "fu
   return `/avatar/ai/v2/${fileNameFor(variant, frame)}`;
 }
 
+// ----- Manifest-aware fallback ---------------------------------------------
+// Loaded lazily from /avatar/ai/v2/manifest.json. While loading (or if the
+// fetch fails) we treat all files as "unknown" and let the <img> onError in
+// the canvas degrade at runtime.
+
+let _manifestSet: Set<string> | null = null;
+let _manifestPromise: Promise<Set<string>> | null = null;
+
+export function loadAvatarManifest(): Promise<Set<string>> {
+  if (_manifestSet) return Promise.resolve(_manifestSet);
+  if (_manifestPromise) return _manifestPromise;
+  _manifestPromise = fetch("/avatar/ai/v2/manifest.json", { cache: "force-cache" })
+    .then((r) => (r.ok ? r.json() : { files: [] }))
+    .then((data: { files?: string[] }) => {
+      _manifestSet = new Set(data.files ?? []);
+      return _manifestSet;
+    })
+    .catch(() => {
+      _manifestSet = new Set();
+      return _manifestSet;
+    });
+  return _manifestPromise;
+}
+
+/** Synchronous accessor; returns null until the manifest has loaded. */
+export function getLoadedManifest(): Set<string> | null {
+  return _manifestSet;
+}
+
+/**
+ * Pick the closest available variant given the manifest. Order of degradation:
+ *  1. exact match
+ *  2. swap hairColor -> "brown" (the seed color we generated first)
+ *  3. swap hair -> "short"
+ *  4. swap skin -> "honey"
+ *  5. swap outfit -> "explorer"
+ *  6. give up and return the exact (broken) URL — let onError handle it
+ */
+export function resolveAiAvatarUrlWithFallback(
+  variant: AiAvatarVariant,
+  frame: "bust" | "full",
+  manifest: Set<string> | null = _manifestSet,
+): string {
+  const candidates: AiAvatarVariant[] = [
+    variant,
+    { ...variant, hairColor: "brown" },
+    { ...variant, hairColor: "brown", hair: "short" },
+    { ...variant, hairColor: "brown", hair: "short", skin: "honey" },
+    { ...variant, hairColor: "brown", hair: "short", skin: "honey", outfit: "explorer" },
+  ];
+  if (manifest && manifest.size > 0) {
+    for (const c of candidates) {
+      const name = fileNameFor(c, frame);
+      if (manifest.has(name)) return `/avatar/ai/v2/${name}`;
+    }
+  }
+  return resolveAiAvatarUrl(variant, frame);
+}
+
 export function getAiVariant(): AiAvatarVariant {
   if (typeof window === "undefined") return { ...DEFAULT_AI_VARIANT };
   try {

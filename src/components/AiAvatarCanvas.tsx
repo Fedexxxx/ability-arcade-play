@@ -1,4 +1,11 @@
-import { resolveAiAvatarUrl, type AiAvatarVariant } from "@/lib/aiAvatarCatalog";
+import { useEffect, useState } from "react";
+import {
+  fileNameFor,
+  loadAvatarManifest,
+  resolveAiAvatarUrl,
+  resolveAiAvatarUrlWithFallback,
+  type AiAvatarVariant,
+} from "@/lib/aiAvatarCatalog";
 import { getGearPlacement, isPaired, type GearPos } from "@/lib/gearPositions";
 import { getItem } from "@/lib/shopCatalog";
 import type { WalletState } from "@/lib/wallet";
@@ -23,7 +30,24 @@ const AiAvatarCanvas = ({
   equipped,
   className,
 }: Props) => {
-  const url = resolveAiAvatarUrl(variant, frame);
+  const [manifestReady, setManifestReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    loadAvatarManifest().then(() => {
+      if (!cancelled) setManifestReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const url = manifestReady
+    ? resolveAiAvatarUrlWithFallback(variant, frame)
+    : resolveAiAvatarUrl(variant, frame);
+  const fallbackUrl = `/avatar/ai/v2/${fileNameFor(
+    { ...variant, hairColor: "brown" },
+    frame,
+  )}`;
 
   return (
     <div className={cn("relative", className)}>
@@ -32,6 +56,20 @@ const AiAvatarCanvas = ({
         alt="Avatar IA"
         className="w-full h-full object-contain"
         draggable={false}
+        onError={(e) => {
+          const img = e.currentTarget;
+          // Try the brown-hair equivalent once; then explorer/honey/short brown.
+          if (img.dataset.fallbackStep === undefined) {
+            img.dataset.fallbackStep = "1";
+            img.src = fallbackUrl;
+          } else if (img.dataset.fallbackStep === "1") {
+            img.dataset.fallbackStep = "2";
+            img.src = `/avatar/ai/v2/${fileNameFor(
+              { outfit: "explorer", skin: "honey", hair: "short", hairColor: "brown" },
+              frame,
+            )}`;
+          }
+        }}
       />
 
       {/* Equipped gear */}
