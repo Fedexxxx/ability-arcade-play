@@ -11,6 +11,7 @@ import { useUiPrefs } from "@/hooks/useUiPrefs";
 import { equip } from "@/lib/wallet";
 import { SHOP_ITEMS, SLOT_META } from "@/lib/shopCatalog";
 import {
+  AI_HAIR_COLORS,
   AI_OUTFITS,
   AI_SKINS,
   DEFAULT_AI_VARIANT,
@@ -22,7 +23,6 @@ import {
 } from "@/lib/aiAvatarCatalog";
 import {
   DEFAULT_UI_PREFS,
-  HAIR_COLORS,
   writeUiPrefs,
   type HairTypeId,
 } from "@/lib/uiPrefs";
@@ -68,18 +68,12 @@ const CustomizePage = () => {
           </span>
         </div>
         <div className="relative w-64 h-80 my-2">
-          <AiAvatarCanvas
-            variant={v}
-            frame="full"
-            equipped={wallet.equipped}
-            hairColor={ui.hairColor}
-            className="w-full h-full"
-          />
+          <AiAvatarCanvas variant={v} frame="full" equipped={wallet.equipped} className="w-full h-full" />
         </div>
         <SherpaSpeech
           mood="encouraging"
           size="sm"
-          message="Cambios en vivo — accesorios y color de pelo se aplican al instante."
+          message="Cambios en vivo — pelo y accesorios se aplican al instante."
         />
       </motion.section>
 
@@ -169,18 +163,21 @@ const AiCustomizePanel = () => {
 
       <Section title="Color de pelo">
         <div className="flex gap-2 flex-wrap">
-          {HAIR_COLORS.map((c) => {
-            const active = ui.hairColor.toLowerCase() === c.hex.toLowerCase();
+          {AI_HAIR_COLORS.map((c) => {
+            const active = v.hairColor === c.id;
             return (
               <button
-                key={c.hex}
-                onClick={() => writeUiPrefs({ hairColor: c.hex })}
+                key={c.id}
+                onClick={() => {
+                  writeUiPrefs({ hairColor: c.swatch });
+                  saveAiVariant({ hairColor: c.id });
+                }}
                 aria-label={c.label}
                 title={c.label}
                 className={`w-8 h-8 rounded-full border-2 transition-transform ${
                   active ? "border-primary scale-110 shadow-summit" : "border-border"
                 }`}
-                style={{ backgroundColor: c.hex }}
+                style={{ backgroundColor: c.swatch }}
               />
             );
           })}
@@ -192,10 +189,9 @@ const AiCustomizePanel = () => {
           {HAIR_TYPES.map((h) => (
             <ChipButton
               key={h.id}
-              active={ui.hairType === h.id}
+              active={v.hair === h.aiHair}
               onClick={() => {
                 writeUiPrefs({ hairType: h.id });
-                // Each type maps 1:1 to a real AI render so the image actually changes.
                 saveAiVariant({ hair: h.aiHair });
               }}
             >
