@@ -3,6 +3,7 @@ import { getGearPlacement, isPaired, type GearPos } from "@/lib/gearPositions";
 import { getItem } from "@/lib/shopCatalog";
 import type { WalletState } from "@/lib/wallet";
 import { cn } from "@/lib/utils";
+import { readUiPrefs, type HairTypeId } from "@/lib/uiPrefs";
 
 interface Props {
   variant: AiAvatarVariant;
@@ -10,6 +11,8 @@ interface Props {
   equipped: WalletState["equipped"];
   /** Hair color hex used as a multiply tint over the head region. */
   hairColor?: string;
+  /** Optional hair-type override. Falls back to UiPrefs. */
+  hairType?: HairTypeId;
   className?: string;
   showHairTint?: boolean;
 }
@@ -25,16 +28,12 @@ const AiAvatarCanvas = ({
   frame,
   equipped,
   hairColor,
+  hairType,
   className,
   showHairTint = true,
 }: Props) => {
   const url = resolveAiAvatarUrl(variant, frame);
-
-  // Hair region as % of container (head occupies the top portion).
-  // For "full" the head is small at the top; for "bust" it's the whole top half.
-  const hairRegion = frame === "full"
-    ? { top: "4%",  left: "32%", width: "36%", height: "16%" }
-    : { top: "6%",  left: "20%", width: "60%", height: "34%" };
+  const ht: HairTypeId = hairType ?? readUiPrefs().hairType;
 
   return (
     <div className={cn("relative", className)}>
@@ -45,25 +44,11 @@ const AiAvatarCanvas = ({
         draggable={false}
       />
 
-      {/* Hair color tint — multiply blend confined to the head region.
-          Uses a soft radial mask so edges fade out. */}
+      {/* Hair overlay — stylized SVG of the hairstyle in the chosen color.
+          This avoids the "color blob" effect of a multiply tint and gives a
+          visible stylistic change on top of the AI base render. */}
       {showHairTint && hairColor && (
-        <div
-          aria-hidden
-          className="absolute pointer-events-none mix-blend-multiply opacity-70"
-          style={{
-            top: hairRegion.top,
-            left: hairRegion.left,
-            width: hairRegion.width,
-            height: hairRegion.height,
-            backgroundColor: hairColor,
-            WebkitMaskImage:
-              "radial-gradient(ellipse at center, rgba(0,0,0,0.95) 35%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0) 100%)",
-            maskImage:
-              "radial-gradient(ellipse at center, rgba(0,0,0,0.95) 35%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0) 100%)",
-            borderRadius: "9999px",
-          }}
-        />
+        <HairOverlay frame={frame} hairType={ht} color={hairColor} />
       )}
 
       {/* Equipped gear */}
@@ -93,6 +78,61 @@ const AiAvatarCanvas = ({
 
         return <Glyph key={slot} glyph={item.glyph} pos={pos} label={item.name} />;
       })}
+    </div>
+  );
+};
+
+/** Stylized hair overlay drawn as SVG so it follows the head silhouette
+ *  instead of looking like a rectangular tint. Sized in % of the container. */
+const HairOverlay = ({
+  frame,
+  hairType,
+  color,
+}: {
+  frame: "bust" | "full";
+  hairType: HairTypeId;
+  color: string;
+}) => {
+  // Head bounding box (as % of container).
+  const box = frame === "full"
+    ? { top: "3%",  left: "30%", width: "40%", height: "22%" }
+    : { top: "2%",  left: "12%", width: "76%", height: "55%" };
+
+  return (
+    <div
+      aria-hidden
+      className="absolute pointer-events-none"
+      style={{ top: box.top, left: box.left, width: box.width, height: box.height }}
+    >
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+        <defs>
+          <linearGradient id="hairShade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stopColor={color} stopOpacity="1" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.85" />
+          </linearGradient>
+        </defs>
+        {hairType === "corto" && (
+          // Cap-like short hair hugging the top of the head.
+          <path
+            d="M 12,46 C 12,18  88,18  88,46 C 84,40 70,32 50,32 C 30,32 16,40 12,46 Z"
+            fill="url(#hairShade)"
+          />
+        )}
+        {hairType === "medio" && (
+          // Medium hair: covers top + sides down to ear level.
+          <path
+            d="M 8,52 C 8,14  92,14  92,52 C 90,58 86,60 84,58 C 82,46 74,38 60,36 C 56,40 44,40 40,36 C 26,38 18,46 16,58 C 14,60 10,58 8,52 Z"
+            fill="url(#hairShade)"
+          />
+        )}
+        {hairType === "largo" && (
+          // Long hair: top + falling past the shoulders.
+          <path
+            d="M 6,55 C 6,12  94,12  94,55 C 96,75 92,92 86,98 C 84,82 80,68 74,58 C 70,52 60,48 50,48 C 40,48 30,52 26,58 C 20,68 16,82 14,98 C 8,92 4,75 6,55 Z"
+            fill="url(#hairShade)"
+          />
+        )}
+      </svg>
     </div>
   );
 };
