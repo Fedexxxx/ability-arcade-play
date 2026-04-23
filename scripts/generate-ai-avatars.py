@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """One-shot generator for the AI avatar prototype (Opción D).
-Creates 4 outfits x 4 skins x 3 hairs = 48 variants, each in 'bust' and 'full' framing
-=> 96 PNGs into public/avatar/ai/v1/. Uses google/gemini-2.5-flash-image via Lovable AI Gateway.
+Creates 4 outfits x 4 skins x 4 hair colors x 3 hairs = 192 variants,
+each in 'bust' and 'full' framing => 384 PNGs into public/avatar/ai/v2/.
+Uses google/gemini-2.5-flash-image via Lovable AI Gateway.
 Concurrency via threads. Skips files that already exist for resumability.
 """
 import os, sys, json, base64, time, re
@@ -11,7 +12,7 @@ import requests
 
 API = "https://ai.gateway.lovable.dev/v1/chat/completions"
 KEY = os.environ["LOVABLE_API_KEY"]
-OUT = Path("public/avatar/ai/v1"); OUT.mkdir(parents=True, exist_ok=True)
+OUT = Path("public/avatar/ai/v2"); OUT.mkdir(parents=True, exist_ok=True)
 MODEL = "google/gemini-2.5-flash-image"
 
 OUTFITS = {
@@ -31,6 +32,12 @@ HAIRS = {
   "medium": "medium-length wavy dark-brown hair",
   "long":   "long dark-brown hair tied in a ponytail",
 }
+HAIR_COLORS = {
+  "black": "raven black hair color",
+  "brown": "natural chestnut brown hair color",
+  "amber": "warm amber honey hair color",
+  "copper": "soft copper ginger hair color",
+}
 FRAMES = {
   "bust": "head-and-shoulders bust portrait, square crop, 1024x1024",
   "full": "full body standing, head to feet visible, slight forward lean, weight on right leg, square crop, 1024x1024",
@@ -46,8 +53,8 @@ PROMPT_TMPL = (
   "No text, no logos, no watermark, no border, no shadow on ground."
 )
 
-def gen(outfit_id, skin_id, hair_id, frame):
-  fname = f"{frame}__outfit-{outfit_id}__skin-{skin_id}__hair-{hair_id}.png"
+def gen(outfit_id, skin_id, hair_id, hair_color_id, frame):
+  fname = f"{frame}__outfit-{outfit_id}__skin-{skin_id}__hair-{hair_id}__hairColor-{hair_color_id}.png"
   fpath = OUT / fname
   if fpath.exists() and fpath.stat().st_size > 5000:
     return fname, "skip"
@@ -55,7 +62,7 @@ def gen(outfit_id, skin_id, hair_id, frame):
     frame_desc=FRAMES[frame],
     outfit_desc=OUTFITS[outfit_id],
     skin_desc=SKINS[skin_id],
-    hair_desc=HAIRS[hair_id],
+    hair_desc=f"{HAIRS[hair_id]} in {HAIR_COLORS[hair_color_id]}",
   )
   body = {
     "model": MODEL,
@@ -85,7 +92,7 @@ def gen(outfit_id, skin_id, hair_id, frame):
       if attempt == 2: return fname, f"ERR-{type(e).__name__}-{e}"
       time.sleep(4)
 
-jobs = [(o,s,h,f) for o in OUTFITS for s in SKINS for h in HAIRS for f in FRAMES]
+jobs = [(o,s,h,hc,f) for o in OUTFITS for s in SKINS for h in HAIRS for hc in HAIR_COLORS for f in FRAMES]
 print(f"Total jobs: {len(jobs)}", flush=True)
 ok = skip = err = 0
 errors = []

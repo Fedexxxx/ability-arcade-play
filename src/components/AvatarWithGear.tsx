@@ -1,6 +1,5 @@
 import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
 import { useWallet } from "@/hooks/useWallet";
-import { useUiPrefs } from "@/hooks/useUiPrefs";
 import { cn } from "@/lib/utils";
 import AiAvatarCanvas from "@/components/AiAvatarCanvas";
 
@@ -28,7 +27,6 @@ const AvatarWithGear = ({
 }: Props) => {
   const aiVariant = useAiAvatarVariant();
   const wallet = useWallet();
-  const ui = useUiPrefs();
   const equipped = showGear ? wallet.equipped : {};
 
   return (
@@ -42,7 +40,6 @@ const AvatarWithGear = ({
         variant={aiVariant}
         frame={variant}
         equipped={equipped}
-        hairColor={ui.hairColor}
         className="w-full h-full"
       />
     </div>
