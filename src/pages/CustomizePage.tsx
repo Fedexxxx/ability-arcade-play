@@ -1,93 +1,44 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, Check, Lock, Minus, Plus, RotateCcw, Sparkles, Store } from "lucide-react";
 import SherpaSpeech from "@/components/SherpaSpeech";
+import AiAvatarCanvas from "@/components/AiAvatarCanvas";
 import { toast } from "@/hooks/use-toast";
 import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
 import { useWallet } from "@/hooks/useWallet";
+import { useUiPrefs } from "@/hooks/useUiPrefs";
 import { equip } from "@/lib/wallet";
-import { SHOP_ITEMS, SLOT_META, getItem } from "@/lib/shopCatalog";
+import { SHOP_ITEMS, SLOT_META } from "@/lib/shopCatalog";
 import {
   AI_HAIRS,
   AI_OUTFITS,
   AI_SKINS,
   DEFAULT_AI_VARIANT,
-  resolveAiAvatarUrl,
   saveAiVariant,
   type AiAvatarVariant,
   type AiHair,
   type AiOutfit,
   type AiSkin,
 } from "@/lib/aiAvatarCatalog";
+import {
+  DEFAULT_UI_PREFS,
+  HAIR_COLORS,
+  writeUiPrefs,
+  type HairTypeId,
+} from "@/lib/uiPrefs";
 
-// User-facing hair types (UI-only). Mapped to the closest renderable AI hair length.
-type HairTypeId = "lacio" | "ondulado" | "corto" | "rizado" | "calvo";
+// Three hair types — each maps 1:1 to a real AI render so the change is visible.
 const HAIR_TYPES: { id: HairTypeId; label: string; aiHair: AiHair }[] = [
-  { id: "lacio",    label: "Lacio",    aiHair: "medium" },
-  { id: "ondulado", label: "Ondulado", aiHair: "medium" },
-  { id: "corto",    label: "Corto",    aiHair: "short" },
-  { id: "rizado",   label: "Rizado",   aiHair: "long" },
-  { id: "calvo",    label: "Calvo",    aiHair: "short" },
+  { id: "corto", label: "Corto", aiHair: "short" },
+  { id: "medio", label: "Medio", aiHair: "medium" },
+  { id: "largo", label: "Largo", aiHair: "long" },
 ];
-
-// Hair color palette — UI-only (AI base image hair color is fixed per-variant).
-const HAIR_COLORS: { hex: string; label: string }[] = [
-  { hex: "#1F1A18", label: "Cuervo" },
-  { hex: "#5A2F1B", label: "Castaño" },
-  { hex: "#9C6A2A", label: "Miel" },
-  { hex: "#D4A65A", label: "Arena" },
-  { hex: "#D6622B", label: "Zanahoria" },
-  { hex: "#9AA0A6", label: "Ceniza" },
-  { hex: "#3FB59A", label: "Menta" },
-  { hex: "#A23E7A", label: "Mora" },
-];
-
-// Local UI-only prefs (hair type + color don't drive the AI image yet).
-const UI_PREFS_KEY = "sherpa.customize.uiPrefs.v1";
-type UiPrefs = { hairType: HairTypeId; hairColor: string };
-const DEFAULT_UI_PREFS: UiPrefs = { hairType: "corto", hairColor: "#5A2F1B" };
-
-const readUiPrefs = (): UiPrefs => {
-  if (typeof window === "undefined") return { ...DEFAULT_UI_PREFS };
-  try {
-    const raw = window.localStorage.getItem(UI_PREFS_KEY);
-    if (!raw) return { ...DEFAULT_UI_PREFS };
-    return { ...DEFAULT_UI_PREFS, ...JSON.parse(raw) };
-  } catch {
-    return { ...DEFAULT_UI_PREFS };
-  }
-};
-
-const writeUiPrefs = (patch: Partial<UiPrefs>) => {
-  try {
-    const next = { ...readUiPrefs(), ...patch };
-    window.localStorage.setItem(UI_PREFS_KEY, JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent("sherpa:customize-ui-prefs"));
-  } catch {
-    // ignore
-  }
-};
-
-import { useEffect, useState } from "react";
-
-const useUiPrefs = (): UiPrefs => {
-  const [p, setP] = useState<UiPrefs>(() => readUiPrefs());
-  useEffect(() => {
-    const sync = () => setP(readUiPrefs());
-    window.addEventListener("sherpa:customize-ui-prefs", sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener("sherpa:customize-ui-prefs", sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
-  return p;
-};
 
 const CustomizePage = () => {
   const navigate = useNavigate();
   const v = useAiAvatarVariant();
+  const ui = useUiPrefs();
   const wallet = useWallet();
   const initialVariant = useRef<AiAvatarVariant>(v);
 
@@ -96,14 +47,6 @@ const CustomizePage = () => {
     writeUiPrefs(DEFAULT_UI_PREFS);
     toast({ title: "Restablecido", description: "Volviste al estilo inicial." });
   };
-
-  // Equipped accessories overlay positions (full-body preview).
-  const equipped = wallet.equipped;
-  const hat = equipped.hat ? getItem(equipped.hat) : null;
-  const scarf = equipped.scarf ? getItem(equipped.scarf) : null;
-  const backpack = equipped.backpack ? getItem(equipped.backpack) : null;
-  const boots = equipped.boots ? getItem(equipped.boots) : null;
-  const badge = equipped.badge ? getItem(equipped.badge) : null;
 
   return (
     <div className="min-h-screen pb-28 px-5 pt-6 max-w-lg mx-auto">
@@ -125,29 +68,19 @@ const CustomizePage = () => {
             <Sparkles size={11} /> En vivo
           </span>
         </div>
-        <div className="relative w-64 h-80 my-2 flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={`${v.outfit}-${v.skin}-${v.hair}`}
-              src={resolveAiAvatarUrl(v, "full")}
-              alt="Avatar IA"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.22 }}
-              className="w-full h-full object-contain"
-            />
-          </AnimatePresence>
-          {hat && <Overlay glyph={hat.glyph} top="6%" left="50%" size="3.2rem" rotate="-4deg" label={hat.name} />}
-          {scarf && <Overlay glyph={scarf.glyph} top="44%" left="50%" size="2.4rem" rotate="0deg" label={scarf.name} />}
-          {backpack && <Overlay glyph={backpack.glyph} top="40%" left="14%" size="2.6rem" rotate="-12deg" label={backpack.name} />}
-          {boots && <Overlay glyph={boots.glyph} top="92%" left="50%" size="2.2rem" rotate="0deg" label={boots.name} />}
-          {badge && <Overlay glyph={badge.glyph} top="50%" left="72%" size="1.8rem" rotate="0deg" label={badge.name} />}
+        <div className="relative w-64 h-80 my-2">
+          <AiAvatarCanvas
+            variant={v}
+            frame="full"
+            equipped={wallet.equipped}
+            hairColor={ui.hairColor}
+            className="w-full h-full"
+          />
         </div>
         <SherpaSpeech
           mood="encouraging"
           size="sm"
-          message="Cambios en vivo — los accesorios comprados también se ven."
+          message="Cambios en vivo — accesorios y color de pelo se aplican al instante."
         />
       </motion.section>
 
@@ -174,19 +107,6 @@ const CustomizePage = () => {
     </div>
   );
 };
-
-const Overlay = ({
-  glyph, top, left, size, rotate, label,
-}: { glyph: string; top: string; left: string; size: string; rotate: string; label: string }) => (
-  <span
-    aria-label={label}
-    title={label}
-    className="absolute -translate-x-1/2 -translate-y-1/2 leading-none drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)] pointer-events-none select-none"
-    style={{ top, left, fontSize: size, transform: `translate(-50%, -50%) rotate(${rotate})` }}
-  >
-    {glyph}
-  </span>
-);
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div className="mb-5">
