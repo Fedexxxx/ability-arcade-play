@@ -1,33 +1,44 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, Check, Lock, Minus, Plus, RotateCcw, Sparkles, Store } from "lucide-react";
 import SherpaSpeech from "@/components/SherpaSpeech";
+import ExplorerSvg from "@/components/ExplorerSvg";
 import { toast } from "@/hooks/use-toast";
-import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
+import { useExplorerStyle } from "@/hooks/useExplorerStyle";
 import { useWallet } from "@/hooks/useWallet";
 import { equip } from "@/lib/wallet";
-import { SHOP_ITEMS } from "@/lib/shopCatalog";
+import { SHOP_ITEMS, SLOT_META } from "@/lib/shopCatalog";
 import {
-  AI_HAIRS,
-  AI_OUTFITS,
-  AI_SKINS,
-  DEFAULT_AI_VARIANT,
-  resolveAiAvatarUrl,
-  saveAiVariant,
-  type AiAvatarVariant,
-  type AiHair,
-  type AiOutfit,
-  type AiSkin,
-} from "@/lib/aiAvatarCatalog";
+  DEFAULT_STYLE,
+  HAIR_COLORS,
+  SKIN_PALETTE,
+  saveExplorerStyle,
+  type ExplorerStyle,
+  type HairStyle,
+  type SkinTone,
+} from "@/lib/explorerStyle";
+
+// User-facing hair types: lacio, ondulado, corto, rizado, calvo.
+// Mapped to the existing renderable hair styles.
+const HAIR_TYPES: { id: HairStyle; label: string }[] = [
+  { id: "medium", label: "Lacio" },
+  { id: "wavy",   label: "Ondulado" },
+  { id: "short",  label: "Corto" },
+  { id: "curly",  label: "Rizado" },
+  { id: "buzz",   label: "Calvo" },
+];
+
+const SKIN_TONES: SkinTone[] = ["porcelain", "honey", "tan", "cocoa", "espresso"];
 
 const CustomizePage = () => {
   const navigate = useNavigate();
-  const v = useAiAvatarVariant();
-  const initialVariant = useRef<AiAvatarVariant>(v);
+  const style = useExplorerStyle();
+  const wallet = useWallet();
+  const initialStyle = useRef<ExplorerStyle>(style);
 
   const handleReset = () => {
-    saveAiVariant(initialVariant.current ?? DEFAULT_AI_VARIANT);
+    saveExplorerStyle(initialStyle.current ?? DEFAULT_STYLE);
     toast({ title: "Restablecido", description: "Volviste al estilo inicial." });
   };
 
@@ -37,13 +48,13 @@ const CustomizePage = () => {
         <ArrowLeft size={22} />
       </button>
 
-      {/* Live preview */}
+      {/* Live preview — no background panel */}
       <motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-border rounded-3xl p-5 shadow-terrain mb-5 flex flex-col items-center"
+        className="mb-5 flex flex-col items-center"
       >
-        <div className="w-full flex items-center justify-between mb-1">
+        <div className="w-full flex items-center justify-between mb-1 px-1">
           <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold">
             Personaliza tu explorador
           </p>
@@ -51,28 +62,23 @@ const CustomizePage = () => {
             <Sparkles size={11} /> En vivo
           </span>
         </div>
-        <div className="w-56 h-72 my-2 flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={`${v.outfit}-${v.skin}-${v.hair}`}
-              src={resolveAiAvatarUrl(v, "full")}
-              alt="Avatar IA"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.22 }}
-              className="w-full h-full object-contain"
-            />
-          </AnimatePresence>
+        <div className="w-64 h-80 my-2 flex items-center justify-center">
+          <ExplorerSvg
+            style={style}
+            gear={wallet.equipped}
+            variant="full"
+            className="w-full h-full"
+            ariaLabel="Vista previa de tu explorador"
+          />
         </div>
         <SherpaSpeech
           mood="encouraging"
           size="sm"
-          message="Versión beta — sin accesorios todavía."
+          message="Cambios en vivo — los accesorios comprados también se ven."
         />
       </motion.section>
 
-      <AiCustomizePanel />
+      <CustomizePanel style={style} />
 
       <div className="mt-6 flex gap-3">
         <button
@@ -124,62 +130,66 @@ const ChipButton = ({
   </button>
 );
 
-const AiCustomizePanel = () => {
-  const v = useAiAvatarVariant();
+const CustomizePanel = ({ style }: { style: ExplorerStyle }) => {
+  const currentHairType = useMemo(
+    () => HAIR_TYPES.find((h) => h.id === style.hair)?.id ?? "short",
+    [style.hair],
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
     >
-      <div className="bg-secondary/10 border border-secondary/30 text-foreground rounded-2xl p-3 mb-5 text-xs">
-        <strong className="font-bold">Modo beta IA.</strong> Set acotado de 48 variantes pre-renderizadas.
-        Sin accesorios ni equipo de la tienda todavía.
-      </div>
-
-      <Section title="Outfit">
-        <div className="grid grid-cols-2 gap-2">
-          {AI_OUTFITS.map((o) => (
-            <button
-              key={o.id}
-              onClick={() => saveAiVariant({ outfit: o.id as AiOutfit })}
-              className={`text-left rounded-2xl border p-3 transition-colors ${
-                v.outfit === o.id
-                  ? "bg-primary/10 border-primary text-foreground"
-                  : "bg-card border-border text-foreground"
-              }`}
-            >
-              <p className="text-sm font-bold">{o.label}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{o.desc}</p>
-            </button>
-          ))}
-        </div>
-      </Section>
-
       <Section title="Tono de piel">
-        <div className="grid grid-cols-4 gap-2">
-          {AI_SKINS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => saveAiVariant({ skin: s.id as AiSkin })}
-              aria-label={s.label}
-              title={s.label}
-              className={`aspect-square rounded-full border-2 transition-transform ${
-                v.skin === s.id ? "border-primary scale-110 shadow-summit" : "border-border"
-              }`}
-              style={{ backgroundColor: s.swatch }}
-            />
-          ))}
+        <div className="flex gap-2 flex-wrap">
+          {SKIN_TONES.map((s) => {
+            const palette = SKIN_PALETTE[s];
+            const active = style.skin === s;
+            return (
+              <button
+                key={s}
+                onClick={() => saveExplorerStyle({ skin: s })}
+                aria-label={palette.label}
+                title={palette.label}
+                className={`w-8 h-8 rounded-full border-2 transition-transform ${
+                  active ? "border-primary scale-110 shadow-summit" : "border-border"
+                }`}
+                style={{ backgroundColor: palette.base }}
+              />
+            );
+          })}
         </div>
       </Section>
 
-      <Section title="Pelo">
+      <Section title="Color de pelo">
+        <div className="flex gap-2 flex-wrap">
+          {HAIR_COLORS.map((c) => {
+            const active = style.hairColor.toLowerCase() === c.hex.toLowerCase();
+            return (
+              <button
+                key={c.id}
+                onClick={() => saveExplorerStyle({ hairColor: c.hex })}
+                aria-label={c.label}
+                title={c.label}
+                className={`w-8 h-8 rounded-full border-2 transition-transform ${
+                  active ? "border-primary scale-110 shadow-summit" : "border-border"
+                }`}
+                style={{ backgroundColor: c.hex }}
+              />
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Tipo de pelo">
         <div className="grid grid-cols-3 gap-2">
-          {AI_HAIRS.map((h) => (
+          {HAIR_TYPES.map((h) => (
             <ChipButton
               key={h.id}
-              active={v.hair === h.id}
-              onClick={() => saveAiVariant({ hair: h.id as AiHair })}
+              active={currentHairType === h.id}
+              onClick={() => saveExplorerStyle({ hair: h.id })}
             >
               {h.label}
             </ChipButton>
@@ -236,6 +246,9 @@ const AccessoriesSection = () => {
                   <span className="text-[10px] font-bold text-foreground line-clamp-1 text-center w-full">
                     {item.name}
                   </span>
+                  <span className="text-[9px] text-muted-foreground">
+                    {SLOT_META[item.slot].label}
+                  </span>
                   <span
                     className={`inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider ${
                       isEquipped ? "text-primary" : "text-muted-foreground"
@@ -264,7 +277,7 @@ const AccessoriesSection = () => {
             </button>
           )}
           <p className="mt-2 text-[10px] text-muted-foreground text-center">
-            Los accesorios aún no se muestran sobre el avatar IA — beta.
+            Equipados sobre el explorador en vivo arriba.
           </p>
         </>
       )}

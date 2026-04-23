@@ -27,6 +27,8 @@ import { clearWallet } from "@/lib/wallet";
 import { clearExplorerStyle } from "@/lib/explorerStyle";
 import { clearTiers } from "@/lib/tiers";
 import { clearAiVariant } from "@/lib/aiAvatarCatalog";
+import { earn } from "@/lib/wallet";
+import { toast } from "@/hooks/use-toast";
 
 const ExplorerProfilePage = () => {
   const navigate = useNavigate();
@@ -49,6 +51,21 @@ const ExplorerProfilePage = () => {
     clearAiVariant();
     clearTiers();
     navigate("/onboarding", { replace: true });
+  };
+
+  const handleDemoCoins = () => {
+    const result = earn({
+      amount: 600,
+      reason: "achievement",
+      sourceId: `demo-${Date.now()}`,
+      label: "Bonus demo",
+    });
+    if (result.credited) {
+      toast({
+        title: "+600 Alticoins",
+        description: "Bonus demo agregado. ¡A probar la tienda!",
+      });
+    }
   };
 
   useEffect(() => {
@@ -126,6 +143,14 @@ const ExplorerProfilePage = () => {
           <Sparkles size={12} />
           {wallet.balance}
         </span>
+      </button>
+
+      <button
+        onClick={handleDemoCoins}
+        className="mt-3 w-full bg-secondary-soft text-secondary border border-secondary/30 rounded-2xl py-3 font-bold text-sm flex items-center justify-center gap-2 hover:bg-secondary/10 transition-colors"
+      >
+        <Sparkles size={14} />
+        +600 Alticoins (demo)
       </button>
 
       <section className="mt-7 mb-6">
