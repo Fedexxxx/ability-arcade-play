@@ -131,6 +131,8 @@ def gen(outfit_id, skin_id, hair_id, hair_color_id, frame):
         # Rate limited: exponential backoff with jitter, respect Retry-After if present.
         if rl_retries >= RL_MAX_RETRIES or rl_total_wait >= RL_MAX_TOTAL_WAIT:
           return fname, f"ERR-429-giveup-after-{rl_retries}-retries-{int(rl_total_wait)}s"
+        if _rl_budget_exhausted():
+          return fname, "ERR-429-global-budget-exhausted"
         retry_after = r.headers.get("Retry-After")
         if retry_after and retry_after.isdigit():
           delay = min(float(retry_after), RL_MAX_DELAY)
@@ -144,6 +146,7 @@ def gen(outfit_id, skin_id, hair_id, hair_color_id, frame):
         time.sleep(delay)
         rl_total_wait += delay
         rl_retries += 1
+        _rl_budget_charge(delay)
         if STOP.is_set():
           return fname, "stopped"
       if r.status_code == 402:
