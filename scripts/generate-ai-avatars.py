@@ -85,6 +85,18 @@ HAIR_COLORS = {
   "amber": "warm amber honey hair color",
   "copper": "soft copper ginger hair color",
 }
+
+# Optional batch filter: HAIR_COLORS=black,amber python scripts/generate-ai-avatars.py
+_hc_filter = os.environ.get("HAIR_COLORS", "").strip()
+if _hc_filter:
+  wanted = {x.strip() for x in _hc_filter.split(",") if x.strip()}
+  unknown = wanted - set(HAIR_COLORS.keys())
+  if unknown:
+    print(f"!! Unknown HAIR_COLORS: {unknown}. Valid: {list(HAIR_COLORS)}", flush=True)
+    sys.exit(2)
+  HAIR_COLORS = {k: v for k, v in HAIR_COLORS.items() if k in wanted}
+  print(f"Filtered HAIR_COLORS -> {list(HAIR_COLORS)}", flush=True)
+
 FRAMES = {
   "bust": "head-and-shoulders bust portrait, square crop, 1024x1024",
   "full": "full body standing, head to feet visible, slight forward lean, weight on right leg, square crop, 1024x1024",
