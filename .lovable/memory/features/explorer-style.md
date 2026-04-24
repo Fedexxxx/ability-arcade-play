@@ -1,31 +1,27 @@
 ---
-name: Explorer visual identity
-description: Layered SVG explorer style (skin/hair/jacket/pants/boots) and customization page
+name: Mountain Avatar system
+description: Layered SVG avatar — palette, options, presets, customize page, shop bridge
 type: feature
 ---
-Visual identity for the explorer is a **layered SVG**, not an emoji. Lives in `src/components/ExplorerSvg.tsx` with `variant: "bust" | "full"`.
+The avatar is a single layered **pure SVG** component: `src/components/avatar/MountainAvatar.tsx` (`variant: "bust" | "full"`, idle blink + gaze + breathe). One config object describes everything; no pre-rendered assets, no AI images.
 
-Style fields (persisted as `sherpa.explorerStyle.v1`, event `sherpa:explorer-style-changed`, hook `useExplorerStyle`):
-`skin` (5 tones); `hair` (7 styles: short/medium/long/curly/wavy/bun/buzz) + `hairColor`; `jacketColor`, `pantsColor`, `bootsColor`, `outfit`.
-Face: `eyeShape` (round/almond/soft), `eyeColor`, `eyebrow` (soft/thick/arched), `freckles` (bool).
-Free accessories (independent from shop, recolorable): `accHat` (none/beanie/cap/explorer-hat) + `accHatColor`, `accScarf` (none/scarf) + `accScarfColor`, `accBackpack` (none/day/trek) + `accBackpackColor`, `accGoggles` (bool).
-Defaults in `DEFAULT_STYLE`. Onboarding seeds via `styleFromLegacyAvatar(avatar)`.
+Data model lives under `src/lib/mountainAvatar/`:
+- `palette.ts` — closed curated palette: `SKIN_PALETTE` (5), `HAIR_COLORS` (5), `OUTFIT_COLORS` (8), `ACCESSORY_COLORS` (7). `shade(hex, amount)` and `luminance()` helpers. NEVER add colors outside these tokens.
+- `options.ts` — option arrays: `SKIN_TONES`, `HAIR_STYLES` (6), `HAIR_COLOR_OPTIONS`, `TOP_OPTIONS` (6), `BOTTOM_OPTIONS` (4), `BOOTS_OPTIONS` (4), `HAT_OPTIONS` (4+none), `NECK_OPTIONS` (3+none), `BACKPACK_OPTIONS` (5+none), `BADGE_OPTIONS` (6+none), `EXPRESSION_OPTIONS` (4). Each gear option has `free: boolean` + optional `lockReason: "shop" | "adventure"`.
+- `state.ts` — `MountainAvatar` config type, `getMountainAvatar()`, `saveMountainAvatar(patch)`, `setMountainAvatar(full)`, `clearMountainAvatar()`. Persisted as `sherpa.mountainAvatar.v1`, event `sherpa:mountain-avatar-changed`, hook `useMountainAvatar()`.
+- `presets.ts` — 10 named curated `PRESETS` (Alpine Scout, Pine Trail Explorer, Glacier Buddy, Summit Pathfinder, Cloud Peak Climber, Stone Ridge Ranger, Snow Map Keeper, Little Mountaineer, Compass Trail Friend, Basecamp Adventurer). Each has `freeOnly` flag.
+- `unlocks.ts` — `unlockedOptionIds(wallet)` returns Set of equippable option ids = free options + shop-owned items mapped via `SHOP_TO_OPTION` (e.g. `hat-cap-base → mountain-cap`, `scarf-wool → scarf`, `bp-day → compact-trail`). Existing wallet purchases auto-migrate visually.
+- `randomize.ts` — `randomizeAvatar(unlocked)` enforces compatibility (skin/hair contrast ≥0.18 luminance, top differs from skin, max 2 strong accents from `ACCENT_OUTFIT`/`ACCENT_ACCESSORY`). `avatarHints(a)` returns soft warning strings. Per project decision **manual editing has NO restrictions**; only randomize is curated.
+- `equipFromShop.ts` — `equipShopItemOnAvatar(itemId, slot)` / `unequipShopItemOnAvatar(slot)` — called from ShopPage on buy/equip/unequip so wallet and avatar stay in sync.
 
-`AvatarWithGear` is the round-avatar wrapper used everywhere (Campamento header, Profile, Shop preview). It now ignores the legacy `avatar`/`emojiClassName` props (kept for back-compat) and renders `ExplorerSvg` driven by `useExplorerStyle()` + `wallet.equipped`.
+**Identity is always free** (skin/hair style/hair color/expression). All gear (top/bottom/boots/hat/neck/backpack/badge) is locked except a starter set: `alpine-jacket`, `trail-pants`, `classic-hiking`, all `none` options. Locked items show a Lock chip and either "Desbloquéalo con Alticoins" (shop) or "Desbloquéalo en aventuras" (progress); clicking a locked card routes to `/tienda`.
 
-Customization page: `/personalizar` (CustomizePage). Tabs: Cara / Pelo / Ropa / Accesorios with framer-motion AnimatePresence transitions. Live preview uses `variant="full"`. Changes save instantly via `saveExplorerStyle(patch)`.
+Customize page (`/personalizar`) has 6 tabs: Piel / Pelo / Ropa / Accesorios / Mochila / Estilos. Live preview uses `variant="full"`. Bottom actions: "Sorpréndeme" (compatibility-aware random), "Restablecer" (revert to initial), "Guardar explorador".
 
-Shop gear is rendered as **SVG inside ExplorerSvg** (HAT/SCARF/BACKPACK/BOOTS/BADGE renderer maps keyed by item id) — not emoji overlays. New shop items must add a renderer entry to keep the avatar consistent; missing renderers degrade gracefully (item still owned/equipped, just no visual). **Shop gear wins over customize-tab accessories** when both are set (hat/scarf/backpack slots).
+`AvatarWithGear` (round wrapper used in Basecamp header / Profile / Shop) renders MountainAvatar `variant="bust"` driven by `useMountainAvatar()`. Legacy props (`avatar`, `emojiClassName`, `showGear`) are accepted but ignored for back-compat — gear is now baked into the avatar config, not overlaid.
 
-ExplorerSvg has built-in **idle animation**: random blinks every ~3.5–6s (with occasional double-blinks), subtle gaze drift every ~2–5s, slow body breathing/sway loop and an independent head micro-tilt loop. **React-on-change pulse** (subtle scale bounce keyed off the full style hash) on style updates. Pass `animate={false}` to disable for static contexts.
+ProfilePage "Reiniciar explorador" calls `clearMountainAvatar()` (alongside `clearExplorer/clearWallet/clearTiers`). Onboarding no longer seeds avatar style — `DEFAULT_MOUNTAIN_AVATAR` is used.
 
-Visual treatment is **Tintin-clarity + soft Pixar warmth** (NOT puppet/Pinocchio): SVG `defs` build per-instance linear/radial gradients (uid-suffixed ids) for skin, face volumetric shading, jacket (top-left highlight → bottom-right shade), pants, hair gloss, and cheek blush. Pose is **asymmetric and dynamic** — slight forward lean, weight on the right leg, left foot stepped forward, front arm bent. Eyes have iris ring + dark pupil + dual highlight reflections + gaze offset (`gaze` -1..+1 horizontal pupil drift); blink renders as soft curved eyelids (not flat lines). Color helpers `shade(hex, amount)` derive consistent dark/light variants used across hair, jacket, pants, boots, accessories. ViewBox widened slightly (`12 2 76 98` for bust, `0 0 100 184` full) to accommodate the leaning silhouette.
+**Removed in this rewrite (do NOT reintroduce)**: `ExplorerSvg.tsx`, `AiAvatarCanvas.tsx`, `aiAvatarCatalog.ts`, `explorerStyle.ts`, `uiPrefs.ts`, `gearPositions.ts`, `useAiAvatarVariant.ts`, `useExplorerStyle.ts`, `useUiPrefs.ts`. AI mode toggle and free-color pickers are gone. The pre-rendered AI PNGs in `public/avatar/ai/v2/` are orphaned (script + manifest still exist if ever needed for reference).
 
-Reset: `clearExplorerStyle()` is called alongside `clearExplorer()` and `clearWallet()` on "Reiniciar explorador".
-
-**A/B prototype — AI pre-rendered avatar (Opción D):** A toggle at the top of `/personalizar` switches between:
-- `svg` (default) — the layered ExplorerSvg system above.
-- `ai` — pre-rendered Pixar-style PNGs from Nano Banana, served from `public/avatar/ai/v1/` (96 files: 4 outfits × 4 skins × 3 hairs × 2 frames). Naming: `<bust|full>__outfit-<id>__skin-<id>__hair-<id>.png`. Catalog and resolver live in `src/lib/aiAvatarCatalog.ts`. Variant persisted as `sherpa.aiAvatarVariant.v1` (event `sherpa:ai-avatar-variant-changed`, hook `useAiAvatarVariant`). Mode persisted as `sherpa.avatarMode` (event `sherpa:avatar-mode-changed`, hook `useAvatarMode`).
-- `AvatarWithGear` honors the mode and renders `<img>` in AI mode; falls back to ExplorerSvg if image fails. Only `/personalizar` and `/perfil` header reflect the mode (Basecamp/Shop stay on SVG — prototype scope).
-- AI mode hides "Mi equipo" and the customize tabs; shows simplified Outfit/Piel/Pelo selectors. No accessories or Shop gear in AI mode.
-- Generation script: `scripts/generate-ai-avatars.py` (one-shot, parallel, resumable). Reset of explorer also clears `aiAvatarVariant` (mode preference is preserved).
+**Visual style rules**: Pixar-soft via SVG gradients (per-instance uid-suffixed `<defs>`), rounded shapes, gentle highlights, soft drop shadow under feet. Asymmetric/dynamic head with cheeks blush + eye highlights. Idle blink ~3.5–6s, occasional double blink, slow gaze drift, scale-pulse on style hash change.
