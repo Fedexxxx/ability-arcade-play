@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { getWallet, WALLET_EVENT, type WalletState, type CosmeticSlot } from "@/lib/wallet";
-import { getItem } from "@/lib/shopCatalog";
+import { getWallet, WALLET_EVENT, type WalletState } from "@/lib/wallet";
 
 /** Mirrors the persisted wallet state and reacts to changes. */
 export function useWallet(): WalletState {
@@ -15,12 +14,4 @@ export function useWallet(): WalletState {
     };
   }, []);
   return state;
-}
-
-/** Returns the glyph (emoji) for the equipped item in a slot, if any. */
-export function useEquippedGlyph(slot: CosmeticSlot): string | null {
-  const wallet = useWallet();
-  const id = wallet.equipped[slot];
-  if (!id) return null;
-  return getItem(id)?.glyph ?? null;
 }

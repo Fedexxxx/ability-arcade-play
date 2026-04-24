@@ -25,7 +25,7 @@ import { useWallet } from "@/hooks/useWallet";
 import AvatarWithGear from "@/components/AvatarWithGear";
 import { clearWallet } from "@/lib/wallet";
 import { clearTiers } from "@/lib/tiers";
-import { clearMountainAvatar } from "@/lib/mountainAvatar";
+import { clearCharacterState } from "@/lib/character/state";
 import { earn } from "@/lib/wallet";
 import { toast } from "@/hooks/use-toast";
 
@@ -46,7 +46,7 @@ const ExplorerProfilePage = () => {
   const handleReset = () => {
     clearExplorer();
     clearWallet();
-    clearMountainAvatar();
+    clearCharacterState();
     clearTiers();
     navigate("/onboarding", { replace: true });
   };
