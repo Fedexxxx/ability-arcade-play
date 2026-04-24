@@ -131,6 +131,38 @@ export function buy(opts: {
   return { ok: true };
 }
 
+/**
+ * Generic coin spend (used by the new character shop).
+ * Debits the balance, records a ledger entry, and adds the id to `owned` for
+ * traceability. Idempotency on `id` prevents double-charge if called twice.
+ */
+export function spend(opts: {
+  id: string;
+  price: number;
+  label: string;
+}): { ok: boolean; reason?: "already_owned" | "insufficient_funds" } {
+  const state = read();
+  if (state.owned.includes(opts.id)) return { ok: false, reason: "already_owned" };
+  if (state.balance < opts.price) return { ok: false, reason: "insufficient_funds" };
+  const next: WalletState = {
+    ...state,
+    balance: state.balance - opts.price,
+    owned: [...state.owned, opts.id],
+    ledger: [
+      ...state.ledger,
+      {
+        id: `purchase:${opts.id}:${Date.now()}`,
+        amount: -opts.price,
+        reason: "purchase",
+        label: opts.label,
+        at: Date.now(),
+      },
+    ],
+  };
+  write(next);
+  return { ok: true };
+}
+
 export function equip(slot: CosmeticSlot, itemId: string | null) {
   const state = read();
   if (itemId && !state.owned.includes(itemId)) return;
