@@ -15,6 +15,7 @@ import {
 import AvatarWithGear from "@/components/AvatarWithGear";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { celebrate } from "@/lib/celebrate";
+import { equipShopItemOnAvatar, unequipShopItemOnAvatar } from "@/lib/mountainAvatar/equipFromShop";
 
 const SLOT_ORDER: CosmeticSlot[] = ["hat", "scarf", "backpack", "boots", "badge"];
 
@@ -96,6 +97,7 @@ const ShopPage = () => {
       return;
     }
     setSherpaMsg(`¡${item.name}! Te queda increíble.`);
+    equipShopItemOnAvatar(item.id, item.slot);
     celebrate();
     toast({
       title: "¡Equipado!",
@@ -106,6 +108,8 @@ const ShopPage = () => {
   const handleEquipToggle = (item: ShopItem) => {
     const isEquipped = wallet.equipped[item.slot] === item.id;
     equip(item.slot, isEquipped ? null : item.id);
+    if (isEquipped) unequipShopItemOnAvatar(item.slot);
+    else equipShopItemOnAvatar(item.id, item.slot);
     setSherpaMsg(
       isEquipped
         ? `Quitaste ${item.name}. Está guardado en tu mochila.`
