@@ -24,9 +24,8 @@ import { clearExplorer } from "@/lib/explorer";
 import { useWallet } from "@/hooks/useWallet";
 import AvatarWithGear from "@/components/AvatarWithGear";
 import { clearWallet } from "@/lib/wallet";
-import { clearExplorerStyle } from "@/lib/explorerStyle";
 import { clearTiers } from "@/lib/tiers";
-import { clearAiVariant } from "@/lib/aiAvatarCatalog";
+import { clearMountainAvatar } from "@/lib/mountainAvatar";
 import { earn } from "@/lib/wallet";
 import { toast } from "@/hooks/use-toast";
 
@@ -47,8 +46,7 @@ const ExplorerProfilePage = () => {
   const handleReset = () => {
     clearExplorer();
     clearWallet();
-    clearExplorerStyle();
-    clearAiVariant();
+    clearMountainAvatar();
     clearTiers();
     navigate("/onboarding", { replace: true });
   };

@@ -1,105 +1,30 @@
-import { useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Check, Lock, Minus, Plus, RotateCcw, Sparkles, Store } from "lucide-react";
-import SherpaSpeech from "@/components/SherpaSpeech";
-import AiAvatarCanvas from "@/components/AiAvatarCanvas";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Check, Lock, RotateCcw, Shuffle, Sparkles, Store } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAiAvatarVariant } from "@/hooks/useAiAvatarVariant";
 import { useWallet } from "@/hooks/useWallet";
-import { useUiPrefs } from "@/hooks/useUiPrefs";
-import { equip } from "@/lib/wallet";
-import { SHOP_ITEMS, SLOT_META } from "@/lib/shopCatalog";
+import { useMountainAvatar } from "@/hooks/useMountainAvatar";
+import MountainAvatar from "@/components/avatar/MountainAvatar";
+import SherpaSpeech from "@/components/SherpaSpeech";
+import { celebrate } from "@/lib/celebrate";
 import {
-  AI_HAIR_COLORS,
-  AI_OUTFITS,
-  AI_SKINS,
-  DEFAULT_AI_VARIANT,
-  saveAiVariant,
-  type AiAvatarVariant,
-  type AiHair,
-  type AiOutfit,
-  type AiSkin,
-} from "@/lib/aiAvatarCatalog";
-import {
-  DEFAULT_UI_PREFS,
-  writeUiPrefs,
-  type HairTypeId,
-} from "@/lib/uiPrefs";
+  ACC_COLOR_CHOICES, ACCESSORY_COLORS, BACKPACK_OPTIONS, BADGE_OPTIONS,
+  BOOTS_COLOR_CHOICES, BOOTS_OPTIONS, BOTTOM_COLOR_CHOICES, BOTTOM_OPTIONS,
+  DEFAULT_MOUNTAIN_AVATAR, EXPRESSION_OPTIONS, HAIR_COLORS, HAIR_COLOR_OPTIONS,
+  HAIR_STYLES, HAT_OPTIONS, NECK_OPTIONS, OUTFIT_COLORS, PRESETS, SKIN_PALETTE,
+  SKIN_TONES, TOP_COLOR_CHOICES, TOP_OPTIONS,
+  randomizeAvatar, saveMountainAvatar, setMountainAvatar, unlockedOptionIds,
+  type AccessoryColorId, type GearOption, type HairColorId, type HairStyleId,
+  type MountainAvatar as MA, type OutfitColorId, type SkinToneId,
+} from "@/lib/mountainAvatar";
 
-// Three hair types — each maps 1:1 to a real AI render so the change is visible.
-const HAIR_TYPES: { id: HairTypeId; label: string; aiHair: AiHair }[] = [
-  { id: "corto", label: "Corto", aiHair: "short" },
-  { id: "medio", label: "Medio", aiHair: "medium" },
-  { id: "largo", label: "Largo", aiHair: "long" },
+type Tab = "skin" | "hair" | "outfit" | "accessories" | "backpack" | "presets";
+const TABS: { id: Tab; label: string }[] = [
+  { id: "skin", label: "Piel" }, { id: "hair", label: "Pelo" },
+  { id: "outfit", label: "Ropa" }, { id: "accessories", label: "Accesorios" },
+  { id: "backpack", label: "Mochila" }, { id: "presets", label: "Estilos" },
 ];
-
-const CustomizePage = () => {
-  const navigate = useNavigate();
-  const v = useAiAvatarVariant();
-  const ui = useUiPrefs();
-  const wallet = useWallet();
-  const initialVariant = useRef<AiAvatarVariant>(v);
-
-  const handleReset = () => {
-    saveAiVariant(initialVariant.current ?? DEFAULT_AI_VARIANT);
-    writeUiPrefs(DEFAULT_UI_PREFS);
-    toast({ title: "Restablecido", description: "Volviste al estilo inicial." });
-  };
-
-  return (
-    <div className="min-h-screen pb-28 px-5 pt-6 max-w-lg mx-auto">
-      <button onClick={() => navigate(-1)} className="text-muted-foreground mb-3" aria-label="Volver">
-        <ArrowLeft size={22} />
-      </button>
-
-      {/* Live preview — no background panel */}
-      <motion.section
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-5 flex flex-col items-center"
-      >
-        <div className="w-full flex items-center justify-between mb-1 px-1">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold">
-            Personaliza tu explorador
-          </p>
-          <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-primary font-bold">
-            <Sparkles size={11} /> En vivo
-          </span>
-        </div>
-        <div className="relative w-64 h-80 my-2">
-          <AiAvatarCanvas variant={v} frame="full" equipped={wallet.equipped} className="w-full h-full" />
-        </div>
-        <SherpaSpeech
-          mood="encouraging"
-          size="sm"
-          message="Cambios en vivo — pelo y accesorios se aplican al instante."
-        />
-      </motion.section>
-
-      <AiCustomizePanel />
-
-      <div className="mt-6 flex gap-3">
-        <button
-          onClick={handleReset}
-          className="flex-1 bg-card border border-border text-foreground rounded-2xl py-3 font-bold flex items-center justify-center gap-2"
-          aria-label="Restablecer al estilo inicial"
-        >
-          <RotateCcw size={16} /> Restablecer
-        </button>
-        <button
-          onClick={() => {
-            toast({ title: "¡Listo!", description: "Tu explorador está al día." });
-            navigate(-1);
-          }}
-          className="flex-[1.2] gradient-sunrise text-secondary-foreground rounded-2xl py-3 font-bold flex items-center justify-center gap-2 shadow-summit"
-        >
-          <Check size={16} /> Listo
-        </button>
-      </div>
-    </div>
-  );
-};
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div className="mb-5">
@@ -107,172 +32,200 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
     {children}
   </div>
 );
-
-const ChipButton = ({
-  active, onClick, children,
-}: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
-  <button
-    onClick={onClick}
-    className={`rounded-2xl border py-2 text-xs font-bold transition-colors ${
-      active ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
-    }`}
-  >
+const Swatch = ({ hex, label, active, onClick }: { hex: string; label: string; active: boolean; onClick: () => void }) => (
+  <button onClick={onClick} aria-label={label} title={label}
+    className={`w-9 h-9 rounded-full border-2 transition-transform ${active ? "border-primary scale-110 shadow-summit" : "border-border"}`}
+    style={{ backgroundColor: hex }} />
+);
+const Chip = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
+  <button onClick={onClick}
+    className={`rounded-2xl border py-2 px-3 text-xs font-bold transition-colors ${active ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"}`}>
     {children}
   </button>
 );
+const GearCard = ({ option, active, locked, onSelect, onLockedClick }:
+  { option: GearOption; active: boolean; locked: boolean; onSelect: () => void; onLockedClick: () => void }) => {
+  const lockLabel = option.lockReason === "adventure" ? "Desbloquéalo en aventuras" : "Desbloquéalo con Alticoins";
+  return (
+    <button onClick={locked ? onLockedClick : onSelect}
+      className={`relative text-left rounded-2xl border p-3 transition-colors ${
+        locked ? "bg-card/60 border-dashed border-border opacity-70"
+        : active ? "bg-primary/10 border-primary" : "bg-card border-border"}`}>
+      <p className="text-sm font-bold leading-tight">{option.label}</p>
+      <p className="text-[10px] text-muted-foreground mt-0.5">{locked ? lockLabel : option.free ? "Gratis" : "Desbloqueado"}</p>
+      {locked && <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground"><Lock size={11} /></span>}
+      {active && !locked && <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground"><Check size={11} /></span>}
+    </button>
+  );
+};
 
-const AiCustomizePanel = () => {
-  const v = useAiAvatarVariant();
-  const ui = useUiPrefs();
+const CustomizePage = () => {
+  const navigate = useNavigate();
+  const avatar = useMountainAvatar();
+  const wallet = useWallet();
+  const initial = useRef<MA>(avatar);
+  const [tab, setTab] = useState<Tab>("skin");
+  const unlocked = useMemo(() => unlockedOptionIds(wallet), [wallet]);
+  const goShop = () => { toast({ title: "Bloqueado", description: "Consíguelo con Alticoins." }); navigate("/tienda"); };
+  const handleReset = () => { setMountainAvatar(initial.current ?? DEFAULT_MOUNTAIN_AVATAR); toast({ title: "Restablecido", description: "Volviste al estilo inicial." }); };
+  const handleRandomize = () => { setMountainAvatar(randomizeAvatar(unlocked)); celebrate(); };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
-      <Section title="Outfit">
-        <div className="grid grid-cols-2 gap-2">
-          {AI_OUTFITS.map((o) => (
-            <button
-              key={o.id}
-              onClick={() => saveAiVariant({ outfit: o.id as AiOutfit })}
-              className={`text-left rounded-2xl border p-3 transition-colors ${
-                v.outfit === o.id ? "bg-primary/10 border-primary text-foreground" : "bg-card border-border text-foreground"
-              }`}
-            >
-              <p className="text-sm font-bold">{o.label}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{o.desc}</p>
+    <div className="min-h-screen pb-28 px-5 pt-6 max-w-lg mx-auto">
+      <button onClick={() => navigate(-1)} className="text-muted-foreground mb-3" aria-label="Volver"><ArrowLeft size={22} /></button>
+
+      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex flex-col items-center">
+        <div className="w-full flex items-center justify-between mb-1 px-1">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold">Personaliza tu explorador</p>
+          <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-primary font-bold"><Sparkles size={11} /> En vivo</span>
+        </div>
+        <div className="relative w-64 h-80 my-2"><MountainAvatar avatar={avatar} variant="full" /></div>
+        <SherpaSpeech mood="encouraging" size="sm" message="Cambios en vivo. Desbloquea más equipo en la tienda." />
+      </motion.section>
+
+      <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1 mb-3">
+        {TABS.map((t) => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors whitespace-nowrap ${tab === t.id ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.16 }}>
+
+          {tab === "skin" && (<>
+            <Section title="Tono de piel">
+              <div className="flex gap-2 flex-wrap">{SKIN_TONES.map((s) => (
+                <Swatch key={s.id} hex={SKIN_PALETTE[s.id]} label={s.label} active={avatar.skinTone === s.id}
+                  onClick={() => saveMountainAvatar({ skinTone: s.id as SkinToneId })} />))}</div>
+            </Section>
+            <Section title="Expresión">
+              <div className="grid grid-cols-2 gap-2">{EXPRESSION_OPTIONS.map((e) => (
+                <Chip key={e.id} active={avatar.expression === e.id} onClick={() => saveMountainAvatar({ expression: e.id })}>{e.label}</Chip>))}</div>
+            </Section>
+          </>)}
+
+          {tab === "hair" && (<>
+            <Section title="Estilo">
+              <div className="grid grid-cols-3 gap-2">{HAIR_STYLES.map((h) => (
+                <Chip key={h.id} active={avatar.hairStyle === h.id} onClick={() => saveMountainAvatar({ hairStyle: h.id as HairStyleId })}>{h.label}</Chip>))}</div>
+            </Section>
+            <Section title="Color">
+              <div className="flex gap-2 flex-wrap">{HAIR_COLOR_OPTIONS.map((c) => (
+                <Swatch key={c.id} hex={HAIR_COLORS[c.id]} label={c.label} active={avatar.hairColor === c.id}
+                  onClick={() => saveMountainAvatar({ hairColor: c.id as HairColorId })} />))}</div>
+            </Section>
+          </>)}
+
+          {tab === "outfit" && (<>
+            <Section title="Chaqueta">
+              <div className="grid grid-cols-2 gap-2">{TOP_OPTIONS.map((o) => (
+                <GearCard key={o.id} option={o} active={avatar.top === o.id} locked={!o.free && !unlocked.has(o.id)}
+                  onSelect={() => saveMountainAvatar({ top: o.id })} onLockedClick={goShop} />))}</div>
+              <div className="mt-3 flex gap-2 flex-wrap">{TOP_COLOR_CHOICES.map((c) => (
+                <Swatch key={c} hex={OUTFIT_COLORS[c]} label={c} active={avatar.topColor === c}
+                  onClick={() => saveMountainAvatar({ topColor: c as OutfitColorId })} />))}</div>
+            </Section>
+            <Section title="Pantalón">
+              <div className="grid grid-cols-2 gap-2">{BOTTOM_OPTIONS.map((o) => (
+                <GearCard key={o.id} option={o} active={avatar.bottom === o.id} locked={!o.free && !unlocked.has(o.id)}
+                  onSelect={() => saveMountainAvatar({ bottom: o.id })} onLockedClick={goShop} />))}</div>
+              <div className="mt-3 flex gap-2 flex-wrap">{BOTTOM_COLOR_CHOICES.map((c) => (
+                <Swatch key={c} hex={OUTFIT_COLORS[c]} label={c} active={avatar.bottomColor === c}
+                  onClick={() => saveMountainAvatar({ bottomColor: c as OutfitColorId })} />))}</div>
+            </Section>
+            <Section title="Botas">
+              <div className="grid grid-cols-2 gap-2">{BOOTS_OPTIONS.map((o) => (
+                <GearCard key={o.id} option={o} active={avatar.boots === o.id} locked={!o.free && !unlocked.has(o.id)}
+                  onSelect={() => saveMountainAvatar({ boots: o.id })} onLockedClick={goShop} />))}</div>
+              <div className="mt-3 flex gap-2 flex-wrap">{BOOTS_COLOR_CHOICES.map((c) => (
+                <Swatch key={c} hex={OUTFIT_COLORS[c]} label={c} active={avatar.bootsColor === c}
+                  onClick={() => saveMountainAvatar({ bootsColor: c as OutfitColorId })} />))}</div>
+            </Section>
+          </>)}
+
+          {tab === "accessories" && (<>
+            <Section title="Gorro">
+              <div className="grid grid-cols-2 gap-2">{HAT_OPTIONS.map((o) => (
+                <GearCard key={o.id} option={o} active={avatar.hat === o.id} locked={!o.free && !unlocked.has(o.id)}
+                  onSelect={() => saveMountainAvatar({ hat: o.id })} onLockedClick={goShop} />))}</div>
+              {avatar.hat !== "none" && (
+                <div className="mt-3 flex gap-2 flex-wrap">{ACC_COLOR_CHOICES.map((c) => (
+                  <Swatch key={c} hex={ACCESSORY_COLORS[c]} label={c} active={avatar.hatColor === c}
+                    onClick={() => saveMountainAvatar({ hatColor: c as AccessoryColorId })} />))}</div>)}
+            </Section>
+            <Section title="Cuello">
+              <div className="grid grid-cols-2 gap-2">{NECK_OPTIONS.map((o) => (
+                <GearCard key={o.id} option={o} active={avatar.neck === o.id} locked={!o.free && !unlocked.has(o.id)}
+                  onSelect={() => saveMountainAvatar({ neck: o.id })} onLockedClick={goShop} />))}</div>
+              {avatar.neck !== "none" && (
+                <div className="mt-3 flex gap-2 flex-wrap">{ACC_COLOR_CHOICES.map((c) => (
+                  <Swatch key={c} hex={ACCESSORY_COLORS[c]} label={c} active={avatar.neckColor === c}
+                    onClick={() => saveMountainAvatar({ neckColor: c as AccessoryColorId })} />))}</div>)}
+            </Section>
+            <Section title="Insignia">
+              <div className="grid grid-cols-2 gap-2">{BADGE_OPTIONS.map((o) => (
+                <GearCard key={o.id} option={o} active={avatar.badge === o.id} locked={!o.free && !unlocked.has(o.id)}
+                  onSelect={() => saveMountainAvatar({ badge: o.id })} onLockedClick={goShop} />))}</div>
+            </Section>
+            <button onClick={() => navigate("/tienda")}
+              className="w-full mt-1 inline-flex items-center justify-center gap-1.5 bg-card border border-dashed border-border text-muted-foreground hover:text-foreground rounded-2xl py-2 text-xs font-bold">
+              <Store size={12} /> Visitar la tienda
             </button>
-          ))}
-        </div>
-      </Section>
+          </>)}
 
-      <Section title="Tono de piel">
-        <div className="flex gap-2 flex-wrap">
-          {AI_SKINS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => saveAiVariant({ skin: s.id as AiSkin })}
-              aria-label={s.label}
-              title={s.label}
-              className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                v.skin === s.id ? "border-primary scale-110 shadow-summit" : "border-border"
-              }`}
-              style={{ backgroundColor: s.swatch }}
-            />
-          ))}
-        </div>
-      </Section>
+          {tab === "backpack" && (<>
+            <Section title="Mochila">
+              <div className="grid grid-cols-2 gap-2">{BACKPACK_OPTIONS.map((o) => (
+                <GearCard key={o.id} option={o} active={avatar.backpack === o.id} locked={!o.free && !unlocked.has(o.id)}
+                  onSelect={() => saveMountainAvatar({ backpack: o.id })} onLockedClick={goShop} />))}</div>
+              {avatar.backpack !== "none" && (
+                <div className="mt-3 flex gap-2 flex-wrap">{ACC_COLOR_CHOICES.map((c) => (
+                  <Swatch key={c} hex={ACCESSORY_COLORS[c]} label={c} active={avatar.backpackColor === c}
+                    onClick={() => saveMountainAvatar({ backpackColor: c as AccessoryColorId })} />))}</div>)}
+            </Section>
+          </>)}
 
-      <Section title="Color de pelo">
-        <div className="flex gap-2 flex-wrap">
-          {AI_HAIR_COLORS.map((c) => {
-            const active = v.hairColor === c.id;
-            return (
-              <button
-                key={c.id}
-                onClick={() => {
-                  writeUiPrefs({ hairColor: c.swatch });
-                  saveAiVariant({ hairColor: c.id });
-                }}
-                aria-label={c.label}
-                title={c.label}
-                className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                  active ? "border-primary scale-110 shadow-summit" : "border-border"
-                }`}
-                style={{ backgroundColor: c.swatch }}
-              />
-            );
-          })}
-        </div>
-      </Section>
+          {tab === "presets" && (
+            <Section title="Estilos rápidos">
+              <div className="grid grid-cols-2 gap-3">{PRESETS.map((p) => {
+                const ids = [p.config.top, p.config.bottom, p.config.boots, p.config.hat, p.config.neck, p.config.backpack, p.config.badge];
+                const FREE = new Set(["alpine-jacket", "trail-pants", "classic-hiking", "none"]);
+                const lockedItems = ids.filter((id) => !FREE.has(id) && !unlocked.has(id));
+                const isLocked = !p.freeOnly && lockedItems.length > 0;
+                return (
+                  <button key={p.id}
+                    onClick={() => {
+                      if (isLocked) { toast({ title: "Estilo bloqueado", description: "Algunas piezas aún no están desbloqueadas." }); return; }
+                      setMountainAvatar(p.config); celebrate();
+                    }}
+                    className={`relative text-left rounded-2xl border p-3 transition-colors ${isLocked ? "bg-card/60 border-dashed border-border opacity-70" : "bg-card border-border hover:border-primary/40"}`}>
+                    <p className="font-display text-sm leading-tight">{p.name}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{p.blurb}</p>
+                    {isLocked && <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground"><Lock size={11} /></span>}
+                    {p.freeOnly && <span className="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wider text-primary bg-primary-soft px-1.5 py-0.5 rounded-full">Free</span>}
+                  </button>
+                );
+              })}</div>
+            </Section>
+          )}
+        </motion.div>
+      </AnimatePresence>
 
-      <Section title="Tipo de pelo">
-        <div className="grid grid-cols-3 gap-2">
-          {HAIR_TYPES.map((h) => (
-            <ChipButton
-              key={h.id}
-              active={v.hair === h.aiHair}
-              onClick={() => {
-                writeUiPrefs({ hairType: h.id });
-                saveAiVariant({ hair: h.aiHair });
-              }}
-            >
-              {h.label}
-            </ChipButton>
-          ))}
+      <div className="mt-6 flex flex-col gap-3">
+        <div className="flex gap-3">
+          <button onClick={handleRandomize} className="flex-1 bg-card border border-border text-foreground rounded-2xl py-3 font-bold flex items-center justify-center gap-2"><Shuffle size={16} /> Sorpréndeme</button>
+          <button onClick={handleReset} className="flex-1 bg-card border border-border text-foreground rounded-2xl py-3 font-bold flex items-center justify-center gap-2"><RotateCcw size={16} /> Restablecer</button>
         </div>
-      </Section>
-
-      <AccessoriesSection />
-    </motion.div>
+        <button onClick={() => { toast({ title: "¡Listo!", description: "Tu explorador está al día." }); navigate(-1); }}
+          className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-bold flex items-center justify-center gap-2 shadow-summit">
+          <Check size={16} /> Guardar explorador
+        </button>
+      </div>
+    </div>
   );
 };
 
 export default CustomizePage;
-
-const AccessoriesSection = () => {
-  const navigate = useNavigate();
-  const wallet = useWallet();
-  const owned = SHOP_ITEMS.filter((i) => wallet.owned.includes(i.id));
-  const lockedCount = SHOP_ITEMS.length - owned.length;
-
-  return (
-    <Section title="Accesorios desbloqueados">
-      {owned.length === 0 ? (
-        <div className="bg-card border border-border rounded-2xl p-4 text-center">
-          <p className="text-sm text-muted-foreground mb-3">
-            Aún no tienes accesorios. Gana Alticoins en cumbres y consigue tu primer equipo.
-          </p>
-          <button
-            onClick={() => navigate("/tienda")}
-            className="inline-flex items-center gap-1.5 gradient-sunrise text-secondary-foreground rounded-xl px-4 py-2 text-xs font-bold shadow-summit"
-          >
-            <Store size={14} /> Visitar tienda
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-3 gap-2">
-            {owned.map((item) => {
-              const isEquipped = wallet.equipped[item.slot] === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => equip(item.slot, isEquipped ? null : item.id)}
-                  aria-label={`${isEquipped ? "Quitar" : "Equipar"} ${item.name}`}
-                  className={`rounded-2xl border p-2 flex flex-col items-center gap-1 transition-colors ${
-                    isEquipped ? "bg-primary/10 border-primary" : "bg-card border-border"
-                  }`}
-                >
-                  <span className="text-2xl leading-none" aria-hidden>{item.glyph}</span>
-                  <span className="text-[10px] font-bold text-foreground line-clamp-1 text-center w-full">
-                    {item.name}
-                  </span>
-                  <span className="text-[9px] text-muted-foreground">
-                    {SLOT_META[item.slot].label}
-                  </span>
-                  <span
-                    className={`inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                      isEquipped ? "text-primary" : "text-muted-foreground"
-                    }`}
-                  >
-                    {isEquipped ? (<><Minus size={9} /> Quitar</>) : (<><Plus size={9} /> Equipar</>)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {lockedCount > 0 && (
-            <button
-              onClick={() => navigate("/tienda")}
-              className="mt-3 w-full inline-flex items-center justify-center gap-1.5 bg-card border border-dashed border-border text-muted-foreground hover:text-foreground rounded-2xl py-2 text-xs font-bold transition-colors"
-            >
-              <Lock size={12} /> {lockedCount} accesorios más en la tienda
-            </button>
-          )}
-          <p className="mt-2 text-[10px] text-muted-foreground text-center">
-            Los accesorios equipados se ven sobre el explorador en vivo arriba.
-          </p>
-        </>
-      )}
-    </Section>
-  );
-};
