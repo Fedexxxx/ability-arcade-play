@@ -21,6 +21,7 @@ import MasteryGalleryPage from "./pages/MasteryGalleryPage";
 import ProfilePage from "./pages/ProfilePage";
 import ShopPage from "./pages/ShopPage";
 import CustomizePage from "./pages/CustomizePage";
+import CharacterQAPage from "./pages/CharacterQAPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/tienda" element={<ShopPage />} />
                     <Route path="/personalizar" element={<CustomizePage />} />
+                    <Route path="/qa/characters" element={<CharacterQAPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <BottomNav />
