@@ -9,11 +9,8 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import {
-  CHARACTERS,
-  getCharacter,
-} from "@/lib/characters";
-import { getSkinVariant } from "@/lib/basecamp";
+import { getCharacter } from "@/lib/characters";
+import { BASECAMP_SKIN_VARIANTS, getSkinVariant } from "@/lib/basecamp";
 import { useCharacter } from "@/hooks/useCharacter";
 
 interface Props {
@@ -32,7 +29,10 @@ interface Props {
   ariaLabel?: string;
 }
 
-const FALLBACK = CHARACTERS[0]?.image ?? "/avatar/characters/alpine-explorer.png";
+// If anything goes wrong loading a Basecamp PNG we still want the user to see
+// Basecamp — never an unrelated NPC explorer (Alpine, Glacier, …).
+const FALLBACK =
+  BASECAMP_SKIN_VARIANTS[0]?.image ?? "/avatar/basecamp/basecamp-light-warm.png";
 
 const MountainAvatar = ({
   characterId,
