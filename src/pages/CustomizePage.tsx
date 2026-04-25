@@ -7,7 +7,7 @@
  */
 
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -29,16 +29,19 @@ const CustomizePage = () => {
   const activeSkin = getSkinVariant(skinTone);
   // Snapshot of skin tone at mount → represents "saved" state.
   const [savedSkin, setSavedSkin] = useState<BasecampSkinTone>(skinTone);
-  // Keep saved snapshot if it changes from outside (e.g., another tab).
-  useEffect(() => {
-    // no-op: savedSkin only updates on explicit Save action
-  }, []);
   const isDirty = skinTone !== savedSkin;
+  // Throttle the "¡Basecamp actualizado!" toast so rapid clicks don't spam.
+  const lastToastAt = useRef(0);
 
   const onPickSkin = (tone: BasecampSkinTone) => {
     if (tone === skinTone) return;
     setSkinTone(tone);
     celebrate();
+    const now = Date.now();
+    if (now - lastToastAt.current > 600) {
+      lastToastAt.current = now;
+      toast({ title: "¡Basecamp actualizado!" });
+    }
   };
 
   return (
@@ -65,10 +68,12 @@ const CustomizePage = () => {
             <Sparkles size={11} /> En vivo
           </span>
         </div>
-        <div className="relative w-72 h-80 my-2">
-          <MountainAvatar variant="full" />
+        <div className="relative w-80 h-96 my-2 sm:w-[22rem] sm:h-[26rem]">
+          <MountainAvatar key={activeSkin.id} variant="full" />
         </div>
-        <p className="font-display text-2xl leading-tight text-center">Basecamp</p>
+        <p className="font-display text-2xl leading-tight text-center">
+          {activeSkin.label}
+        </p>
         <p className="text-xs text-muted-foreground text-center mt-1 px-4">
           Tu compañero de aventura.
         </p>
@@ -76,7 +81,7 @@ const CustomizePage = () => {
           <SherpaSpeech
             mood="encouraging"
             size="sm"
-            message="Elige el tono de piel de tu explorador. Pronto podrás cambiar pelo y equipo."
+            message="Elige la versión de Basecamp que más te represente. Pronto llegarán pelo y equipo."
           />
         </div>
       </motion.section>
@@ -84,7 +89,7 @@ const CustomizePage = () => {
       {/* Tu explorador — skin tone picker (only customization in this MVP) */}
       <Section
         title="Tu explorador"
-        subtitle="Elige el tono de piel de tu Basecamp"
+        subtitle="Elige la versión de Basecamp que te acompañará en la aventura."
       >
         <div className="grid grid-cols-5 gap-2.5">
           {BASECAMP_SKIN_VARIANTS.map((v) => (
@@ -96,9 +101,6 @@ const CustomizePage = () => {
             />
           ))}
         </div>
-        <p className="text-[11px] text-muted-foreground mt-2.5 text-center">
-          {activeSkin.label}
-        </p>
       </Section>
 
       <div className="mt-6">
@@ -158,31 +160,41 @@ const SkinSwatch = ({
   active: boolean;
   onClick: () => void;
 }) => (
-  <button
-    onClick={onClick}
-    aria-pressed={active}
-    aria-label={variant.label}
-    className={`relative aspect-square rounded-2xl border-2 transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-      active
-        ? "border-primary scale-[1.04] shadow-summit"
-        : "border-border hover:border-primary/40"
-    }`}
-    style={{ background: variant.swatch }}
-  >
-    <img
-      src={variant.image}
-      alt=""
-      aria-hidden
-      draggable={false}
-      loading="lazy"
-      className="absolute inset-0 w-full h-full object-cover object-top scale-[1.9] translate-y-[20%] pointer-events-none select-none"
-    />
-    {active && (
-      <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-summit ring-2 ring-background">
-        <Check size={11} strokeWidth={3} />
-      </span>
-    )}
-  </button>
+  <div className="flex flex-col items-center gap-1.5 min-w-0">
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      aria-label={variant.label}
+      title={variant.label}
+      className={`relative aspect-square w-full rounded-2xl border-2 transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+        active
+          ? "border-primary scale-[1.04] shadow-summit ring-2 ring-primary/30"
+          : "border-border hover:border-primary/40"
+      }`}
+      style={{ background: variant.swatch }}
+    >
+      <img
+        src={variant.image}
+        alt=""
+        aria-hidden
+        draggable={false}
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover object-top scale-[1.9] translate-y-[20%] pointer-events-none select-none"
+      />
+      {active && (
+        <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-summit ring-2 ring-background">
+          <Check size={11} strokeWidth={3} />
+        </span>
+      )}
+    </button>
+    <span
+      className={`text-[9.5px] leading-tight text-center truncate w-full font-bold ${
+        active ? "text-primary" : "text-muted-foreground"
+      }`}
+    >
+      {variant.label.replace("Basecamp ", "")}
+    </span>
+  </div>
 );
 
 export default CustomizePage;
