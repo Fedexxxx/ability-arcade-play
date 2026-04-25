@@ -10,7 +10,11 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getCharacter } from "@/lib/characters";
-import { BASECAMP_SKIN_VARIANTS, getSkinVariant } from "@/lib/basecamp";
+import {
+  BASECAMP_SKIN_VARIANTS,
+  getGearSet,
+  getSkinVariant,
+} from "@/lib/basecamp";
 import { useCharacter } from "@/hooks/useCharacter";
 
 interface Props {
@@ -41,17 +45,23 @@ const MountainAvatar = ({
   className,
   ariaLabel,
 }: Props) => {
-  const { skinTone } = useCharacter();
+  const { skinTone, equippedGearSetId } = useCharacter();
 
   // No explicit id (or explicitly the Basecamp character) → render the user's
-  // selected Basecamp skin-tone variant. Any other id renders an NPC.
+  // current Basecamp look. If they have a gear set equipped, show that
+  // pre-rendered PNG; otherwise fall back to the chosen skin-tone variant.
+  // Any non-Basecamp id renders an NPC (story moments only).
   const isBasecamp = !characterId || characterId === "basecamp-explorer";
   const skin = getSkinVariant(skinTone);
+  const gear = isBasecamp ? getGearSet(equippedGearSetId) : undefined;
   const npc = isBasecamp ? null : getCharacter(characterId);
 
-  const src = isBasecamp ? skin.image : npc?.image ?? FALLBACK;
+  const src = isBasecamp
+    ? gear?.image || skin.image
+    : npc?.image ?? FALLBACK;
   const alt =
-    ariaLabel ?? (isBasecamp ? "Basecamp" : npc?.name ?? "Explorador");
+    ariaLabel ??
+    (isBasecamp ? gear?.name ?? "Basecamp" : npc?.name ?? "Explorador");
 
   return (
     <div
