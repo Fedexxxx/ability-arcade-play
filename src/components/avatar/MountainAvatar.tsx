@@ -11,7 +11,6 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   CHARACTERS,
-  DEFAULT_CHARACTER_ID,
   getCharacter,
 } from "@/lib/characters";
 import { getSkinVariant } from "@/lib/basecamp";
