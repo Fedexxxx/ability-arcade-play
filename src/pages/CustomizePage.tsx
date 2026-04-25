@@ -171,6 +171,7 @@ const CustomizePage = () => {
             <GearCard
               key={g.id}
               gear={g}
+              skinImage={activeSkin.image}
               owned={isOwned(g)}
               equipped={isEquipped(g)}
               balance={wallet.balance}
@@ -270,6 +271,7 @@ const SkinSwatch = ({
 
 const GearCard = ({
   gear,
+  skinImage,
   owned,
   equipped,
   balance,
@@ -277,6 +279,10 @@ const GearCard = ({
   onEquip,
 }: {
   gear: BasecampGearSet;
+  /** Used as the preview source when the gear set has no dedicated PNG (the
+   * free Clásico look — it should show the user's current skin tone, not
+   * whatever gear is currently equipped on the live avatar). */
+  skinImage: string;
   owned: boolean;
   equipped: boolean;
   balance: number;
@@ -312,22 +318,15 @@ const GearCard = ({
 
       {/* Preview */}
       <div className="aspect-square w-full rounded-2xl bg-gradient-to-b from-muted/40 to-card overflow-hidden flex items-center justify-center mb-2">
-        {gear.image ? (
-          <img
-            src={gear.image}
-            alt={gear.name}
-            width={1024}
-            height={1024}
-            loading="lazy"
-            draggable={false}
-            className={`w-full h-full object-contain ${showLockedDim ? "grayscale opacity-80" : ""}`}
-          />
-        ) : (
-          // Free Clásico has no dedicated image — render the live Basecamp.
-          <div className="w-full h-full">
-            <MountainAvatar variant="full" animate={false} />
-          </div>
-        )}
+        <img
+          src={gear.image || skinImage}
+          alt={gear.name}
+          width={1024}
+          height={1024}
+          loading="lazy"
+          draggable={false}
+          className={`w-full h-full object-contain ${showLockedDim ? "grayscale opacity-80" : ""}`}
+        />
       </div>
 
       <p className="font-display text-sm leading-tight">{gear.name}</p>
