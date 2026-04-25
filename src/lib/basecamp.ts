@@ -30,31 +30,31 @@ export interface BasecampSkinVariant {
 export const BASECAMP_SKIN_VARIANTS: BasecampSkinVariant[] = [
   {
     id: "light-warm",
-    label: "Cálida clara",
+    label: "Basecamp Claro",
     swatch: "#F5D7B5",
     image: "/avatar/basecamp/basecamp-light-warm.png",
   },
   {
     id: "medium-warm",
-    label: "Cálida media",
+    label: "Basecamp Cálido",
     swatch: "#E0B58A",
     image: "/avatar/basecamp/basecamp-medium-warm.png",
   },
   {
     id: "golden",
-    label: "Dorada",
+    label: "Basecamp Dorado",
     swatch: "#C99565",
     image: "/avatar/basecamp/basecamp-golden.png",
   },
   {
     id: "brown",
-    label: "Marrón cálido",
+    label: "Basecamp Tierra",
     swatch: "#9B6A45",
     image: "/avatar/basecamp/basecamp-brown.png",
   },
   {
     id: "deep-brown",
-    label: "Marrón profundo",
+    label: "Basecamp Noche",
     swatch: "#5D3A24",
     image: "/avatar/basecamp/basecamp-deep-brown.png",
   },
