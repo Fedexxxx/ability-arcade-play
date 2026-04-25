@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Check, Lock, Sparkles, Store } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import MountainAvatar from "@/components/avatar/MountainAvatar";
+import BasecampVariantsPreview from "@/components/avatar/BasecampVariantsPreview";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { celebrate } from "@/lib/celebrate";
 import { useCharacter } from "@/hooks/useCharacter";
@@ -73,6 +74,11 @@ const CustomizePage = () => {
         </div>
         <div className="relative w-64 h-72 my-2">
           <MountainAvatar variant="full" />
+        </div>
+        {/* Live skin variants strip — sits with the avatar so the user
+            sees that the preview above reflects their selection. */}
+        <div className="w-full mt-1 mb-1">
+          <BasecampVariantsPreview hideLabel size="md" />
         </div>
         <p className="font-display text-2xl leading-tight text-center">Basecamp</p>
         <p className="text-xs text-muted-foreground text-center mt-1 px-4">
