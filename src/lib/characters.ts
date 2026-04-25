@@ -135,7 +135,10 @@ export const CHARACTERS: CharacterDef[] = [
   },
 ];
 
-export const DEFAULT_CHARACTER_ID = "alpine-explorer";
+// Basecamp is the user's canonical, only-selectable Explorer. NPC ids
+// (alpine-explorer, etc.) remain in CHARACTERS for in-world story moments
+// only — they are never the user's avatar.
+export const DEFAULT_CHARACTER_ID = "basecamp-explorer";
 
 /** Always-unlocked character ids (free tier). */
 export const FREE_CHARACTER_IDS: string[] = CHARACTERS

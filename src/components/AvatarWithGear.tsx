@@ -1,5 +1,4 @@
 import MountainAvatar from "@/components/avatar/MountainAvatar";
-import { useCharacter } from "@/hooks/useCharacter";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -14,7 +13,10 @@ interface Props {
 }
 
 const AvatarWithGear = ({ className = "w-20 h-20", variant = "bust" }: Props) => {
-  const { characterId } = useCharacter();
+  // Basecamp is the user's only avatar. We deliberately ignore any stored
+  // characterId here so legacy values (e.g. "alpine-explorer") can never
+  // surface as the user's identity. NPC characters are rendered explicitly
+  // by their consumers via <MountainAvatar characterId="..." />.
   return (
     <div
       className={cn(
@@ -22,7 +24,7 @@ const AvatarWithGear = ({ className = "w-20 h-20", variant = "bust" }: Props) =>
         className,
       )}
     >
-      <MountainAvatar characterId={characterId} variant={variant} className="w-full h-full" />
+      <MountainAvatar variant={variant} className="w-full h-full" />
     </div>
   );
 };
