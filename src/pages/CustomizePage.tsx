@@ -7,6 +7,7 @@
  */
 
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -26,6 +27,13 @@ const CustomizePage = () => {
   const navigate = useNavigate();
   const { skinTone } = useCharacter();
   const activeSkin = getSkinVariant(skinTone);
+  // Snapshot of skin tone at mount → represents "saved" state.
+  const [savedSkin, setSavedSkin] = useState<BasecampSkinTone>(skinTone);
+  // Keep saved snapshot if it changes from outside (e.g., another tab).
+  useEffect(() => {
+    // no-op: savedSkin only updates on explicit Save action
+  }, []);
+  const isDirty = skinTone !== savedSkin;
 
   const onPickSkin = (tone: BasecampSkinTone) => {
     if (tone === skinTone) return;
@@ -96,12 +104,21 @@ const CustomizePage = () => {
       <div className="mt-6">
         <button
           onClick={() => {
+            if (!isDirty) return;
+            setSavedSkin(skinTone);
             toast({ title: "¡Listo!", description: "Tu Basecamp está al día." });
             navigate(-1);
           }}
-          className="w-full gradient-sunrise text-secondary-foreground rounded-2xl py-3.5 font-bold flex items-center justify-center gap-2 shadow-summit"
+          disabled={!isDirty}
+          aria-disabled={!isDirty}
+          className={`w-full rounded-2xl py-3.5 font-bold flex items-center justify-center gap-2 transition-all ${
+            isDirty
+              ? "gradient-sunrise text-secondary-foreground shadow-summit"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
+          }`}
         >
-          <Check size={16} /> Guardar Basecamp
+          <Check size={16} />
+          {isDirty ? "Guardar Basecamp" : "Basecamp guardado"}
         </button>
       </div>
 
