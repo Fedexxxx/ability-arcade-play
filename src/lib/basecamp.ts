@@ -70,26 +70,120 @@ export function getSkinVariant(id: string | undefined): BasecampSkinVariant {
 
 /**
  * Gear sets — full pre-rendered Basecamp variants with integrated equipment
- * (hat + scarf + backpack + boots together). Empty for now; a later phase
- * will generate them. The shop reads from this list, so leaving it empty
- * makes the shop show a "coming soon" state without crashing.
+ * baked into a single PNG. Each set is the WHOLE character; we never overlay
+ * loose accessories on top of the base Basecamp.
+ *
+ * Tiers:
+ *   - "free"    → Basecamp Clásico, owned and equipped from day one.
+ *   - "shop"    → unlockable with Alticoins.
+ *   - "soon"    → preview-only; cannot be bought yet.
  */
+export type BasecampGearTier = "free" | "shop" | "soon";
+
 export interface BasecampGearSet {
   id: string;
   name: string;
   blurb: string;
-  /** Alticoin price. */
+  /** Alticoin price. 0 for free / coming-soon sets. */
   price: number;
-  /** Full pre-rendered PNG of Basecamp wearing the set. */
+  /** Full pre-rendered PNG of Basecamp wearing the set. Empty for "soon". */
   image: string;
-  /** True when this set is generated and ready to ship. */
-  available: boolean;
+  tier: BasecampGearTier;
 }
 
+/** Sentinel id for the always-owned default look. */
+export const DEFAULT_GEAR_SET_ID = "classic";
+
+/**
+ * The 6 active gear sets shown in "Equipo de aventura".
+ * Order matters — it's the order the cards are rendered.
+ */
 export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
-  // Placeholders — visuals will be generated in phase 2.
-  { id: "winter",   name: "Basecamp Invierno",   blurb: "Gorro, bufanda y chaqueta cálida.", price: 220, image: "", available: false },
-  { id: "climbing", name: "Basecamp Escalada",   blurb: "Casco, arnés y cuerda.",            price: 320, image: "", available: false },
-  { id: "forest",   name: "Basecamp Bosque",     blurb: "Capa verde y mochila ligera.",      price: 180, image: "", available: false },
-  { id: "summit",   name: "Basecamp Cumbre",     blurb: "Plumas técnicas y crampones.",      price: 360, image: "", available: false },
+  {
+    id: DEFAULT_GEAR_SET_ID,
+    name: "Basecamp Clásico",
+    blurb: "Sudadera oliva e insignia de brújula. Listo para empezar.",
+    price: 0,
+    image: "", // Empty → MountainAvatar falls back to the skin-tone variant.
+    tier: "free",
+  },
+  {
+    id: "winter",
+    name: "Basecamp Invierno",
+    blurb: "Plumas azul marino, bufanda tejida y botas para la nieve.",
+    price: 100,
+    image: "/avatar/basecamp/gear/basecamp-invierno.png",
+    tier: "shop",
+  },
+  {
+    id: "climbing",
+    name: "Basecamp Escalada",
+    blurb: "Casco rojo, arnés naranja y cuerda para tu primera vía.",
+    price: 150,
+    image: "/avatar/basecamp/gear/basecamp-escalada.png",
+    tier: "shop",
+  },
+  {
+    id: "glacier",
+    name: "Basecamp Glaciar",
+    blurb: "Chaqueta hielo, capucha de piel y crampones de aventura.",
+    price: 200,
+    image: "/avatar/basecamp/gear/basecamp-glaciar.png",
+    tier: "shop",
+  },
+  {
+    id: "cartographer",
+    name: "Basecamp Cartógrafo",
+    blurb: "Chaleco de bolsillos, mapa enrollado y compás de bronce.",
+    price: 250,
+    image: "/avatar/basecamp/gear/basecamp-cartografo.png",
+    tier: "shop",
+  },
+  {
+    id: "summit",
+    name: "Basecamp Cumbre",
+    blurb: "Plumas doradas, piolet y bandera para coronar la cima.",
+    price: 300,
+    image: "/avatar/basecamp/gear/basecamp-cumbre.png",
+    tier: "shop",
+  },
 ];
+
+/**
+ * "Próximos premios" — purely aspirational previews. Image is intentionally
+ * empty; the UI shows a silhouette so we don't ship half-finished assets.
+ */
+export const BASECAMP_GEAR_COMING_SOON: BasecampGearSet[] = [
+  {
+    id: "aurora",
+    name: "Basecamp Aurora",
+    blurb: "Plumas iridiscentes con reflejos de aurora boreal.",
+    price: 0,
+    image: "",
+    tier: "soon",
+  },
+  {
+    id: "legend",
+    name: "Basecamp Leyenda",
+    blurb: "Equipo dorado de las grandes expediciones.",
+    price: 0,
+    image: "",
+    tier: "soon",
+  },
+  {
+    id: "map-master",
+    name: "Basecamp Maestro de mapas",
+    blurb: "Capa de explorador con cartas y brújulas antiguas.",
+    price: 0,
+    image: "",
+    tier: "soon",
+  },
+];
+
+export function getGearSet(id: string | null | undefined): BasecampGearSet | undefined {
+  if (!id) return undefined;
+  return (
+    BASECAMP_GEAR_SETS.find((g) => g.id === id) ??
+    BASECAMP_GEAR_COMING_SOON.find((g) => g.id === id)
+  );
+}
