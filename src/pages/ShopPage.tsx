@@ -41,9 +41,9 @@ const ShopPage = () => {
       const owned = ownedGearSetIds.includes(s.id);
       const affordable = wallet.balance >= s.price;
       switch (status) {
-        case "available": return !owned && affordable && s.available;
+        case "available": return !owned && affordable && s.tier === "shop";
         case "owned":     return owned;
-        case "locked":    return !owned && (!affordable || !s.available);
+        case "locked":    return !owned && (!affordable || s.tier !== "shop");
         default:          return true;
       }
     });
@@ -71,7 +71,7 @@ const ShopPage = () => {
   const displayMsg = sherpaMsg ?? contextualMsg;
 
   const handleBuy = (s: BasecampGearSet) => {
-    if (!s.available) {
+    if (s.tier !== "shop") {
       toast({
         title: "Próximamente",
         description: `${s.name} se desbloqueará en una próxima expedición.`,
@@ -210,7 +210,7 @@ const ShopPage = () => {
                 <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">
                   {s.blurb}
                 </p>
-                {!s.available && (
+                {s.tier !== "shop" && (
                   <p className="text-[10px] text-secondary font-bold mt-1">Próximamente</p>
                 )}
 
@@ -236,14 +236,14 @@ const ShopPage = () => {
                     <>
                       <button
                         onClick={() => handleBuy(s)}
-                        disabled={!affordable || !s.available}
+                        disabled={!affordable || s.tier !== "shop"}
                         className={`w-full rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 ${
-                          affordable && s.available
+                          affordable && s.tier === "shop"
                             ? "gradient-sunrise text-secondary-foreground shadow-summit"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {affordable && s.available ? <Sparkles size={14} /> : <Lock size={12} />}
+                        {affordable && s.tier === "shop" ? <Sparkles size={14} /> : <Lock size={12} />}
                         {s.price}
                       </button>
                       {isCheapestUnaffordable && (
