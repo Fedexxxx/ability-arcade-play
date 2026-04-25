@@ -13,6 +13,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { CHARACTERS } from "@/lib/characters";
+import { BASECAMP_SKIN_VARIANTS } from "@/lib/basecamp";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -38,10 +39,37 @@ const CharacterQAPage = () => {
       </header>
 
       <main className="px-4 py-6 space-y-8 max-w-6xl mx-auto">
+        {/* Basecamp identity variants — the canonical Explorer */}
+        <section>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            Basecamp · Variantes de identidad
+          </h2>
+          <div
+            className="grid grid-cols-5 gap-2 rounded-xl p-2 border border-border"
+            style={{ background: CHECKER_BG }}
+          >
+            {BASECAMP_SKIN_VARIANTS.map((v) => (
+              <figure key={v.id} className="space-y-1">
+                <div className="aspect-square flex items-center justify-center">
+                  <img
+                    src={v.image}
+                    alt={v.label}
+                    className="w-full h-full object-contain"
+                    draggable={false}
+                  />
+                </div>
+                <figcaption className="text-[10px] text-muted-foreground text-center">
+                  {v.label}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
         {/* Quick contact-sheet: every character on the same checkerboard */}
         <section>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Hoja de contacto (transparencia)
+            NPCs del mundo (legacy)
           </h2>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 rounded-xl p-2 border border-border"
                style={{ background: CHECKER_BG }}>

@@ -11,12 +11,18 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   CHARACTERS,
-  DEFAULT_CHARACTER_ID,
   getCharacter,
 } from "@/lib/characters";
+import { getSkinVariant } from "@/lib/basecamp";
+import { useCharacter } from "@/hooks/useCharacter";
 
 interface Props {
-  /** Character id from `lib/characters.ts`. Falls back to default when missing. */
+  /**
+   * Character id from `lib/characters.ts`. Falls back to the user's selected
+   * Basecamp variant when omitted. NPC ids (alpine, glacier, summit, …) still
+   * resolve to their pre-rendered PNG so they can appear in modules and story
+   * moments.
+   */
   characterId?: string;
   /** 'full' = whole body; 'bust' = focused on head + shoulders (uses CSS framing). */
   variant?: "full" | "bust";
@@ -35,10 +41,17 @@ const MountainAvatar = ({
   className,
   ariaLabel,
 }: Props) => {
-  const character = getCharacter(characterId ?? DEFAULT_CHARACTER_ID) ??
-    getCharacter(DEFAULT_CHARACTER_ID);
-  const src = character?.image ?? FALLBACK;
-  const alt = ariaLabel ?? character?.name ?? "Explorador";
+  const { skinTone } = useCharacter();
+
+  // No explicit id (or explicitly the Basecamp character) → render the user's
+  // selected Basecamp skin-tone variant. Any other id renders an NPC.
+  const isBasecamp = !characterId || characterId === "basecamp-explorer";
+  const skin = getSkinVariant(skinTone);
+  const npc = isBasecamp ? null : getCharacter(characterId);
+
+  const src = isBasecamp ? skin.image : npc?.image ?? FALLBACK;
+  const alt =
+    ariaLabel ?? (isBasecamp ? "Basecamp" : npc?.name ?? "Explorador");
 
   return (
     <div
