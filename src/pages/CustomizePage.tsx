@@ -145,18 +145,24 @@ const SkinSwatch = ({
     onClick={onClick}
     aria-pressed={active}
     aria-label={variant.label}
-    className={`relative aspect-square rounded-2xl border-2 transition-all overflow-hidden ${
+    className={`relative aspect-square rounded-2xl border-2 transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
       active
         ? "border-primary scale-[1.04] shadow-summit"
         : "border-border hover:border-primary/40"
     }`}
     style={{ background: variant.swatch }}
   >
+    <img
+      src={variant.image}
+      alt=""
+      aria-hidden
+      draggable={false}
+      loading="lazy"
+      className="absolute inset-0 w-full h-full object-cover object-top scale-[1.9] translate-y-[20%] pointer-events-none select-none"
+    />
     {active && (
-      <span className="absolute inset-0 flex items-center justify-center">
-        <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-summit">
-          <Check size={12} strokeWidth={3} />
-        </span>
+      <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-summit ring-2 ring-background">
+        <Check size={11} strokeWidth={3} />
       </span>
     )}
   </button>
