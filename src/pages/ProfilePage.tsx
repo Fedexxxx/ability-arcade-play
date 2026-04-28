@@ -23,7 +23,6 @@ import { useExplorer } from "@/hooks/useExplorer";
 import { clearExplorer } from "@/lib/explorer";
 import { useWallet } from "@/hooks/useWallet";
 import AvatarWithGear from "@/components/AvatarWithGear";
-import BasecampVariantsPreview from "@/components/avatar/BasecampVariantsPreview";
 import { clearWallet } from "@/lib/wallet";
 import { clearTiers } from "@/lib/tiers";
 import { clearCharacterState } from "@/lib/character/state";
@@ -95,10 +94,7 @@ const ExplorerProfilePage = () => {
         ) : (
           <Sherpa mood="encouraging" size="lg" halo className="mx-auto" />
         )}
-        <div className="mx-auto mt-3 max-w-[260px]">
-          <BasecampVariantsPreview size="sm" />
-        </div>
-        <h1 className="font-display text-2xl mt-2">{explorer?.name ?? userProfile.name}</h1>
+        <h1 className="font-display text-2xl mt-3">{explorer?.name ?? userProfile.name}</h1>
         <p className="text-sm text-muted-foreground">
           Nivel {userProfile.level} · {explorer ? `${explorer.ageBand} años · ` : ""}Aprendiz de cima
         </p>
