@@ -1,14 +1,16 @@
 /**
- * Personaliza tu Basecamp.
+ * Personaliza tu Explorador.
  *
- * Three sections:
- *   1. Tu Basecamp        → skin-tone identity picker (5 variants).
- *   2. Equipo de aventura → 6 gear sets: Clásico (free) + 5 unlockables.
- *   3. Próximos premios   → coming-soon previews (visually disabled).
+ * Two sections:
+ *   1. Personajes         → 6 complete Explorador variants (Clásico free + 5
+ *                           unlockables) bought with Alticoins.
+ *   2. Próximos premios   → coming-soon previews (visually disabled).
  *
- * Reward loop: earn Alticoins → unlock a gear set with `spend()` → it gets
- * recorded in `ownedGearSetIds` and auto-equipped → MountainAvatar shows
- * the equipped PNG everywhere in the app, persisted in localStorage.
+ * Reward loop: earn Alticoins → unlock a complete Explorador variant with
+ * `spend()` → it gets recorded in `ownedGearSetIds` and auto-equipped →
+ * MountainAvatar shows the equipped PNG everywhere, persisted in
+ * localStorage. Skin tone customization has been removed; the Explorador
+ * always uses the default tone internally.
  */
 
 import { useNavigate } from "react-router-dom";
@@ -28,17 +30,14 @@ import { celebrate } from "@/lib/celebrate";
 import { useCharacter } from "@/hooks/useCharacter";
 import { useWallet } from "@/hooks/useWallet";
 import {
-  BASECAMP_SKIN_VARIANTS,
   BASECAMP_GEAR_SETS,
   BASECAMP_GEAR_COMING_SOON,
   DEFAULT_GEAR_SET_ID,
   getGearSet,
   getSkinVariant,
   type BasecampGearSet,
-  type BasecampSkinTone,
-  type BasecampSkinVariant,
 } from "@/lib/basecamp";
-import { equipGearSet, setSkinTone, unlockGearSet } from "@/lib/character/state";
+import { equipGearSet, unlockGearSet } from "@/lib/character/state";
 import { spend } from "@/lib/wallet";
 
 const CustomizePage = () => {
@@ -47,14 +46,8 @@ const CustomizePage = () => {
   const wallet = useWallet();
   const activeSkin = getSkinVariant(skinTone);
   const equippedGear = getGearSet(equippedGearSetId);
-  const equippedName = equippedGear?.name ?? "Basecamp Clásico";
+  const equippedName = equippedGear?.name ?? "Explorador Clásico";
   const [sherpaMsg, setSherpaMsg] = useState<string | null>(null);
-
-  const onPickSkin = (tone: BasecampSkinTone) => {
-    if (tone === skinTone) return;
-    setSkinTone(tone);
-    celebrate();
-  };
 
   const isOwned = (g: BasecampGearSet): boolean =>
     g.id === DEFAULT_GEAR_SET_ID || ownedGearSetIds.includes(g.id);
@@ -72,7 +65,7 @@ const CustomizePage = () => {
     setSherpaMsg(`${g.name} listo para la cumbre.`);
     toast({
       title: "¡Equipado!",
-      description: "¡Basecamp está listo para la aventura!",
+      description: "¡Tu Explorador está listo para la aventura!",
     });
   };
 
@@ -82,9 +75,9 @@ const CustomizePage = () => {
       toast({
         title: "Faltan Alticoins",
         description:
-          "Necesitas más Alticoins para desbloquear este equipo.",
+          "Necesitas más Alticoins para desbloquear este Explorador.",
       });
-      setSherpaMsg("Sigue subiendo y vuelve por tu equipo.");
+      setSherpaMsg("Sigue subiendo y vuelve por tu nuevo Explorador.");
       return;
     }
     const result = spend({ id: `gear:${g.id}`, price: g.price, label: g.name });
@@ -93,8 +86,8 @@ const CustomizePage = () => {
     celebrate();
     setSherpaMsg(`${g.name} desbloqueado. Te queda increíble.`);
     toast({
-      title: "¡Nuevo equipo desbloqueado!",
-      description: `${g.name} ya es parte de tu equipo.`,
+      title: "¡Nuevo Explorador desbloqueado!",
+      description: `${g.name} ya es parte de tu colección.`,
     });
   };
 
@@ -116,7 +109,7 @@ const CustomizePage = () => {
       >
         <div className="w-full flex items-center justify-between mb-1 px-1">
           <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold">
-            Tu Basecamp
+            Tu Explorador
           </span>
           <span className="inline-flex items-center gap-1 bg-secondary-soft text-secondary rounded-full px-2.5 py-1">
             <Sparkles size={12} />
@@ -138,33 +131,16 @@ const CustomizePage = () => {
             size="sm"
             message={
               sherpaMsg ??
-              "Cambia tu identidad o desbloquea equipo con Alticoins."
+              "Desbloquea nuevos Exploradores con tus Alticoins."
             }
           />
         </div>
       </motion.section>
 
-      {/* SECTION 1 — Skin tone identity */}
+      {/* SECTION 1 — Complete Explorador variants */}
       <Section
-        title="Tu Basecamp"
-        subtitle="Elige la versión de Basecamp que te acompañará en la aventura."
-      >
-        <div className="grid grid-cols-5 gap-2.5">
-          {BASECAMP_SKIN_VARIANTS.map((v) => (
-            <SkinSwatch
-              key={v.id}
-              variant={v}
-              active={v.id === activeSkin.id}
-              onClick={() => onPickSkin(v.id)}
-            />
-          ))}
-        </div>
-      </Section>
-
-      {/* SECTION 2 — Gear sets */}
-      <Section
-        title="Equipo de aventura"
-        subtitle="Conjuntos completos. Desbloquéalos con Alticoins y equípalos al instante."
+        title="Personajes"
+        subtitle="Exploradores completos. Desbloquéalos con Alticoins y equípalos al instante."
       >
         <div className="grid grid-cols-2 gap-3">
           {BASECAMP_GEAR_SETS.map((g) => (
@@ -182,10 +158,10 @@ const CustomizePage = () => {
         </div>
       </Section>
 
-      {/* SECTION 3 — Coming soon */}
+      {/* SECTION 2 — Coming soon */}
       <Section
         title="Próximos premios"
-        subtitle="Conjuntos en preparación para futuras expediciones."
+        subtitle="Exploradores en preparación para futuras expediciones."
       >
         <div className="grid grid-cols-3 gap-2.5">
           {BASECAMP_GEAR_COMING_SOON.map((g) => (
@@ -195,7 +171,7 @@ const CustomizePage = () => {
       </Section>
 
       <p className="text-[10px] text-muted-foreground text-center mt-6 px-6">
-        Cada conjunto es un Basecamp completo. Sin accesorios sueltos.
+        Cada personaje es un Explorador completo.
       </p>
     </div>
   );
@@ -221,52 +197,6 @@ const Section = ({
     )}
     <div className="mt-2.5">{children}</div>
   </section>
-);
-
-const SkinSwatch = ({
-  variant,
-  active,
-  onClick,
-}: {
-  variant: BasecampSkinVariant;
-  active: boolean;
-  onClick: () => void;
-}) => (
-  <div className="flex flex-col items-center gap-1.5 min-w-0">
-    <button
-      onClick={onClick}
-      aria-pressed={active}
-      aria-label={variant.label}
-      title={variant.label}
-      className={`relative aspect-square w-full rounded-2xl border-2 transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-        active
-          ? "border-primary scale-[1.04] shadow-summit ring-2 ring-primary/30"
-          : "border-border hover:border-primary/40"
-      }`}
-      style={{ background: variant.swatch }}
-    >
-      <img
-        src={variant.image}
-        alt=""
-        aria-hidden
-        draggable={false}
-        loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover object-top scale-[1.9] translate-y-[20%] pointer-events-none select-none"
-      />
-      {active && (
-        <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-summit ring-2 ring-background">
-          <Check size={11} strokeWidth={3} />
-        </span>
-      )}
-    </button>
-    <span
-      className={`text-[9.5px] leading-tight text-center truncate w-full font-bold ${
-        active ? "text-primary" : "text-muted-foreground"
-      }`}
-    >
-      {variant.label.replace("Basecamp ", "")}
-    </span>
-  </div>
 );
 
 const GearCard = ({
