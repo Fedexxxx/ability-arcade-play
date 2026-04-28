@@ -101,7 +101,7 @@ const ShopPage = () => {
     equipGearSet(isEquipped ? null : s.id);
     setSherpaMsg(
       isEquipped
-        ? "Vuelves al look base de Basecamp."
+        ? "Vuelves al look base del Explorador."
         : `${s.name} listo para la próxima cumbre.`,
     );
   };
@@ -127,7 +127,7 @@ const ShopPage = () => {
             <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-bold">
               Tienda del Campamento
             </p>
-            <h1 className="font-display text-2xl leading-tight">Equipo de Basecamp</h1>
+            <h1 className="font-display text-2xl leading-tight">Personajes Exploradores</h1>
             <div className="mt-2 inline-flex items-center gap-1.5 bg-secondary-soft text-secondary rounded-full px-3 py-1">
               <Sparkles size={14} />
               <span className="text-sm font-bold">{wallet.balance} Alticoins</span>

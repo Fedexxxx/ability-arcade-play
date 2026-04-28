@@ -30,31 +30,31 @@ export interface BasecampSkinVariant {
 export const BASECAMP_SKIN_VARIANTS: BasecampSkinVariant[] = [
   {
     id: "light-warm",
-    label: "Basecamp Claro",
+    label: "Explorador Claro",
     swatch: "#F5D7B5",
     image: "/avatar/basecamp/basecamp-light-warm.png",
   },
   {
     id: "medium-warm",
-    label: "Basecamp Cálido",
+    label: "Explorador Cálido",
     swatch: "#E0B58A",
     image: "/avatar/basecamp/basecamp-medium-warm.png",
   },
   {
     id: "golden",
-    label: "Basecamp Dorado",
+    label: "Explorador Dorado",
     swatch: "#C99565",
     image: "/avatar/basecamp/basecamp-golden.png",
   },
   {
     id: "brown",
-    label: "Basecamp Tierra",
+    label: "Explorador Tierra",
     swatch: "#9B6A45",
     image: "/avatar/basecamp/basecamp-brown.png",
   },
   {
     id: "deep-brown",
-    label: "Basecamp Noche",
+    label: "Explorador Noche",
     swatch: "#5D3A24",
     image: "/avatar/basecamp/basecamp-deep-brown.png",
   },
@@ -101,7 +101,7 @@ export const DEFAULT_GEAR_SET_ID = "classic";
 export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
   {
     id: DEFAULT_GEAR_SET_ID,
-    name: "Basecamp Clásico",
+    name: "Explorador Clásico",
     blurb: "Sudadera oliva e insignia de brújula. Listo para empezar.",
     price: 0,
     image: "", // Empty → MountainAvatar falls back to the skin-tone variant.
@@ -109,7 +109,7 @@ export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
   },
   {
     id: "winter",
-    name: "Basecamp Invierno",
+    name: "Explorador Invierno",
     blurb: "Plumas azul marino, bufanda tejida y botas para la nieve.",
     price: 100,
     image: "/avatar/basecamp/gear/basecamp-invierno.png",
@@ -117,7 +117,7 @@ export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
   },
   {
     id: "climbing",
-    name: "Basecamp Escalada",
+    name: "Explorador Escalada",
     blurb: "Casco rojo, arnés naranja y cuerda para tu primera vía.",
     price: 150,
     image: "/avatar/basecamp/gear/basecamp-escalada.png",
@@ -125,7 +125,7 @@ export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
   },
   {
     id: "glacier",
-    name: "Basecamp Glaciar",
+    name: "Explorador Glaciar",
     blurb: "Chaqueta hielo, capucha de piel y crampones de aventura.",
     price: 200,
     image: "/avatar/basecamp/gear/basecamp-glaciar.png",
@@ -133,7 +133,7 @@ export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
   },
   {
     id: "cartographer",
-    name: "Basecamp Cartógrafo",
+    name: "Explorador Cartógrafo",
     blurb: "Chaleco de bolsillos, mapa enrollado y compás de bronce.",
     price: 250,
     image: "/avatar/basecamp/gear/basecamp-cartografo.png",
@@ -141,7 +141,7 @@ export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
   },
   {
     id: "summit",
-    name: "Basecamp Cumbre",
+    name: "Explorador Cumbre",
     blurb: "Plumas doradas, piolet y bandera para coronar la cima.",
     price: 300,
     image: "/avatar/basecamp/gear/basecamp-cumbre.png",
@@ -156,7 +156,7 @@ export const BASECAMP_GEAR_SETS: BasecampGearSet[] = [
 export const BASECAMP_GEAR_COMING_SOON: BasecampGearSet[] = [
   {
     id: "aurora",
-    name: "Basecamp Aurora",
+    name: "Explorador Aurora",
     blurb: "Plumas iridiscentes con reflejos de aurora boreal.",
     price: 0,
     image: "",
@@ -164,7 +164,7 @@ export const BASECAMP_GEAR_COMING_SOON: BasecampGearSet[] = [
   },
   {
     id: "legend",
-    name: "Basecamp Leyenda",
+    name: "Explorador Leyenda",
     blurb: "Equipo dorado de las grandes expediciones.",
     price: 0,
     image: "",
@@ -172,7 +172,7 @@ export const BASECAMP_GEAR_COMING_SOON: BasecampGearSet[] = [
   },
   {
     id: "map-master",
-    name: "Basecamp Maestro de mapas",
+    name: "Explorador Maestro de mapas",
     blurb: "Capa de explorador con cartas y brújulas antiguas.",
     price: 0,
     image: "",
