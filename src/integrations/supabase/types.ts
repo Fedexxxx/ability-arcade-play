@@ -14,13 +14,387 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      challenges: {
+        Row: {
+          active: boolean
+          age_band: string
+          concept: string | null
+          created_at: string
+          id: string
+          module_id: string
+          mountain_id: string
+          payload: Json
+          sort_order: number
+          tier: string
+          type: string
+        }
+        Insert: {
+          active?: boolean
+          age_band: string
+          concept?: string | null
+          created_at?: string
+          id?: string
+          module_id: string
+          mountain_id: string
+          payload: Json
+          sort_order?: number
+          tier: string
+          type: string
+        }
+        Update: {
+          active?: boolean
+          age_band?: string
+          concept?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string
+          mountain_id?: string
+          payload?: Json
+          sort_order?: number
+          tier?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      explorer_progress: {
+        Row: {
+          explorer_id: string
+          id: string
+          level: number
+          updated_at: string
+          xp_total: number
+        }
+        Insert: {
+          explorer_id: string
+          id?: string
+          level?: number
+          updated_at?: string
+          xp_total?: number
+        }
+        Update: {
+          explorer_id?: string
+          id?: string
+          level?: number
+          updated_at?: string
+          xp_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "explorer_progress_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: true
+            referencedRelation: "explorer_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "explorer_progress_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: true
+            referencedRelation: "explorers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      explorers: {
+        Row: {
+          age_band: string
+          avatar_emoji: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          age_band: string
+          avatar_emoji?: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          age_band?: string
+          avatar_emoji?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      ledger_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          dedup_key: string
+          explorer_id: string
+          id: string
+          label: string
+          reason: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          dedup_key: string
+          explorer_id: string
+          id?: string
+          label: string
+          reason: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          dedup_key?: string
+          explorer_id?: string
+          id?: string
+          label?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorer_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_completions: {
+        Row: {
+          completed_at: string
+          explorer_id: string
+          id: string
+          module_id: string
+          mountain_id: string
+          score: number
+          tier: string
+        }
+        Insert: {
+          completed_at?: string
+          explorer_id: string
+          id?: string
+          module_id: string
+          mountain_id: string
+          score: number
+          tier: string
+        }
+        Update: {
+          completed_at?: string
+          explorer_id?: string
+          id?: string
+          module_id?: string
+          mountain_id?: string
+          score?: number
+          tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_completions_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorer_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_completions_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_tiers: {
+        Row: {
+          explorer_id: string
+          id: string
+          module_id: string
+          mountain_id: string
+          pinned: boolean
+          recent_results: boolean[]
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          explorer_id: string
+          id?: string
+          module_id: string
+          mountain_id: string
+          pinned?: boolean
+          recent_results?: boolean[]
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          explorer_id?: string
+          id?: string
+          module_id?: string
+          mountain_id?: string
+          pinned?: boolean
+          recent_results?: boolean[]
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_tiers_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorer_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_tiers_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mountain_progress: {
+        Row: {
+          explorer_id: string
+          id: string
+          mountain_id: string
+          pct_complete: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          explorer_id: string
+          id?: string
+          mountain_id: string
+          pct_complete?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          explorer_id?: string
+          id?: string
+          mountain_id?: string
+          pct_complete?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mountain_progress_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorer_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mountain_progress_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owned_items: {
+        Row: {
+          acquired_at: string
+          equipped: boolean
+          explorer_id: string
+          id: string
+          item_id: string
+          slot: string
+        }
+        Insert: {
+          acquired_at?: string
+          equipped?: boolean
+          explorer_id: string
+          id?: string
+          item_id: string
+          slot: string
+        }
+        Update: {
+          acquired_at?: string
+          equipped?: boolean
+          explorer_id?: string
+          id?: string
+          item_id?: string
+          slot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owned_items_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorer_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owned_items_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: false
+            referencedRelation: "explorers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallet: {
+        Row: {
+          balance: number
+          explorer_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          explorer_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          explorer_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: true
+            referencedRelation: "explorer_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_explorer_id_fkey"
+            columns: ["explorer_id"]
+            isOneToOne: true
+            referencedRelation: "explorers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      explorer_state: {
+        Row: {
+          age_band: string | null
+          alticoins: number | null
+          avatar_emoji: string | null
+          created_at: string | null
+          id: string | null
+          level: number | null
+          name: string | null
+          xp_total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      current_explorer_id: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
