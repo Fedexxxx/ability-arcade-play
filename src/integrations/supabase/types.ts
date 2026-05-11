@@ -399,6 +399,15 @@ export type Database = {
         Returns: string
       }
       current_explorer_id: { Args: never; Returns: string }
+      get_explorer: {
+        Args: { p_id: string }
+        Returns: {
+          age_band: string
+          avatar_emoji: string
+          created_at: string
+          name: string
+        }[]
+      }
       set_config: {
         Args: { is_local: boolean; new_value: string; setting_name: string }
         Returns: string
