@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.create_explorer_companions() FROM PUBLIC, anon, authenticated;
