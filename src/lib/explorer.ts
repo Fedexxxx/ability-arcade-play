@@ -90,13 +90,20 @@ export const getExplorer = async (sessionId?: string | null): Promise<ExplorerPr
 export const saveExplorer = async (
   profile: Omit<ExplorerProfile, "createdAt">,
 ): Promise<void> => {
-  const { data, error } = await supabase.rpc("create_explorer" as never, {
+  const response = await supabase.rpc("create_explorer" as never, {
     p_name: profile.name,
     p_avatar: profile.avatar,
     p_age_band: profile.ageBand,
   } as never);
-  if (error || !data) return;
-  const newId = data as unknown as string;
+  const { data, error } = response;
+  console.log("[explorer] create_explorer RPC response", { data, error, profile });
+  if (error) {
+    throw new Error(`create_explorer failed: ${error.message}`);
+  }
+  if (!data || typeof data !== "string") {
+    throw new Error(`create_explorer returned no id (data=${JSON.stringify(data)})`);
+  }
+  const newId = data as string;
   setSessionId(newId);
   await setExplorerContext(newId);
   if (typeof window !== "undefined") {
