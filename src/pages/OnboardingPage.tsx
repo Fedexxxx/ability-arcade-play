@@ -43,10 +43,10 @@ const OnboardingPage = () => {
     (step === 3 && !!ageBand) ||
     step === 4;
 
-  const next = () => {
+  const next = async () => {
     if (step === 4) {
       if (!ageBand || !avatar || !name.trim()) return;
-      saveExplorer({ name: name.trim(), avatar, ageBand });
+      await saveExplorer({ name: name.trim(), avatar, ageBand });
       // Edit mode returns to the profile so the user sees the updated card.
       navigate(editMode ? "/profile" : "/", { replace: true });
       return;
