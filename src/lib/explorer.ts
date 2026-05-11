@@ -67,22 +67,21 @@ export const getExplorer = async (sessionId?: string | null): Promise<ExplorerPr
   }
   console.log("[explorer] session lookup", { sessionId: id });
   await setExplorerContext(id);
-  const { data, error } = await supabase
-    .from("explorer_state")
-    .select("name, avatar_emoji, age_band, created_at")
-    .eq("id", id)
-    .maybeSingle();
+  // Use a SECURITY DEFINER RPC so the lookup doesn't depend on the
+  // app.explorer_id GUC surviving across pooled-connection HTTP requests.
+  const { data, error } = await supabase.rpc("get_explorer" as never, { p_id: id } as never);
+  const row = Array.isArray(data) ? (data[0] as { name?: string; avatar_emoji?: string; age_band?: string; created_at?: string } | undefined) : undefined;
   console.log("[explorer] profile response", { sessionId: id, data, error });
-  if (error || !data || !data.name || !data.avatar_emoji || !data.age_band) {
+  if (error || !row || !row.name || !row.avatar_emoji || !row.age_band) {
     setSessionId(null);
     await setExplorerContext(null);
     return null;
   }
   return {
-    name: data.name,
-    avatar: data.avatar_emoji,
-    ageBand: data.age_band as AgeBand,
-    createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+    name: row.name,
+    avatar: row.avatar_emoji,
+    ageBand: row.age_band as AgeBand,
+    createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
   };
 };
 
