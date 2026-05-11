@@ -4,6 +4,8 @@
 // promoted/demoted based on rolling per-module accuracy.
 
 import type { AgeBand } from "@/lib/explorer";
+import { setExplorerContext } from "@/lib/explorer";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Tier = "inicial" | "avanzado" | "experto";
 
@@ -33,116 +35,147 @@ export function tierFromAgeBand(band: AgeBand | undefined): Tier {
 
 // ---------- Persistence ----------
 
-const KEY = "sherpa.tiers.v1";
 export const TIER_EVENT = "sherpa:tier-changed";
+const SESSION_KEY = "sherpa.explorer.session";
 
-/** Per-module accuracy ledger: keeps the last N challenge results to drive adaptation. */
-interface ModuleStat {
-  /** Most recent tier the module was played at. */
-  tier: Tier;
-  /** True if the user manually overrode the tier (auto-adapt is paused). */
-  pinned: boolean;
-  /** Last results — `true` = correct, `false` = incorrect. Capped to RECENT_WINDOW. */
-  recent: boolean[];
-}
-
-interface TiersState {
-  /** key: `${mountainId}:${moduleId}` */
-  modules: Record<string, ModuleStat>;
-}
-
-const EMPTY: TiersState = { modules: {} };
 const RECENT_WINDOW = 6;
 const PROMOTE_AT = 0.85; // ≥85% correct over the window → step up
 const DEMOTE_AT  = 0.45; // ≤45% correct over the window → step down
 const MIN_SAMPLES = 4;   // need at least this many results before adapting
 
-function read(): TiersState {
-  if (typeof window === "undefined") return { modules: {} };
+interface ModuleStat {
+  tier: Tier;
+  pinned: boolean;
+  recent: boolean[];
+}
+
+const getExplorerId = (): string | null => {
+  if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return { modules: {} };
-    const parsed = JSON.parse(raw) as Partial<TiersState>;
-    return { modules: parsed.modules ?? {} };
+    return window.localStorage.getItem(SESSION_KEY);
   } catch {
-    return { modules: {} };
+    return null;
   }
-}
+};
 
-function write(state: TiersState) {
-  // Throws if persistence fails (e.g. storage quota, disabled storage,
-  // private mode). Callers that mutate user-visible settings should catch
-  // and surface the error so the UI can offer a retry.
-  window.localStorage.setItem(KEY, JSON.stringify(state));
-  window.dispatchEvent(new CustomEvent(TIER_EVENT));
-}
+const emitChange = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(TIER_EVENT));
+  }
+};
 
-function moduleKey(mountainId: string, moduleId: string) {
-  return `${mountainId}:${moduleId}`;
+async function fetchRow(
+  explorerId: string,
+  mountainId: string,
+  moduleId: string,
+): Promise<ModuleStat | null> {
+  const { data } = await supabase
+    .from("module_tiers")
+    .select("tier, pinned, recent_results")
+    .eq("explorer_id", explorerId)
+    .eq("mountain_id", mountainId)
+    .eq("module_id", moduleId)
+    .maybeSingle();
+  if (!data) return null;
+  return {
+    tier: data.tier as Tier,
+    pinned: !!data.pinned,
+    recent: Array.isArray(data.recent_results) ? (data.recent_results as boolean[]) : [],
+  };
 }
 
 /** Resolve current tier for a module. Falls back to age-band default. */
-export function getModuleTier(
+export async function getModuleTier(
   mountainId: string,
   moduleId: string,
   ageBand: AgeBand | undefined,
-): Tier {
-  const state = read();
-  const stat = state.modules[moduleKey(mountainId, moduleId)];
-  if (stat?.tier) return stat.tier;
-  return tierFromAgeBand(ageBand);
+): Promise<Tier> {
+  const explorerId = getExplorerId();
+  if (!explorerId) return tierFromAgeBand(ageBand);
+  await setExplorerContext(explorerId);
+  const row = await fetchRow(explorerId, mountainId, moduleId);
+  return row?.tier ?? tierFromAgeBand(ageBand);
 }
 
 /** Returns the current per-module record (or a synthesized default). */
-export function getModuleStat(
+export async function getModuleStat(
   mountainId: string,
   moduleId: string,
   ageBand: AgeBand | undefined,
-): ModuleStat {
-  const state = read();
-  return (
-    state.modules[moduleKey(mountainId, moduleId)] ?? {
-      tier: tierFromAgeBand(ageBand),
-      pinned: false,
-      recent: [],
-    }
-  );
+): Promise<ModuleStat> {
+  const explorerId = getExplorerId();
+  const fallback: ModuleStat = {
+    tier: tierFromAgeBand(ageBand),
+    pinned: false,
+    recent: [],
+  };
+  if (!explorerId) return fallback;
+  await setExplorerContext(explorerId);
+  const row = await fetchRow(explorerId, mountainId, moduleId);
+  return row ?? fallback;
 }
 
 /** Manual override — pins the tier so adaptation pauses. */
-export function setModuleTier(mountainId: string, moduleId: string, tier: Tier) {
-  const state = read();
-  const key = moduleKey(mountainId, moduleId);
-  const prev = state.modules[key] ?? { tier, pinned: true, recent: [] };
-  state.modules[key] = { ...prev, tier, pinned: true };
-  write(state);
+export async function setModuleTier(
+  mountainId: string,
+  moduleId: string,
+  tier: Tier,
+): Promise<void> {
+  const explorerId = getExplorerId();
+  if (!explorerId) return;
+  await setExplorerContext(explorerId);
+  await supabase
+    .from("module_tiers")
+    .upsert(
+      {
+        explorer_id: explorerId,
+        mountain_id: mountainId,
+        module_id: moduleId,
+        tier,
+        pinned: true,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "explorer_id,mountain_id,module_id" },
+    );
+  emitChange();
 }
 
 /** Clear a manual pin so adaptation resumes from the next attempt. */
-export function unpinModuleTier(mountainId: string, moduleId: string) {
-  const state = read();
-  const key = moduleKey(mountainId, moduleId);
-  const prev = state.modules[key];
-  if (!prev) return;
-  state.modules[key] = { ...prev, pinned: false };
-  write(state);
+export async function unpinModuleTier(
+  mountainId: string,
+  moduleId: string,
+): Promise<void> {
+  const explorerId = getExplorerId();
+  if (!explorerId) return;
+  await setExplorerContext(explorerId);
+  await supabase
+    .from("module_tiers")
+    .update({ pinned: false, updated_at: new Date().toISOString() })
+    .eq("explorer_id", explorerId)
+    .eq("mountain_id", mountainId)
+    .eq("module_id", moduleId);
+  emitChange();
 }
 
 /**
  * Record a challenge result. When the rolling window is full enough the tier
  * is auto-promoted/demoted (unless the user pinned it).
- * Returns the resulting tier and whether it changed.
  */
-export function recordChallengeResult(
+export async function recordChallengeResult(
   mountainId: string,
   moduleId: string,
   ageBand: AgeBand | undefined,
   correct: boolean,
-): { tier: Tier; changed: boolean; previous: Tier } {
-  const state = read();
-  const key = moduleKey(mountainId, moduleId);
-  const prev = state.modules[key] ?? {
-    tier: tierFromAgeBand(ageBand),
+): Promise<{ tier: Tier; changed: boolean; previous: Tier }> {
+  const explorerId = getExplorerId();
+  const fallbackTier = tierFromAgeBand(ageBand);
+  if (!explorerId) {
+    return { tier: fallbackTier, changed: false, previous: fallbackTier };
+  }
+  await setExplorerContext(explorerId);
+
+  const prev = (await fetchRow(explorerId, mountainId, moduleId)) ?? {
+    tier: fallbackTier,
     pinned: false,
     recent: [] as boolean[],
   };
@@ -163,25 +196,29 @@ export function recordChallengeResult(
     }
   }
 
-  // Reset the window when the tier shifts so the next adaptation needs fresh data.
-  state.modules[key] = {
-    tier: nextTier,
-    pinned: prev.pinned,
-    recent: changed ? [] : recent,
-  };
-  try {
-    write(state);
-  } catch {
-    // Best-effort: a failed persistence here shouldn't block challenge feedback.
-  }
+  await supabase
+    .from("module_tiers")
+    .upsert(
+      {
+        explorer_id: explorerId,
+        mountain_id: mountainId,
+        module_id: moduleId,
+        tier: nextTier,
+        pinned: prev.pinned,
+        recent_results: changed ? [] : recent,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "explorer_id,mountain_id,module_id" },
+    );
 
+  emitChange();
   return { tier: nextTier, changed, previous: prev.tier };
 }
 
-export function clearTiers() {
-  try {
-    write({ modules: {} });
-  } catch {
-    // Best-effort cleanup.
-  }
+export async function clearTiers(): Promise<void> {
+  const explorerId = getExplorerId();
+  if (!explorerId) return;
+  await setExplorerContext(explorerId);
+  await supabase.from("module_tiers").delete().eq("explorer_id", explorerId);
+  emitChange();
 }
