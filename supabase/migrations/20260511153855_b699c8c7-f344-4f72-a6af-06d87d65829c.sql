@@ -1,0 +1,1 @@
+alter view public.explorer_state set (security_invoker = true);
