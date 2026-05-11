@@ -77,7 +77,7 @@ const MasteryCard = ({ superpower, unlockedAt, modulesUnlocked }: MasteryCardPro
             await navigator.share({
               files: [file],
               title: `Maestría: ${superpower.title}`,
-              text: `¡He dominado el superpoder ${superpower.title}! 🏆`,
+              text: `¡He conquistado la montaña ${superpower.title}! 🏆`,
             });
             toast.success("¡Compartido!");
             return;
@@ -242,7 +242,7 @@ const MasteryGalleryPage = () => {
         <div className="flex-1">
           <h1 className="font-display text-2xl font-bold leading-tight">Galería de Maestrías</h1>
           <p className="text-xs text-muted-foreground">
-            Tu colección de superpoderes dominados.
+            Tu colección de montañas conquistadas.
           </p>
         </div>
       </div>
@@ -261,7 +261,7 @@ const MasteryGalleryPage = () => {
           </p>
           <p className="text-[11px] text-muted-foreground">
             {masteredCount === 0
-              ? "Empieza a dominar superpoderes para llenar tu galería"
+              ? "Empieza a conquistar montañas para llenar tu galería"
               : masteredCount === total
                 ? "¡Has completado la colección!"
                 : "Sigue entrenando para conquistarlos todos"}
@@ -272,7 +272,7 @@ const MasteryGalleryPage = () => {
       {sorted.length === 0 ? (
         <div className="gradient-card rounded-2xl p-8 border border-border text-center">
           <Sparkles size={32} className="mx-auto text-muted-foreground mb-2" />
-          <p className="font-display font-semibold">Todavía no hay superpoderes</p>
+          <p className="font-display font-semibold">Todavía no hay montañas</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
