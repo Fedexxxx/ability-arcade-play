@@ -70,7 +70,7 @@ const ShopPage = () => {
 
   const displayMsg = sherpaMsg ?? contextualMsg;
 
-  const handleBuy = (s: BasecampGearSet) => {
+  const handleBuy = async (s: BasecampGearSet) => {
     if (s.tier !== "shop") {
       toast({
         title: "Próximamente",
@@ -78,7 +78,7 @@ const ShopPage = () => {
       });
       return;
     }
-    const result = spend({ id: `gear:${s.id}`, price: s.price, label: s.name });
+    const result = await spend({ id: `gear:${s.id}`, price: s.price, label: s.name });
     if (!result.ok) {
       if (result.reason === "insufficient_funds") {
         const missing = s.price - wallet.balance;

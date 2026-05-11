@@ -69,7 +69,7 @@ const CustomizePage = () => {
     });
   };
 
-  const handleBuy = (g: BasecampGearSet) => {
+  const handleBuy = async (g: BasecampGearSet) => {
     if (g.tier !== "shop" || isOwned(g)) return;
     if (wallet.balance < g.price) {
       toast({
@@ -80,7 +80,7 @@ const CustomizePage = () => {
       setSherpaMsg("Sigue subiendo y vuelve por tu nuevo Explorador.");
       return;
     }
-    const result = spend({ id: `gear:${g.id}`, price: g.price, label: g.name });
+    const result = await spend({ id: `gear:${g.id}`, price: g.price, label: g.name });
     if (!result.ok) return;
     unlockGearSet(g.id); // also auto-equips it
     celebrate();
