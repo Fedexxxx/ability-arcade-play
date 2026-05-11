@@ -98,7 +98,17 @@ const ChallengePage = () => {
   }, [phase, isCorrect, sp, mod, explorer?.ageBand]);
 
   if (!sp || !mod || !challenge) {
-    return <div className="p-4 text-center text-muted-foreground">Desafío no encontrado</div>;
+    return (
+      <div className="min-h-screen px-4 pt-6 pb-8 max-w-lg mx-auto flex flex-col items-center justify-center text-center gap-4">
+        <p className="text-muted-foreground">Desafío no encontrado</p>
+        <button
+          onClick={() => (modId && spId ? navigate(`/module/${spId}/${modId}`, { replace: true }) : navigate("/"))}
+          className="gradient-energy text-primary-foreground rounded-2xl px-5 py-3 font-display font-bold glow-primary"
+        >
+          ← Volver al módulo
+        </button>
+      </div>
+    );
   }
 
   const handleSubmit = () => {
@@ -309,7 +319,7 @@ const ChallengePage = () => {
                 </motion.div>
                 <h2 className={`font-display ${feedbackTitle} font-bold mb-2`}>¡Excelente!</h2>
                 {density.showSubtext && (
-                  <p className="text-muted-foreground text-sm mb-2">¡Lo clavaste! +25 XP</p>
+                  <p className="text-muted-foreground text-sm mb-2">¡Lo lograste! +25 XP</p>
                 )}
               </>
             ) : (

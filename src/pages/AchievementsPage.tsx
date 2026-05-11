@@ -66,7 +66,7 @@ const AchievementsPage = () => {
           <div className="flex-1 min-w-0">
             <p className="font-display font-bold text-sm">Galería de Maestrías</p>
             <p className="text-[11px] text-muted-foreground">
-              Explora tus superpoderes dominados como cartas holográficas
+              Explora tus montañas conquistadas como cartas holográficas
             </p>
           </div>
           <span className="text-xp text-lg">→</span>
@@ -121,7 +121,7 @@ const AchievementsPage = () => {
                 Aún no hay insignias aquí
               </p>
               <p className="text-xs text-muted-foreground">
-                Completa módulos y superpoderes para desbloquear maestrías.
+                Completa módulos y montañas para desbloquear maestrías.
               </p>
             </div>
           ) : (

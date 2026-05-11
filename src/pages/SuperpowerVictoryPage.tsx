@@ -51,7 +51,7 @@ const SuperpowerVictoryPage = () => {
   }, [sp]);
 
   if (!sp || !stats) {
-    return <div className="p-4 text-center text-muted-foreground">Superpoder no encontrado</div>;
+    return <div className="p-4 text-center text-muted-foreground">Montaña no encontrada</div>;
   }
 
   return (
@@ -77,7 +77,7 @@ const SuperpowerVictoryPage = () => {
           transition={{ delay: 0.2 }}
           className="text-[10px] uppercase tracking-[0.3em] text-xp font-bold mb-3"
         >
-          ★ Superpoder Dominado ★
+          ★ Montaña Conquistada ★
         </motion.p>
 
         {/* Avatar Evolution */}
@@ -220,7 +220,7 @@ const SuperpowerVictoryPage = () => {
           transition={{ delay: 2.1 }}
           className="text-sm text-muted-foreground mb-1 max-w-xs"
         >
-          Has dominado este superpoder por completo.
+          Has conquistado esta montaña por completo.
         </motion.p>
         <motion.p
           initial={{ opacity: 0 }}
@@ -305,7 +305,7 @@ const SuperpowerVictoryPage = () => {
             onClick={() => navigate("/explore", { replace: true })}
             className="w-full gradient-energy text-primary-foreground rounded-2xl py-4 font-display font-bold text-lg glow-primary"
           >
-            Descubrir Nuevo Superpoder →
+            Descubrir Nueva Montaña →
           </button>
           <button
             onClick={() => navigate("/achievements", { replace: true })}
