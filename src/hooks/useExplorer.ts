@@ -19,6 +19,17 @@ export const useExplorerState = (): ExplorerState => {
     let cancelled = false;
     const sync = () => {
       const sessionId = getStoredExplorerSessionId();
+      // Raw localStorage snapshot at the exact moment the hook mounts/syncs.
+      // Useful to detect storage being cleared by the host iframe between reloads.
+      const rawStored =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("sherpa.explorer.session")
+          : null;
+      console.log("[explorer] useExplorer mount/sync", {
+        sessionId,
+        rawLocalStorageValue: rawStored,
+        href: typeof window !== "undefined" ? window.location.href : null,
+      });
       setState((prev) => ({ explorer: prev.explorer, loading: true }));
       getExplorer(sessionId).then((next) => {
         if (!cancelled) setState({ explorer: next, loading: false });
