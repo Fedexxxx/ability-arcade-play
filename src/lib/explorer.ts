@@ -70,7 +70,8 @@ export const getExplorer = async (sessionId?: string | null): Promise<ExplorerPr
   // Use a SECURITY DEFINER RPC so the lookup doesn't depend on the
   // app.explorer_id GUC surviving across pooled-connection HTTP requests.
   const { data, error } = await supabase.rpc("get_explorer" as never, { p_id: id } as never);
-  const row = Array.isArray(data) ? (data[0] as { name?: string; avatar_emoji?: string; age_band?: string; created_at?: string } | undefined) : undefined;
+  const rows = (data ?? []) as Array<{ name?: string; avatar_emoji?: string; age_band?: string; created_at?: string }>;
+  const row = rows[0];
   console.log("[explorer] profile response", { sessionId: id, data, error });
   if (error || !row || !row.name || !row.avatar_emoji || !row.age_band) {
     setSessionId(null);
