@@ -31,6 +31,8 @@ const getSessionId = (): string | null => {
   }
 };
 
+export const getStoredExplorerSessionId = (): string | null => getSessionId();
+
 const setSessionId = (id: string | null) => {
   try {
     if (id) window.localStorage.setItem(SESSION_KEY, id);
@@ -57,16 +59,23 @@ export const setExplorerContext = async (id: string | null): Promise<void> => {
 };
 
 /** Reads the current explorer profile via the explorer_state view. */
-export const getExplorer = async (): Promise<ExplorerProfile | null> => {
-  const id = getSessionId();
-  if (!id) return null;
+export const getExplorer = async (sessionId?: string | null): Promise<ExplorerProfile | null> => {
+  const id = sessionId === undefined ? getSessionId() : sessionId;
+  if (!id) {
+    console.log("[explorer] session lookup", { sessionId: null });
+    return null;
+  }
+  console.log("[explorer] session lookup", { sessionId: id });
   await setExplorerContext(id);
   const { data, error } = await supabase
     .from("explorer_state")
     .select("name, avatar_emoji, age_band, created_at")
     .eq("id", id)
     .maybeSingle();
+  console.log("[explorer] profile response", { sessionId: id, data, error });
   if (error || !data || !data.name || !data.avatar_emoji || !data.age_band) {
+    setSessionId(null);
+    await setExplorerContext(null);
     return null;
   }
   return {
