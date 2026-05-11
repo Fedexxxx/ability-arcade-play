@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getExplorer, type ExplorerProfile } from "@/lib/explorer";
+import { getExplorer, getStoredExplorerSessionId, type ExplorerProfile } from "@/lib/explorer";
 
 export interface ExplorerState {
   explorer: ExplorerProfile | null;
@@ -18,8 +18,9 @@ export const useExplorerState = (): ExplorerState => {
   useEffect(() => {
     let cancelled = false;
     const sync = () => {
+      const sessionId = getStoredExplorerSessionId();
       setState((prev) => ({ explorer: prev.explorer, loading: true }));
-      getExplorer().then((next) => {
+      getExplorer(sessionId).then((next) => {
         if (!cancelled) setState({ explorer: next, loading: false });
       });
     };
