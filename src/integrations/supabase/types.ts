@@ -395,6 +395,10 @@ export type Database = {
     }
     Functions: {
       current_explorer_id: { Args: never; Returns: string }
+      set_config: {
+        Args: { is_local: boolean; new_value: string; setting_name: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
