@@ -81,18 +81,15 @@ export const getExplorer = async (): Promise<ExplorerProfile | null> => {
 export const saveExplorer = async (
   profile: Omit<ExplorerProfile, "createdAt">,
 ): Promise<void> => {
-  const { data, error } = await supabase
-    .from("explorers")
-    .insert({
-      name: profile.name,
-      avatar_emoji: profile.avatar,
-      age_band: profile.ageBand,
-    })
-    .select("id")
-    .single();
+  const { data, error } = await supabase.rpc("create_explorer" as never, {
+    p_name: profile.name,
+    p_avatar: profile.avatar,
+    p_age_band: profile.ageBand,
+  } as never);
   if (error || !data) return;
-  setSessionId(data.id);
-  await setExplorerContext(data.id);
+  const newId = data as unknown as string;
+  setSessionId(newId);
+  await setExplorerContext(newId);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("sherpa:explorer-changed"));
   }
