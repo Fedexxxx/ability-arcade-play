@@ -51,8 +51,8 @@ const ExplorerProfilePage = () => {
     navigate("/onboarding", { replace: true });
   };
 
-  const handleDemoCoins = () => {
-    const result = earn({
+  const handleDemoCoins = async () => {
+    const result = await earn({
       amount: 600,
       reason: "achievement",
       sourceId: `demo-${Date.now()}`,
