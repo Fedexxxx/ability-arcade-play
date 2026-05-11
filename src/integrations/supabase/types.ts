@@ -394,6 +394,10 @@ export type Database = {
       }
     }
     Functions: {
+      create_explorer: {
+        Args: { p_age_band: string; p_avatar: string; p_name: string }
+        Returns: string
+      }
       current_explorer_id: { Args: never; Returns: string }
       set_config: {
         Args: { is_local: boolean; new_value: string; setting_name: string }
