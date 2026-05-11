@@ -160,8 +160,8 @@ const letras: Mountain = {
       avanzado: [
         q("Sílaba tónica", "La sílaba tónica suena más fuerte.", "¿Cuál es la sílaba fuerte de CA-MI-NO?", ["CA", "MI", "NO", "Ninguna"], 1),
         d("Clasifica por sílabas", "Cuenta antes de soltar.", "Arrastra cada palabra al grupo correcto",
-          [{ id: "s2", label: "2 sílabas", emoji: "✌️" }, { id: "s3", label: "3 sílabas", emoji: "🤟" }, { id: "s4", label: "4 sílabas", emoji: "🖖" }],
-          [{ id: "i1", label: "PA-TO", bucket: "s2" }, { id: "i2", label: "CA-SI-TA", bucket: "s3" }, { id: "i3", label: "MA-RI-PO-SA", bucket: "s4" }, { id: "i4", label: "SOL", bucket: "s2" }, { id: "i5", label: "TE-LÉ-FO-NO", bucket: "s4" }, { id: "i6", label: "LU-NA", bucket: "s2" }]),
+          [{ id: "s1", label: "1 sílaba", emoji: "☝️" }, { id: "s2", label: "2 sílabas", emoji: "✌️" }, { id: "s3", label: "3 sílabas", emoji: "🤟" }, { id: "s4", label: "4 sílabas", emoji: "🖖" }],
+          [{ id: "i1", label: "PA-TO", bucket: "s2" }, { id: "i2", label: "CA-SI-TA", bucket: "s3" }, { id: "i3", label: "MA-RI-PO-SA", bucket: "s4" }, { id: "i4", label: "SOL", bucket: "s1" }, { id: "i5", label: "TE-LÉ-FO-NO", bucket: "s4" }, { id: "i6", label: "LU-NA", bucket: "s2" }]),
         q("Falta una sílaba", "Imagina cómo suena.", "¿Qué falta? VEN-TA-__", ["NA", "DA", "TA", "RA"], 0),
       ],
       experto: [
