@@ -60,8 +60,11 @@ export const setExplorerContext = async (id: string | null): Promise<void> => {
 
 /** Reads the current explorer profile via the explorer_state view. */
 export const getExplorer = async (sessionId?: string | null): Promise<ExplorerProfile | null> => {
-  const id = sessionId ?? getSessionId();
-  if (!id) return null;
+  const id = sessionId === undefined ? getSessionId() : sessionId;
+  if (!id) {
+    console.log("[explorer] session lookup", { sessionId: null });
+    return null;
+  }
   console.log("[explorer] session lookup", { sessionId: id });
   await setExplorerContext(id);
   const { data, error } = await supabase
