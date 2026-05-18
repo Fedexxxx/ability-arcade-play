@@ -35,9 +35,27 @@ const ChallengePage = () => {
   const mod = tiered
     ? { ...tiered.module, challenges: tierChallenges }
     : sp?.modules.find((m) => m.id === modId);
-  const challenge =
-    tierChallenges.find((c) => c.id === chId) ??
-    mod?.challenges.find((c) => c.id === chId);
+  // Look up the challenge in the active tier first; if not found (e.g. the
+  // URL points at a different tier than the one currently selected, or the
+  // tier engine is still loading), search every tier of this module so we
+  // never wrongly show "Desafío no encontrado".
+  let challenge = tierChallenges.find((c) => c.id === chId);
+  if (!challenge && tiered?.module.byTier) {
+    for (const t of Object.keys(tiered.module.byTier) as (keyof typeof tiered.module.byTier)[]) {
+      const found = tiered.module.byTier[t]?.find((c) => c.id === chId);
+      if (found) { challenge = found; break; }
+    }
+  }
+  if (!challenge) challenge = mod?.challenges.find((c) => c.id === chId);
+
+  // Diagnostic: surface what the lookup actually saw.
+  // eslint-disable-next-line no-console
+  console.log("[challenge] lookup", {
+    spId, modId, chId, tier,
+    tieredFound: !!tiered,
+    tierChallengeIds: tierChallenges.map((c) => c.id),
+    matched: challenge?.id ?? null,
+  });
 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
