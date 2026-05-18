@@ -160,7 +160,7 @@ const ModuleVictoryPage = () => {
                 Maestro de {mod.title}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Parte del superpoder <span className="text-foreground font-medium">{sp.title}</span>
+                Parte de la montaña <span className="text-foreground font-medium">{sp.title}</span>
               </p>
             </div>
           </div>
@@ -192,7 +192,7 @@ const ModuleVictoryPage = () => {
               onClick={() => navigate(`/superpower/${sp.id}`, { replace: true })}
               className="w-full gradient-energy text-primary-foreground rounded-2xl py-4 font-display font-bold text-lg glow-primary"
             >
-              Ver Superpoder
+              Ver montaña
             </button>
           )}
           <button
