@@ -115,7 +115,7 @@ const letras: Mountain = {
     tiered("lp-c1", "Las primeras letras", "Reconoce las vocales que abren todo camino.", {
       inicial: [
         v("¿Qué empieza con A?", "La letra A es la primera vocal 🐝", "¿Qué empieza con A?",
-          [{ emoji: "🍎", label: "Manzana" }, { emoji: "🐝", label: "Abeja" }, { emoji: "🌳", label: "Árbol" }, { emoji: "🚗", label: "Coche" }], 1),
+          [{ emoji: "🍎", label: "Manzana" }, { emoji: "🐝", label: "Abeja" }, { emoji: "🐸", label: "Rana" }, { emoji: "🚗", label: "Coche" }], 1),
         q("Vocal escondida", "Las vocales son: A, E, I, O, U.", "¿Cuál NO es una vocal?", ["A", "E", "M", "O"], 2),
         v("Empieza con O", "La O es redonda como el sol 🌞", "¿Qué empieza con la letra O?",
           [{ emoji: "🐻", label: "Oso" }, { emoji: "🌸", label: "Flor" }, { emoji: "🦋", label: "Mariposa" }, { emoji: "🐠", label: "Pez" }], 0),
