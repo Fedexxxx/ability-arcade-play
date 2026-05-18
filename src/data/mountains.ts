@@ -890,7 +890,7 @@ const social: Mountain = {
 // =============================================================
 // EXPORTED CATALOG
 // =============================================================
-export const mountains: Mountain[] = [
+const ALL_MOUNTAINS: Mountain[] = [
   letras,
   numeros,
   naturaleza,
@@ -898,6 +898,38 @@ export const mountains: Mountain[] = [
   logica,
   social,
 ];
+
+// -----------------------------------------------------------------
+// Stable, deterministic challenge IDs.
+//
+// The previous module-level `uid()` counter could drift across HMR
+// re-evaluations or import-order changes, producing IDs like `ch-7`
+// that became invalid between sessions and broke deep-linked
+// challenge URLs ("Desafío no encontrado").
+//
+// We now derive each challenge id from its mountain + module +
+// tier-initial + 1-based index, e.g. `letras-peak-lp-c1-i-1`,
+// `letras-peak-lp-c1-a-2`, etc. These are stable forever.
+// -----------------------------------------------------------------
+const TIER_INITIAL: Record<Tier, string> = {
+  inicial: "i",
+  avanzado: "a",
+  experto: "e",
+};
+for (const mn of ALL_MOUNTAINS) {
+  for (const mod of mn.modules) {
+    if (!mod.byTier) continue;
+    (Object.keys(mod.byTier) as Tier[]).forEach((tier) => {
+      mod.byTier![tier].forEach((ch, idx) => {
+        ch.id = `${mn.id}-${mod.id}-${TIER_INITIAL[tier]}-${idx + 1}`;
+      });
+    });
+    // `mod.challenges` is the same array reference as `byTier.inicial`,
+    // so its IDs are updated by the loop above too.
+  }
+}
+
+export const mountains: Mountain[] = ALL_MOUNTAINS;
 
 export const mountainsCategories = ["Todas", "Letras", "Números", "Naturaleza", "Creativa", "Lógica", "Social"];
 
