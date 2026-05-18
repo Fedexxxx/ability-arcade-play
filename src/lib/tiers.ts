@@ -24,13 +24,12 @@ export const TIER_HINT: Record<Tier, string> = {
 };
 
 /** Map onboarding age band to a starting tier. */
-export function tierFromAgeBand(band: AgeBand | undefined): Tier {
-  switch (band) {
-    case "4-6":  return "inicial";
-    case "7-8":  return "avanzado";
-    case "9-10": return "experto";
-    default:     return "inicial";
-  }
+export function tierFromAgeBand(_band: AgeBand | undefined): Tier {
+  // Age band drives UI density (text size, visual complexity) via
+  // AgeDensityContext — NOT the starting difficulty tier. Every explorer
+  // starts every module at "inicial"; the adaptive engine promotes from
+  // there based on rolling per-module accuracy.
+  return "inicial";
 }
 
 // ---------- Persistence ----------
