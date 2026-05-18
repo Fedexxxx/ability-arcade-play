@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   TIER_EVENT,
   getModuleStat,
+  tierFromAgeBand,
   type Tier,
 } from "@/lib/tiers";
 import { useExplorer } from "@/hooks/useExplorer";
@@ -37,6 +38,6 @@ export function useTier(mountainId: string | undefined, moduleId: string | undef
     };
   }, [mountainId, moduleId, ageBand]);
 
-  const tier: Tier = stat?.tier ?? "inicial";
+  const tier: Tier = stat?.tier ?? tierFromAgeBand(ageBand);
   return { tier, pinned: stat?.pinned ?? false, recent: stat?.recent ?? [] };
 }
