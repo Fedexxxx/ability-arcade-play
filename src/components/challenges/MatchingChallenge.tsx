@@ -19,6 +19,16 @@ const shuffle = <T,>(arr: T[]): T[] => {
   return a;
 };
 
+// Normalize Spanish accented vowels so "á/é/í/ó/ú" compare equal to
+// their base vowels. Used when matching answers so that e.g. clicking
+// "Águila" still works against a left labelled "A".
+const normalizeVowels = (s: string): string =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+const vowelEq = (a: string, b: string) => normalizeVowels(a) === normalizeVowels(b);
+
 const MatchingChallenge = ({ challenge, submitted, onResolve }: Props) => {
   const pairs = challenge.pairs ?? [];
   const lefts = useMemo(() => pairs.map((p) => p.left), [pairs]);
@@ -40,7 +50,7 @@ const MatchingChallenge = ({ challenge, submitted, onResolve }: Props) => {
   const handleRight = (right: string) => {
     if (!selectedLeft || submitted) return;
     const pair = pairs.find((p) => p.left === selectedLeft);
-    if (pair && pair.right === right) {
+    if (pair && vowelEq(pair.right, right)) {
       setMatches((prev) => ({ ...prev, [selectedLeft]: right }));
       setSelectedLeft(null);
     } else {
