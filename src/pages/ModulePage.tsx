@@ -67,6 +67,11 @@ const ModulePage = () => {
   const mod = tieredModule
     ? { ...tieredModule, challenges }
     : legacyMod!;
+  // Live completion % for the progress bar.
+  if (challenges.length > 0) {
+    const doneCount = challenges.filter((c) => c.status === "completed").length;
+    mod.completion = Math.round((doneCount / challenges.length) * 100);
+  }
 
   const heroTitle = density.scale === "lg" ? "text-2xl" : density.scale === "md" ? "text-xl" : "text-lg";
   const cardPad = density.scale === "lg" ? "p-4" : density.scale === "md" ? "p-3.5" : "p-3";
