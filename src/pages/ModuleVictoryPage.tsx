@@ -192,7 +192,7 @@ const ModuleVictoryPage = () => {
               onClick={() => navigate(`/superpower/${sp.id}`, { replace: true })}
               className="w-full gradient-energy text-primary-foreground rounded-2xl py-4 font-display font-bold text-lg glow-primary"
             >
-              Ver montaña
+              Ver montaña escalada
             </button>
           )}
           <button
