@@ -1,15 +1,10 @@
 // =============================================================
-// MOUNTAINS — Slice 3 catalog: 6 ranges × 5 checkpoints, 3 tiers.
+// MOUNTAINS — Complete catalog: 6 mountains × 5 checkpoints × 3 tiers.
 //
-// Two "deep" mountains (Letras + Números) ship with playable challenges
-// across all tiers and modules. The other four mountains (Naturaleza,
-// Creativa, Lógica, Social) ship with one fully-tiered playable module
-// each — the rest are skeleton stubs ("Próximamente") so the journey
-// map already feels complete end-to-end.
-//
-// Compatible with the legacy Superpower / PowerModule / Challenge shape
-// so existing pages (SuperpowerPage / ModulePage / ChallengePage) keep
-// working through `getActiveChallenges(mod, tier)`.
+// All six mountains ship with fully playable challenges across all
+// tiers and modules. Compatible with the legacy Superpower / PowerModule
+// / Challenge shape so existing pages keep working through
+// `getActiveChallenges(mod, tier)`.
 // =============================================================
 
 import type {
@@ -28,9 +23,7 @@ export type TierChallenges = Record<Tier, Challenge[]> | null;
 
 /** A module enriched with adaptive per-tier challenges. */
 export interface TieredModule extends Omit<PowerModule, "challenges"> {
-  /** Default challenges (= inicial tier) — kept so legacy pages still render. */
   challenges: Challenge[];
-  /** Challenges per tier. Null means the module is a skeleton stub. */
   byTier: TierChallenges;
 }
 
@@ -87,16 +80,7 @@ const d = (
   concept, question, buckets, dragItems,
 });
 
-/** Skeleton module factory — appears on the map but is not yet playable. */
-const stub = (id: string, title: string, description: string): TieredModule => ({
-  id, title, description,
-  completion: 0,
-  status: "locked",
-  challenges: [],
-  byTier: null,
-});
-
-/** Tiered module factory — three difficulty bands of the same checkpoint. */
+/** Tiered module factory. */
 const tiered = (
   id: string,
   title: string,
@@ -113,7 +97,7 @@ const tiered = (
 });
 
 // =============================================================
-// MOUNTAIN 1 — PICO DE LAS LETRAS (DEEP)
+// MOUNTAIN 1 — PICO DE LAS LETRAS (COMPLETE)
 // =============================================================
 const letras: Mountain = {
   id: "letras-peak",
@@ -185,7 +169,7 @@ const letras: Mountain = {
       avanzado: [
         m("Sinónimos", "Sinónimo = significa lo mismo.", "Une cada palabra con su sinónimo",
           [{ left: "Bonito", right: "Lindo" }, { left: "Rápido", right: "Veloz" }, { left: "Grande", right: "Enorme" }, { left: "Feliz", right: "Alegre" }]),
-        q("Antónimo", "Antónimo = lo contrario.", "¿Cuál es el contrario de FRÍO?", ["Helado", "Caliente", "Tibio", "Fresco" ], 1),
+        q("Antónimo", "Antónimo = lo contrario.", "¿Cuál es el contrario de FRÍO?", ["Helado", "Caliente", "Tibio", "Fresco"], 1),
         d("Singular o plural", "Plural = más de uno.", "Arrastra cada palabra",
           [{ id: "sg", label: "Singular", emoji: "1️⃣" }, { id: "pl", label: "Plural", emoji: "🔢" }],
           [{ id: "i1", label: "Perro", bucket: "sg" }, { id: "i2", label: "Casas", bucket: "pl" }, { id: "i3", label: "Estrellas", bucket: "pl" }, { id: "i4", label: "Sol", bucket: "sg" }, { id: "i5", label: "Niños", bucket: "pl" }, { id: "i6", label: "Mesa", bucket: "sg" }]),
@@ -203,7 +187,8 @@ const letras: Mountain = {
         q("Frase ordenada", "Una frase tiene orden.", "¿Cuál tiene sentido?", ["Perro come el", "El perro come", "Come el perro", "Perro el come"], 1),
         m("Sujeto y acción", "¿Quién? ¿Qué hace?", "Une el sujeto con su acción",
           [{ left: "El pájaro", right: "vuela" }, { left: "El pez", right: "nada" }, { left: "El conejo", right: "salta" }, { left: "El sol", right: "brilla" }]),
-        v("¿Qué hace?", "Mira y elige.", "El gato…", [{ emoji: "🏃", label: "Corre" }, { emoji: "💤", label: "Duerme" }, { emoji: "🍽️", label: "Come" }, { emoji: "🎵", label: "Canta" }], 1),
+        v("¿Qué hace?", "Mira y elige.", "El gato…",
+          [{ emoji: "🏃", label: "Corre" }, { emoji: "💤", label: "Duerme" }, { emoji: "🍽️", label: "Come" }, { emoji: "🎵", label: "Canta" }], 1),
       ],
       avanzado: [
         q("Pregunta o frase", "Las preguntas terminan en ?", "¿Cuál es una pregunta?", ["El cielo es azul.", "¿Dónde estás?", "Hace calor.", "Vamos al parque."], 1),
@@ -213,10 +198,10 @@ const letras: Mountain = {
         q("Concordancia", "El verbo concuerda con el sujeto.", "¿Cuál está bien?", ["Los niños juega.", "Los niños juegan.", "Los niño juegan.", "Las niños juegan."], 1),
       ],
       experto: [
-        q("Tipo de oración", "Cada frase tiene una intención.", "“¡Qué bonito día!” es una oración…", ["enunciativa", "interrogativa", "exclamativa", "imperativa"], 2),
+        q("Tipo de oración", "Cada frase tiene una intención.", '"¡Qué bonito día!" es una oración…', ["enunciativa", "interrogativa", "exclamativa", "imperativa"], 2),
         m("Verbo en su tiempo", "Pasado, presente o futuro.", "Une cada verbo con su tiempo",
           [{ left: "Comí", right: "Pasado" }, { left: "Como", right: "Presente" }, { left: "Comeré", right: "Futuro" }, { left: "Comía", right: "Pasado" }]),
-        q("Conector lógico", "Conectores unen ideas.", "“Quería salir, ____ llovía mucho.”", ["porque", "pero", "y", "si"], 1),
+        q("Conector lógico", "Conectores unen ideas.", '"Quería salir, ____ llovía mucho."', ["porque", "pero", "y", "si"], 1),
       ],
     }, { status: "locked", completion: 0 }),
 
@@ -237,14 +222,14 @@ const letras: Mountain = {
         q("Reto experto", "Detalle fino.", "¿Cuál es esdrújula?", ["camino", "música", "pelota", "ventana"], 1),
         m("Categoría experta", "Cada palabra ocupa su lugar.", "Une cada palabra con su categoría",
           [{ left: "Escalar", right: "Verbo" }, { left: "Cumbre", right: "Sustantivo" }, { left: "Helado", right: "Adjetivo" }, { left: "Arriba", right: "Adverbio" }]),
-        q("Conector experto", "Conecta con sentido.", "“Subiré a la cima ____ llueva.”", ["porque", "aunque", "y", "como"], 1),
+        q("Conector experto", "Conecta con sentido.", '"Subiré a la cima ____ llueva."', ["porque", "aunque", "y", "como"], 1),
       ],
     }, { status: "locked", isBoss: true, completion: 0 }),
   ],
 };
 
 // =============================================================
-// MOUNTAIN 2 — CRESTA DE LOS NÚMEROS (DEEP)
+// MOUNTAIN 2 — CRESTA DE LOS NÚMEROS (COMPLETE)
 // =============================================================
 const numeros: Mountain = {
   id: "numeros-ridge",
@@ -370,7 +355,7 @@ const numeros: Mountain = {
 };
 
 // =============================================================
-// MOUNTAIN 3 — SENDERO DE LA NATURALEZA (1 deep module)
+// MOUNTAIN 3 — SENDERO DE LA NATURALEZA (COMPLETE)
 // =============================================================
 const naturaleza: Mountain = {
   id: "naturaleza-trail",
@@ -404,22 +389,109 @@ const naturaleza: Mountain = {
       ],
       experto: [
         q("Cadena alimenticia", "Sigue la energía.", "El sol → planta → conejo → __", ["Hormiga", "Águila", "Pez", "Vaca"], 1),
-        q("Animal en peligro", "Necesitan que los cuidemos.", "¿Cuál está en peligro?", ["Paloma", "Panda gigante", "Gallina", "Perro"], 1),
-        d("Vertebrado o invertebrado", "Vertebrado = tiene huesos.", "Arrastra cada animal",
+        q("Animal en peligro", "Necesitan que los cuidemos.", "¿Cuál está en peligro de extinción?", ["Paloma", "Panda gigante", "Gallina", "Perro"], 1),
+        d("Vertebrado o invertebrado", "Vertebrado = tiene columna.", "Arrastra cada animal",
           [{ id: "ver", label: "Vertebrado", emoji: "🦴" }, { id: "inv", label: "Invertebrado", emoji: "🪱" }],
           [{ id: "i1", label: "Perro", bucket: "ver" }, { id: "i2", label: "Pulpo", bucket: "inv" }, { id: "i3", label: "Águila", bucket: "ver" }, { id: "i4", label: "Hormiga", bucket: "inv" }, { id: "i5", label: "Tiburón", bucket: "ver" }, { id: "i6", label: "Mariposa", bucket: "inv" }]),
       ],
     }, { status: "available", completion: 0 }),
 
-    stub("nt-c2", "Las plantas crecen", "Mira nacer las cosas que respiran."),
-    stub("nt-c3", "Cuida el planeta", "Pequeños pasos, gran montaña."),
-    stub("nt-c4", "Ríos y océanos", "El agua que une todo."),
-    stub("nt-summit", "Cumbre del Sendero", "Conviértete en guardián."),
+    tiered("nt-c2", "Las plantas crecen", "Descubre cómo nace y crece la vida verde.", {
+      inicial: [
+        v("¿Qué crece de una semilla?", "Toda planta grande fue pequeña 🌱", "¿Qué crece de una semilla?",
+          [{ emoji: "🌳", label: "Árbol" }, { emoji: "🪨", label: "Piedra" }, { emoji: "💧", label: "Gota" }, { emoji: "☁️", label: "Nube" }], 0),
+        q("Las plantas necesitan", "Agua, sol y tierra son sus tres amigos.", "¿Qué necesita una planta para crecer?", ["Solo agua", "Solo sol", "Agua, sol y tierra", "Nada"], 2),
+        m("Partes de la planta", "Cada parte tiene su trabajo.", "Une la parte con su función",
+          [{ left: "Raíz", right: "Bebe agua" }, { left: "Hoja", right: "Atrapa el sol" }, { left: "Flor", right: "Hace semillas" }, { left: "Tallo", right: "Sostiene todo" }]),
+      ],
+      avanzado: [
+        q("Fotosíntesis", "Las plantas fabrican su propio alimento con luz.", "¿Qué producen las plantas con la fotosíntesis?", ["Agua", "Oxígeno", "Tierra", "Lluvia"], 1),
+        d("¿Dónde crece cada planta?", "Cada planta elige su hogar.", "Arrastra cada planta a su lugar",
+          [{ id: "agua", label: "Agua", emoji: "🌊" }, { id: "desierto", label: "Desierto", emoji: "🏜️" }, { id: "bosque", label: "Bosque", emoji: "🌲" }],
+          [{ id: "i1", label: "Nenúfar", bucket: "agua" }, { id: "i2", label: "Cactus", bucket: "desierto" }, { id: "i3", label: "Roble", bucket: "bosque" }, { id: "i4", label: "Alga", bucket: "agua" }, { id: "i5", label: "Pino", bucket: "bosque" }, { id: "i6", label: "Palmera datilera", bucket: "desierto" }]),
+        q("Planta con flor", "Las plantas con flor se llaman angiospermas.", "¿Cuál es una planta con flor?", ["Helecho", "Musgo", "Rosal", "Pino"], 2),
+      ],
+      experto: [
+        q("Polinización", "Las flores necesitan ayuda para reproducirse.", "¿Quién ayuda principalmente a polinizar las flores?", ["Peces", "Abejas", "Serpientes", "Tortugas"], 1),
+        m("Tipo de planta", "Cada planta pertenece a un grupo.", "Une cada planta con su tipo",
+          [{ left: "Rosal", right: "Angiosperma" }, { left: "Pino", right: "Gimnosperma" }, { left: "Helecho", right: "Pteridofita" }, { left: "Musgo", right: "Briofita" }]),
+        d("¿Útil para qué?", "Las plantas nos dan muchas cosas.", "Arrastra cada planta",
+          [{ id: "com", label: "Comida", emoji: "🍽️" }, { id: "med", label: "Medicina", emoji: "💊" }, { id: "dec", label: "Decoración", emoji: "🌸" }],
+          [{ id: "i1", label: "Manzano", bucket: "com" }, { id: "i2", label: "Aloe vera", bucket: "med" }, { id: "i3", label: "Orquídea", bucket: "dec" }, { id: "i4", label: "Trigo", bucket: "com" }, { id: "i5", label: "Menta", bucket: "med" }, { id: "i6", label: "Rosa", bucket: "dec" }]),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("nt-c3", "Cuida el planeta", "Pequeños pasos, gran montaña.", {
+      inicial: [
+        q("Reciclar ayuda", "Cada cosa va a su lugar.", "¿Qué ayuda a cuidar la naturaleza?", ["Tirar basura al suelo", "Reciclar", "Talar árboles", "Contaminar el río"], 1),
+        d("Recicla bien", "Cada residuo tiene su contenedor.", "Arrastra cada objeto a su contenedor",
+          [{ id: "papel", label: "Papel", emoji: "📄" }, { id: "plast", label: "Plástico", emoji: "♻️" }, { id: "org", label: "Orgánico", emoji: "🍂" }],
+          [{ id: "i1", label: "Periódico", bucket: "papel" }, { id: "i2", label: "Botella", bucket: "plast" }, { id: "i3", label: "Cáscara de fruta", bucket: "org" }, { id: "i4", label: "Cartón", bucket: "papel" }, { id: "i5", label: "Bolsa", bucket: "plast" }, { id: "i6", label: "Restos de comida", bucket: "org" }]),
+        q("Ahorrar agua", "Cada gota vale.", "¿Cuándo gastamos menos agua?", ["Dejando el grifo abierto", "Cerrando el grifo al lavarse", "Usando la manguera siempre", "Llenando la bañera a diario"], 1),
+      ],
+      avanzado: [
+        q("Efecto invernadero", "Los gases atrapan el calor del planeta.", "¿Qué gas contribuye más al efecto invernadero?", ["Oxígeno", "Hidrógeno", "Dióxido de carbono", "Nitrógeno"], 2),
+        m("Acción y efecto", "Cada acción tiene consecuencia.", "Une cada acción con su efecto",
+          [{ left: "Plantar árboles", right: "Más oxígeno" }, { left: "Contaminar ríos", right: "Peces enfermos" }, { left: "Usar energía solar", right: "Menos contaminación" }, { left: "Quemar basura", right: "Aire sucio" }]),
+        d("Energía limpia o contaminante", "Algunas energías cuidan el planeta.", "Arrastra cada fuente de energía",
+          [{ id: "lim", label: "Limpia", emoji: "🌱" }, { id: "con", label: "Contaminante", emoji: "🏭" }],
+          [{ id: "i1", label: "Solar", bucket: "lim" }, { id: "i2", label: "Carbón", bucket: "con" }, { id: "i3", label: "Eólica", bucket: "lim" }, { id: "i4", label: "Petróleo", bucket: "con" }, { id: "i5", label: "Hidráulica", bucket: "lim" }, { id: "i6", label: "Gas natural", bucket: "con" }]),
+      ],
+      experto: [
+        q("Biodiversidad", "Cuantas más especies, más sano el ecosistema.", "¿Qué significa biodiversidad?", ["Muchas montañas", "Variedad de seres vivos", "Cantidad de agua", "Tipo de suelo"], 1),
+        q("Huella de carbono", "Cada acción deja una marca.", "¿Qué reduce más la huella de carbono?", ["Usar el coche siempre", "Comer más carne", "Usar transporte público", "Comprar ropa nueva cada semana"], 2),
+        m("Problema y solución", "Cada problema ambiental tiene solución.", "Une cada problema con su solución",
+          [{ left: "Deforestación", right: "Reforestar" }, { left: "Contaminación marina", right: "Reducir plásticos" }, { left: "Calentamiento global", right: "Energías renovables" }, { left: "Extinción de especies", right: "Crear reservas naturales" }]),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("nt-c4", "Ríos y océanos", "El agua que une todo.", {
+      inicial: [
+        v("¿Qué es un río?", "El río corre hacia el mar 🌊", "¿Cuál es un río?",
+          [{ emoji: "🏔️", label: "Montaña" }, { emoji: "🌊", label: "Río" }, { emoji: "🌵", label: "Desierto" }, { emoji: "🌲", label: "Bosque" }], 1),
+        q("Agua dulce o salada", "El mar es salado, el río es dulce.", "¿Dónde hay agua dulce?", ["En el océano", "En el río", "En el mar", "En la playa"], 1),
+        m("Animal y su hogar acuático", "Cada ser tiene su agua.", "Une cada animal con su hogar",
+          [{ left: "Trucha", right: "Río" }, { left: "Tiburón", right: "Océano" }, { left: "Hipopótamo", right: "Lago" }, { left: "Cangrejo de río", right: "Río" }]),
+      ],
+      avanzado: [
+        q("Ciclo del agua", "El agua viaja sin parar.", "¿Qué pasa cuando el sol calienta el agua del mar?", ["Se congela", "Se evapora", "Se vuelve dulce", "Desaparece"], 1),
+        d("Agua dulce o salada", "No toda el agua es igual.", "Arrastra cada elemento",
+          [{ id: "dulce", label: "Agua dulce", emoji: "💧" }, { id: "salada", label: "Agua salada", emoji: "🌊" }],
+          [{ id: "i1", label: "Lago de montaña", bucket: "dulce" }, { id: "i2", label: "Océano Pacífico", bucket: "salada" }, { id: "i3", label: "Río Amazonas", bucket: "dulce" }, { id: "i4", label: "Mar Mediterráneo", bucket: "salada" }, { id: "i5", label: "Glaciar", bucket: "dulce" }, { id: "i6", label: "Mar Muerto", bucket: "salada" }]),
+        q("Profundidad del océano", "El fondo del mar guarda secretos.", "¿Cómo se llama la zona más profunda del océano?", ["Zona litoral", "Zona abisal", "Zona de mareas", "Zona costera"], 1),
+      ],
+      experto: [
+        q("Corrientes marinas", "El océano también se mueve.", "¿Para qué sirven las corrientes marinas?", ["Para crear tormentas", "Para regular el clima del planeta", "Para elevar las montañas", "Para crear ríos"], 1),
+        m("Ecosistema acuático", "Cada zona tiene su comunidad.", "Une cada ecosistema con su característica",
+          [{ left: "Arrecife de coral", right: "Gran biodiversidad" }, { left: "Zona abisal", right: "Sin luz solar" }, { left: "Estuario", right: "Mezcla de agua dulce y salada" }, { left: "Marisma", right: "Zona costera pantanosa" }]),
+        q("Amenaza oceánica", "Los océanos están en peligro.", "¿Cuál es la mayor amenaza para los arrecifes de coral?", ["El viento", "El calentamiento del agua", "La luna", "Las mareas"], 1),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("nt-summit", "Cumbre del Sendero", "Conviértete en guardián de la naturaleza.", {
+      inicial: [
+        q("Reto del bosque", "Recuerda lo que viste.", "¿Qué animal vive en el agua?", ["Águila", "Pez", "Zorro", "Ratón"], 1),
+        q("Reto verde", "Las plantas son vida.", "¿Qué parte de la planta bebe agua?", ["Hoja", "Flor", "Raíz", "Tallo"], 2),
+        q("Reto del planeta", "Cada gesto cuenta.", "¿Cuál es la mejor acción para el planeta?", ["Reciclar", "Tirar al suelo", "Quemar plástico", "Cortar árboles"], 0),
+      ],
+      avanzado: [
+        q("Reto animal", "La vida salvaje nos necesita.", "¿Qué es una cadena alimenticia?", ["Una cadena de metal", "La relación entre depredadores y presas", "Un tipo de ecosistema", "Una especie en peligro"], 1),
+        m("Reto del ciclo", "El agua no descansa.", "Une cada fase del ciclo del agua con su descripción",
+          [{ left: "Evaporación", right: "El agua sube al cielo" }, { left: "Condensación", right: "Se forman nubes" }, { left: "Precipitación", right: "Llueve o nieva" }, { left: "Infiltración", right: "El agua entra al suelo" }]),
+        q("Reto energético", "El planeta tiene soluciones.", "¿Cuál es una energía renovable?", ["Carbón", "Petróleo", "Solar", "Gas"], 2),
+      ],
+      experto: [
+        q("Reto ecosistema", "Todo está conectado.", "¿Qué ocurre si desaparecen las abejas?", ["Nada importante", "Menos polinización y menos frutos", "Más flores", "El clima mejora"], 1),
+        q("Reto huella", "Mide tu impacto.", "¿Qué dieta tiene menor huella de carbono?", ["Rica en carne de res", "Basada en plantas", "Solo pescado", "Solo lácteos"], 1),
+        m("Reto conservación", "Proteger requiere conocimiento.", "Une cada espacio protegido con su objetivo",
+          [{ left: "Parque nacional", right: "Proteger ecosistemas" }, { left: "Reserva marina", right: "Proteger vida oceánica" }, { left: "Corredor biológico", right: "Conectar hábitats" }, { left: "Zona de exclusión", right: "Evitar actividad humana" }]),
+      ],
+    }, { status: "locked", isBoss: true, completion: 0 }),
   ],
 };
 
 // =============================================================
-// MOUNTAIN 4 — MIRADOR CREATIVO (1 deep module)
+// MOUNTAIN 4 — MIRADOR CREATIVO (COMPLETE)
 // =============================================================
 const creativa: Mountain = {
   id: "creativa-mirador",
@@ -447,25 +519,111 @@ const creativa: Mountain = {
         d("Cálido o frío", "Cálidos: rojo, naranja, amarillo. Fríos: azul, verde, morado.", "Arrastra cada color",
           [{ id: "cal", label: "Cálido", emoji: "🔥" }, { id: "fri", label: "Frío", emoji: "❄️" }],
           [{ id: "i1", label: "Rojo", bucket: "cal" }, { id: "i2", label: "Azul", bucket: "fri" }, { id: "i3", label: "Naranja", bucket: "cal" }, { id: "i4", label: "Verde", bucket: "fri" }, { id: "i5", label: "Amarillo", bucket: "cal" }, { id: "i6", label: "Morado", bucket: "fri" }]),
-        q("Color secundario", "Se hace mezclando dos primarios.", "¿Cuál es secundario?", ["Rojo", "Azul", "Verde", "Amarillo"], 2),
+        q("Color secundario", "Se hace mezclando dos primarios.", "¿Cuál es un color secundario?", ["Rojo", "Azul", "Verde", "Amarillo"], 2),
       ],
       experto: [
         m("Mezcla experta", "Cada mezcla, un nuevo color.", "Une cada mezcla con su resultado",
           [{ left: "Rojo + Azul", right: "Morado" }, { left: "Rojo + Amarillo", right: "Naranja" }, { left: "Azul + Amarillo", right: "Verde" }, { left: "Blanco + Negro", right: "Gris" }]),
-        q("Color complementario", "Están en lados opuestos.", "¿Cuál es el complementario del rojo?", ["Azul", "Verde", "Amarillo", "Morado"], 1),
-        q("Tono y matiz", "Aclarar = añadir blanco.", "¿Cómo aclaras un color?", ["Añadiendo negro", "Añadiendo blanco", "Añadiendo agua", "Frotando"], 1),
+        q("Color complementario", "Están en lados opuestos del círculo cromático.", "¿Cuál es el complementario del rojo?", ["Azul", "Verde", "Amarillo", "Morado"], 1),
+        q("Tono y matiz", "Aclarar = añadir blanco.", "¿Cómo se aclara un color?", ["Añadiendo negro", "Añadiendo blanco", "Añadiendo agua", "Mezclando todos"], 1),
       ],
     }, { status: "available", completion: 0 }),
 
-    stub("cm-c2", "Formas y figuras", "Líneas, curvas y patrones."),
-    stub("cm-c3", "Cuento mío", "Inventa una historia paso a paso."),
-    stub("cm-c4", "Música y ritmo", "Sonidos que cuentan."),
-    stub("cm-summit", "Cumbre del Mirador", "Tu obra al viento."),
+    tiered("cm-c2", "Formas y figuras", "Líneas, curvas y patrones que construyen el mundo.", {
+      inicial: [
+        v("¿Qué forma es?", "Las formas están en todas partes 🔷", "¿Cuál es un círculo?",
+          [{ emoji: "🔴", label: "Círculo" }, { emoji: "🔷", label: "Rombo" }, { emoji: "⬛", label: "Cuadrado" }, { emoji: "🔺", label: "Triángulo" }], 0),
+        q("Lados del triángulo", "Tri = tres.", "¿Cuántos lados tiene un triángulo?", ["2", "3", "4", "5"], 1),
+        m("Une forma y objeto", "Cada objeto esconde una forma.", "Une cada forma con un objeto del mundo real",
+          [{ left: "Círculo", right: "Rueda" }, { left: "Cuadrado", right: "Ventana" }, { left: "Triángulo", right: "Pizza" }, { left: "Rectángulo", right: "Puerta" }]),
+      ],
+      avanzado: [
+        q("Polígonos", "Polígono = figura cerrada con líneas rectas.", "¿Cuántos lados tiene un hexágono?", ["4", "5", "6", "8"], 2),
+        d("Figura plana o sólida", "Plana = 2D. Sólida = 3D.", "Arrastra cada figura",
+          [{ id: "plan", label: "Plana (2D)", emoji: "📄" }, { id: "sol", label: "Sólida (3D)", emoji: "📦" }],
+          [{ id: "i1", label: "Círculo", bucket: "plan" }, { id: "i2", label: "Esfera", bucket: "sol" }, { id: "i3", label: "Cuadrado", bucket: "plan" }, { id: "i4", label: "Cubo", bucket: "sol" }, { id: "i5", label: "Triángulo", bucket: "plan" }, { id: "i6", label: "Pirámide", bucket: "sol" }]),
+        q("Simetría", "Simétrico = igual a ambos lados.", "¿Cuál tiene simetría?", ["Letra S", "Letra A", "Letra Z", "Letra R"], 1),
+      ],
+      experto: [
+        q("Área del cuadrado", "Área = lado × lado.", "¿Cuál es el área de un cuadrado de lado 5?", ["10", "20", "25", "15"], 2),
+        m("Figura y propiedad", "Cada forma tiene sus reglas.", "Une cada figura con su propiedad",
+          [{ left: "Círculo", right: "Sin lados rectos" }, { left: "Cuadrado", right: "4 lados iguales" }, { left: "Triángulo equilátero", right: "3 lados iguales" }, { left: "Rectángulo", right: "4 ángulos rectos" }]),
+        d("Ángulo agudo, recto u obtuso", "Agudo < 90°, Recto = 90°, Obtuso > 90°.", "Arrastra cada ángulo",
+          [{ id: "ag", label: "Agudo", emoji: "📐" }, { id: "rec", label: "Recto", emoji: "⬜" }, { id: "ob", label: "Obtuso", emoji: "📏" }],
+          [{ id: "i1", label: "45°", bucket: "ag" }, { id: "i2", label: "90°", bucket: "rec" }, { id: "i3", label: "120°", bucket: "ob" }, { id: "i4", label: "30°", bucket: "ag" }, { id: "i5", label: "150°", bucket: "ob" }, { id: "i6", label: "180°", bucket: "ob" }]),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("cm-c3", "Cuento mío", "Inventa historias paso a paso.", {
+      inicial: [
+        q("Partes del cuento", "Todo cuento tiene inicio, nudo y desenlace.", "¿Qué va primero en un cuento?", ["El final", "El nudo", "El inicio", "El personaje"], 2),
+        m("Une parte con su momento", "Cada parte del cuento tiene su momento.", "Une cada parte con lo que pasa",
+          [{ left: "Inicio", right: "Presentamos a los personajes" }, { left: "Nudo", right: "Ocurre el problema" }, { left: "Desenlace", right: "El problema se resuelve" }, { left: "Moraleja", right: "Lo que aprendemos" }]),
+        v("¿Quién es el protagonista?", "El protagonista es el personaje principal 🦸", "¿Cuál suele ser el protagonista en un cuento?",
+          [{ emoji: "🧙", label: "Mago" }, { emoji: "🦸", label: "Héroe" }, { emoji: "🐉", label: "Dragón" }, { emoji: "🌲", label: "Árbol" }], 1),
+      ],
+      avanzado: [
+        q("Narrador", "El narrador cuenta la historia.", "¿Cómo cuenta la historia un narrador en primera persona?", ["Dice 'él hizo'", "Dice 'yo hice'", "Dice 'tú hiciste'", "No habla"], 1),
+        d("Tipo de personaje", "Cada personaje tiene su papel.", "Arrastra cada personaje a su tipo",
+          [{ id: "prot", label: "Protagonista", emoji: "🦸" }, { id: "ant", label: "Antagonista", emoji: "🦹" }, { id: "sec", label: "Secundario", emoji: "🧑" }],
+          [{ id: "i1", label: "El héroe valiente", bucket: "prot" }, { id: "i2", label: "El villano malvado", bucket: "ant" }, { id: "i3", label: "El amigo fiel", bucket: "sec" }, { id: "i4", label: "La bruja maliciosa", bucket: "ant" }, { id: "i5", label: "El explorador", bucket: "prot" }, { id: "i6", label: "El guarda del bosque", bucket: "sec" }]),
+        q("Descripción", "Describir es pintar con palabras.", "¿Qué hace una descripción?", ["Resume el final", "Presenta un problema", "Explica cómo es algo", "Indica el tiempo"], 2),
+      ],
+      experto: [
+        q("Metáfora", "Decir que algo ES otra cosa.", '"Sus ojos eran dos estrellas" es una…', ["Comparación", "Metáfora", "Pregunta", "Descripción"], 1),
+        m("Recurso literario", "Cada figura da color al texto.", "Une cada ejemplo con su recurso",
+          [{ left: '"Rápido como el viento"', right: "Símil" }, { left: '"El mar rugía"', right: "Personificación" }, { left: '"Llegó, vio, venció"', right: "Enumeración" }, { left: '"Sus ojos son luceros"', right: "Metáfora" }]),
+        q("Punto de vista", "La historia cambia según quien la cuenta.", "¿Qué cambia al contar una historia en tercera persona?", ["El lugar", "El tiempo", "El narrador habla de 'él' o 'ella'", "El número de personajes"], 2),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("cm-c4", "Música y ritmo", "Sonidos que cuentan historias.", {
+      inicial: [
+        v("¿Qué hace ruido?", "La música tiene instrumentos 🎵", "¿Cuál hace música?",
+          [{ emoji: "🎸", label: "Guitarra" }, { emoji: "🪨", label: "Piedra" }, { emoji: "🌵", label: "Cactus" }, { emoji: "🥾", label: "Bota" }], 0),
+        m("Instrumento y familia", "Los instrumentos se agrupan por cómo suenan.", "Une cada instrumento con su familia",
+          [{ left: "Guitarra", right: "Cuerda" }, { left: "Flauta", right: "Viento" }, { left: "Tambor", right: "Percusión" }, { left: "Violín", right: "Cuerda" }]),
+        q("El ritmo", "El ritmo es el pulso de la música.", "¿Qué es el ritmo en música?", ["El volumen", "El pulso y la repetición de sonidos", "El instrumento", "La letra"], 1),
+      ],
+      avanzado: [
+        q("Notas musicales", "Do, Re, Mi, Fa, Sol, La, Si.", "¿Cuántas notas tiene la escala musical?", ["5", "6", "7", "8"], 2),
+        d("Instrumento de viento, cuerda o percusión", "Cada familia suena diferente.", "Arrastra cada instrumento",
+          [{ id: "viento", label: "Viento", emoji: "💨" }, { id: "cuerda", label: "Cuerda", emoji: "🎸" }, { id: "perc", label: "Percusión", emoji: "🥁" }],
+          [{ id: "i1", label: "Trompeta", bucket: "viento" }, { id: "i2", label: "Piano", bucket: "cuerda" }, { id: "i3", label: "Batería", bucket: "perc" }, { id: "i4", label: "Saxofón", bucket: "viento" }, { id: "i5", label: "Arpa", bucket: "cuerda" }, { id: "i6", label: "Maracas", bucket: "perc" }]),
+        q("Tempo", "El tempo marca la velocidad de la música.", "¿Qué significa 'Allegro' en música?", ["Lento", "Muy lento", "Rápido", "Sin ritmo"], 2),
+      ],
+      experto: [
+        q("Compás", "El compás organiza el ritmo.", "¿Qué indica el compás de 4/4?", ["4 notas iguales", "4 tiempos por cada compás", "4 instrumentos", "4 canciones"], 1),
+        m("Género y característica", "Cada género tiene su sello.", "Une cada género con su característica",
+          [{ left: "Jazz", right: "Improvisación y sincopado" }, { left: "Flamenco", right: "Guitarra y palmas" }, { left: "Clásica", right: "Orquesta y partitura" }, { left: "Rock", right: "Guitarra eléctrica" }]),
+        q("Armonía", "Sonidos que suenan juntos y bien.", "¿Qué es la armonía en música?", ["La letra de una canción", "La combinación agradable de notas simultáneas", "El volumen máximo", "El tempo más lento"], 1),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("cm-summit", "Cumbre del Mirador", "Tu obra más alta.", {
+      inicial: [
+        q("Reto del color", "¿Recuerdas las mezclas?", "¿Qué obtienes al mezclar rojo y azul?", ["Verde", "Naranja", "Morado", "Marrón"], 2),
+        q("Reto de formas", "Las figuras están en todas partes.", "¿Cuántos lados tiene un cuadrado?", ["3", "4", "5", "6"], 1),
+        q("Reto del cuento", "Todo cuento tiene su orden.", "¿Qué parte del cuento presenta el problema?", ["El inicio", "El nudo", "El desenlace", "La moraleja"], 1),
+      ],
+      avanzado: [
+        q("Reto cromático", "El círculo cromático no miente.", "¿Cuál es el complementario del azul?", ["Verde", "Morado", "Naranja", "Rojo"], 2),
+        m("Reto creativo", "Arte en todas sus formas.", "Une cada disciplina con su herramienta",
+          [{ left: "Pintura", right: "Pincel" }, { left: "Escultura", right: "Cincel" }, { left: "Música", right: "Partitura" }, { left: "Literatura", right: "Pluma" }]),
+        q("Reto narrativo", "El narrador da vida a la historia.", "¿Qué es un símil?", ["Una metáfora directa", "Una comparación con 'como'", "Un personaje secundario", "El punto de vista"], 1),
+      ],
+      experto: [
+        q("Reto geométrico", "Ángulos y medidas.", "¿Cuántos grados suman los ángulos internos de un triángulo?", ["90°", "180°", "270°", "360°"], 1),
+        q("Reto musical", "La teoría hace al músico.", "¿Cuántas corcheas equivalen a una negra?", ["1", "2", "3", "4"], 1),
+        m("Reto de recursos", "El lenguaje tiene muchos colores.", "Une cada recurso con su ejemplo",
+          [{ left: "Metáfora", right: '"La vida es un sueño"' }, { left: "Hipérbole", right: '"Tengo mil cosas que hacer"' }, { left: "Personificación", right: '"El viento susurraba"' }, { left: "Aliteración", right: '"Tres tristes tigres"' }]),
+      ],
+    }, { status: "locked", isBoss: true, completion: 0 }),
   ],
 };
 
 // =============================================================
-// MOUNTAIN 5 — PASO DE LA LÓGICA (1 deep module)
+// MOUNTAIN 5 — PASO DE LA LÓGICA (COMPLETE)
 // =============================================================
 const logica: Mountain = {
   id: "logica-paso",
@@ -484,34 +642,122 @@ const logica: Mountain = {
       inicial: [
         v("¿Qué sigue?", "Mira el patrón.", "🔵 🔴 🔵 🔴 __",
           [{ emoji: "🔵", label: "Azul" }, { emoji: "🔴", label: "Rojo" }, { emoji: "🟢", label: "Verde" }, { emoji: "🟡", label: "Amarillo" }], 0),
-        q("Lo que NO encaja", "Uno no es como los demás.", "¿Cuál es el intruso?", ["🍎 Manzana", "🍐 Pera", "🥕 Zanahoria", "🍌 Plátano"], 2),
-        m("Une figura y sombra", "Las sombras imitan la forma.", "Une cada figura con su sombra",
-          [{ left: "🐘 Elefante", right: "Grande y gris" }, { left: "🐭 Ratón", right: "Pequeño y rápido" }, { left: "🦒 Jirafa", right: "Alta y delgada" }, { left: "🐢 Tortuga", right: "Lenta y dura" }]),
+        q("El intruso", "Uno no es como los demás.", "¿Cuál NO es una fruta?", ["🍎 Manzana", "🍐 Pera", "🥕 Zanahoria", "🍌 Plátano"], 2),
+        m("Une figura y sombra", "Las sombras imitan la forma.", "Une cada animal con su característica",
+          [{ left: "🐘 Elefante", right: "Grande y con trompa" }, { left: "🐭 Ratón", right: "Pequeño y rápido" }, { left: "🦒 Jirafa", right: "Alta y con manchas" }, { left: "🐢 Tortuga", right: "Lenta con caparazón" }]),
       ],
       avanzado: [
-        q("Adivinanza lógica", "Lee con calma.", "Ana es mayor que Ben. Ben es mayor que Coco. ¿Quién es el mayor?", ["Ana", "Ben", "Coco", "Ninguno"], 0),
+        q("Adivinanza lógica", "Lee con calma.", "Ana es mayor que Ben. Ben es mayor que Coco. ¿Quién es el más joven?", ["Ana", "Ben", "Coco", "Ninguno"], 2),
         d("Causa o efecto", "La causa pasa antes.", "Arrastra cada hecho",
           [{ id: "cau", label: "Causa", emoji: "🌧️" }, { id: "ef", label: "Efecto", emoji: "💧" }],
-          [{ id: "i1", label: "Llueve", bucket: "cau" }, { id: "i2", label: "El suelo se moja", bucket: "ef" }, { id: "i3", label: "Como mucho", bucket: "cau" }, { id: "i4", label: "Me lleno", bucket: "ef" }]),
-        q("Falta una pieza", "Patrón con orden.", "¿Qué falta? ⬛⬜⬛⬜__⬜", ["⬛", "⬜", "🔴", "Nada"], 0),
+          [{ id: "i1", label: "Llueve mucho", bucket: "cau" }, { id: "i2", label: "El suelo se moja", bucket: "ef" }, { id: "i3", label: "Como mucho", bucket: "cau" }, { id: "i4", label: "Me lleno", bucket: "ef" }]),
+        q("Patrón con figuras", "Busca qué se repite.", "¿Qué falta? ⬛⬜⬛⬜__⬜", ["⬛", "⬜", "🔴", "Nada"], 0),
       ],
       experto: [
-        q("Si... entonces...", "Razona en cadena.", "Si todos los osos duermen y Bo es un oso, entonces…", ["Bo come", "Bo duerme", "Bo corre", "No sabemos"], 1),
-        q("Lógica numérica", "Encuentra la regla.", "Si 2→4, 3→9, 4→16, entonces 5→?", ["10", "20", "25", "30"], 2),
-        m("Une enigma con respuesta", "Piensa antes de unir.", "Une cada enigma",
+        q("Si... entonces...", "Razona en cadena.", "Si todos los osos duermen en invierno y Bo es un oso, entonces…", ["Bo come", "Bo duerme", "Bo corre", "No sabemos"], 1),
+        q("Regla numérica", "Encuentra la regla.", "Si 2→4, 3→9, 4→16, entonces 5→?", ["10", "20", "25", "30"], 2),
+        m("Enigma y respuesta", "Piensa antes de unir.", "Une cada enigma con su respuesta",
           [{ left: "Tiene patas pero no anda", right: "Mesa" }, { left: "Cae pero no se rompe", right: "Noche" }, { left: "Cuanto más quitas, más grande es", right: "Hoyo" }, { left: "Sin alas pero vuela", right: "Tiempo" }]),
       ],
     }, { status: "available", completion: 0 }),
 
-    stub("lg-c2", "Secuencias", "Lo que va antes y después."),
-    stub("lg-c3", "Categorías", "Agrupar por lo que comparten."),
-    stub("lg-c4", "Acertijos", "Pequeños retos para crecer."),
-    stub("lg-summit", "Cumbre de la Lógica", "Pon tu mente a prueba."),
+    tiered("lg-c2", "Secuencias", "Lo que va antes y lo que va después.", {
+      inicial: [
+        q("¿Qué va después?", "Las secuencias tienen orden.", "Lunes, Martes, Miércoles, __", ["Viernes", "Jueves", "Sábado", "Domingo"], 1),
+        m("Ordena las estaciones", "El año tiene cuatro estaciones.", "Une cada estación con lo que trae",
+          [{ left: "Primavera", right: "Flores y lluvia" }, { left: "Verano", right: "Calor y playa" }, { left: "Otoño", right: "Hojas que caen" }, { left: "Invierno", right: "Frío y nieve" }]),
+        v("¿Qué va primero?", "El orden importa 📋", "¿Qué haces primero para lavarte los dientes?",
+          [{ emoji: "🦷", label: "Cepillar" }, { emoji: "💧", label: "Mojar el cepillo" }, { emoji: "🪥", label: "Coger el cepillo" }, { emoji: "🚰", label: "Enjuagar" }], 2),
+      ],
+      avanzado: [
+        d("Ordena la historia", "Cada evento tiene su momento.", "Arrastra en el orden correcto",
+          [{ id: "p1", label: "1º", emoji: "1️⃣" }, { id: "p2", label: "2º", emoji: "2️⃣" }, { id: "p3", label: "3º", emoji: "3️⃣" }, { id: "p4", label: "4º", emoji: "4️⃣" }],
+          [{ id: "i1", label: "Plantar la semilla", bucket: "p1" }, { id: "i2", label: "Regar cada día", bucket: "p2" }, { id: "i3", label: "Brotar el tallo", bucket: "p3" }, { id: "i4", label: "Florecer", bucket: "p4" }]),
+        q("Número en la secuencia", "Busca la regla.", "1, 1, 2, 3, 5, 8, __", ["10", "11", "13", "12"], 2),
+        m("Evento histórico en orden", "El tiempo tiene su fila.", "Ordena del más antiguo al más reciente",
+          [{ left: "1º", right: "Invención de la escritura" }, { left: "2º", right: "Construcción de las pirámides" }, { left: "3º", right: "Llegada del hombre a la luna" }, { left: "4º", right: "Creación de internet" }]),
+      ],
+      experto: [
+        q("Progresión geométrica", "Se multiplica en vez de sumar.", "2, 6, 18, 54, __", ["72", "108", "162", "216"], 1),
+        q("Deducción en cadena", "Usa todo lo que sabes.", "A es más alto que B. C es más bajo que B. D es igual que A. ¿Quién es el más bajo?", ["A", "B", "C", "D"], 2),
+        d("Tipo de secuencia", "Cada secuencia sigue su regla.", "Arrastra cada secuencia a su tipo",
+          [{ id: "arit", label: "Aritmética (+constante)", emoji: "➕" }, { id: "geo", label: "Geométrica (×constante)", emoji: "✖️" }],
+          [{ id: "i1", label: "2, 4, 6, 8", bucket: "arit" }, { id: "i2", label: "3, 9, 27, 81", bucket: "geo" }, { id: "i3", label: "10, 20, 30, 40", bucket: "arit" }, { id: "i4", label: "2, 4, 8, 16", bucket: "geo" }]),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("lg-c3", "Categorías", "Agrupar por lo que comparten.", {
+      inicial: [
+        d("Frutas o verduras", "Cada alimento tiene su grupo.", "Arrastra cada alimento",
+          [{ id: "fru", label: "Fruta", emoji: "🍎" }, { id: "ver", label: "Verdura", emoji: "🥦" }],
+          [{ id: "i1", label: "Manzana", bucket: "fru" }, { id: "i2", label: "Zanahoria", bucket: "ver" }, { id: "i3", label: "Naranja", bucket: "fru" }, { id: "i4", label: "Brócoli", bucket: "ver" }, { id: "i5", label: "Uva", bucket: "fru" }, { id: "i6", label: "Lechuga", bucket: "ver" }]),
+        q("¿Qué tienen en común?", "Busca lo que comparten.", "¿Qué tienen en común perro, gato y caballo?", ["Vuelan", "Son mamíferos", "Viven en el agua", "Son insectos"], 1),
+        m("Une con su categoría", "Cada cosa pertenece a algún grupo.", "Une cada cosa con su categoría",
+          [{ left: "Guitarra", right: "Instrumento" }, { left: "Rosa", right: "Planta" }, { left: "Tiburón", right: "Animal" }, { left: "Flauta", right: "Instrumento" }]),
+      ],
+      avanzado: [
+        q("El que no encaja", "Busca al intruso.", "¿Cuál NO pertenece al grupo? Plutón, Júpiter, Saturno, Luna", ["Plutón", "Júpiter", "Saturno", "Luna"], 3),
+        d("Seres vivos o no vivos", "Los seres vivos nacen, crecen y mueren.", "Arrastra cada elemento",
+          [{ id: "vivo", label: "Ser vivo", emoji: "🌱" }, { id: "novivo", label: "No vivo", emoji: "🪨" }],
+          [{ id: "i1", label: "Perro", bucket: "vivo" }, { id: "i2", label: "Piedra", bucket: "novivo" }, { id: "i3", label: "Árbol", bucket: "vivo" }, { id: "i4", label: "Nube", bucket: "novivo" }, { id: "i5", label: "Hongo", bucket: "vivo" }, { id: "i6", label: "Agua", bucket: "novivo" }]),
+        q("Subconjunto", "Dentro de un grupo puede haber grupos más pequeños.", "Los poodles son un subconjunto de…", ["Gatos", "Perros", "Aves", "Peces"], 1),
+      ],
+      experto: [
+        q("Intersección", "Algunos elementos comparten dos categorías.", "¿Cuál es a la vez mamífero y marino?", ["Tiburón", "Pingüino", "Delfín", "Pulpo"], 2),
+        m("Jerarquía de categorías", "Los grupos tienen niveles.", "Une cada nivel de la jerarquía",
+          [{ left: "Animal", right: "Categoría general" }, { left: "Mamífero", right: "Subcategoría" }, { left: "Perro", right: "Especie" }, { left: "Poodle", right: "Raza" }]),
+        d("Clasifica por dos criterios", "Algunos grupos comparten dos rasgos.", "Arrastra cada animal",
+          [{ id: "volmam", label: "Vuela y es mamífero", emoji: "🦇" }, { id: "volnomam", label: "Vuela, no mamífero", emoji: "🐦" }, { id: "noval", label: "No vuela", emoji: "🐘" }],
+          [{ id: "i1", label: "Murciélago", bucket: "volmam" }, { id: "i2", label: "Águila", bucket: "volnomam" }, { id: "i3", label: "Elefante", bucket: "noval" }, { id: "i4", label: "Loro", bucket: "volnomam" }, { id: "i5", label: "Pingüino", bucket: "noval" }]),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("lg-c4", "Acertijos", "Pequeños retos para crecer.", {
+      inicial: [
+        q("Acertijo fácil", "Piensa despacio.", "Tengo manos pero no puedo aplaudir. ¿Qué soy?", ["Un guante", "Un reloj", "Un árbol", "Una puerta"], 1),
+        q("Acertijo de animales", "El animal habla en acertijo.", "Vuelo sin alas, lloro sin ojos. Cuando llego, el campo festeja. ¿Qué soy?", ["El viento", "La lluvia", "El sol", "La nube"], 1),
+        v("Acertijo visual", "La imagen da la pista 🔍", "Soy redondo, ilumino de noche y cambio de forma. ¿Qué soy?",
+          [{ emoji: "☀️", label: "Sol" }, { emoji: "🌙", label: "Luna" }, { emoji: "⭐", label: "Estrella" }, { emoji: "💡", label: "Bombilla" }], 1),
+      ],
+      avanzado: [
+        q("Acertijo numérico", "Los números también son acertijos.", "Soy un número. Si me doblas, obtienes 18. ¿Quién soy?", ["7", "8", "9", "10"], 2),
+        q("Acertijo lógico", "Razona paso a paso.", "En una carrera, si adelantas al segundo, ¿en qué posición quedas?", ["Primero", "Segundo", "Tercero", "Último"], 1),
+        m("Une acertijo con respuesta", "Cada enigma tiene su llave.", "Une cada acertijo con su respuesta",
+          [{ left: "Cuanto más seca, más moja", right: "Toalla" }, { left: "Tiene dientes pero no muerde", right: "Peine" }, { left: "Habla sin boca", right: "Eco" }, { left: "Va por el río sin moverse", right: "Orilla" }]),
+      ],
+      experto: [
+        q("Acertijo de tiempo", "El tiempo también es un misterio.", "El padre de mi hijo no es mi marido. ¿Quién es?", ["Mi hermano", "Mi padre", "Yo misma", "Mi tío"], 2),
+        q("Acertijo de lógica pura", "Piensa al revés si hace falta.", "Un hombre vive en el piso 30. Baja siempre en ascensor pero sube andando hasta el piso 15. ¿Por qué?", ["Le gusta caminar", "El ascensor no sube", "Es muy bajo y no alcanza el botón 30", "Ahorra energía"], 2),
+        d("Tipo de razonamiento", "Cada acertijo usa un tipo.", "Arrastra cada acertijo a su tipo de razonamiento",
+          [{ id: "ded", label: "Deductivo", emoji: "🔍" }, { id: "ind", label: "Inductivo", emoji: "📊" }, { id: "lat", label: "Lateral", emoji: "🔄" }],
+          [{ id: "i1", label: "Si todos los A son B y X es A, entonces X es B", bucket: "ded" }, { id: "i2", label: "He visto 10 cuervos negros, probablemente todos lo son", bucket: "ind" }, { id: "i3", label: "El hombre del ascensor que es bajo", bucket: "lat" }]),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("lg-summit", "Cumbre de la Lógica", "Pon tu mente a prueba.", {
+      inicial: [
+        q("Reto de patrón", "El ritmo no miente.", "¿Qué sigue? 🔴🔵🟢🔴🔵__", ["🔴", "🔵", "🟢", "🟡"], 2),
+        q("Reto del intruso", "Uno no encaja.", "¿Cuál NO es un planeta?", ["Marte", "Luna", "Saturno", "Júpiter"], 1),
+        q("Reto de acertijo", "Piensa con calma.", "¿Qué cosa tiene un ojo pero no puede ver?", ["Un pez", "Una aguja", "Un cíclope", "Un telescopio"], 1),
+      ],
+      avanzado: [
+        q("Reto de secuencia", "Busca la regla oculta.", "2, 3, 5, 7, 11, __", ["12", "13", "14", "15"], 1),
+        q("Reto de deducción", "Razona en cadena.", "Si A > B y B > C, entonces…", ["C > A", "A > C", "B > A", "C = A"], 1),
+        m("Reto de categorías", "Cada cosa en su lugar.", "Une cada elemento con su categoría correcta",
+          [{ left: "Ecuación", right: "Matemáticas" }, { left: "Metáfora", right: "Literatura" }, { left: "Fotosíntesis", right: "Biología" }, { left: "Democracia", right: "Ciencias sociales" }]),
+      ],
+      experto: [
+        q("Reto experto de acertijo", "El más difícil.", "Cuanto más grande, menos ves. ¿Qué soy?", ["Un elefante", "La oscuridad", "Un agujero", "El universo"], 1),
+        q("Reto de lógica formal", "La verdad no negocia.", "Si 'todos los gatos son mamíferos' y 'Felix es un gato', ¿qué es verdad?", ["Felix vuela", "Felix es mamífero", "Felix es reptil", "No sabemos"], 1),
+        m("Reto de razonamiento", "Cada tipo de razonamiento tiene su lugar.", "Une cada ejemplo con su tipo",
+          [{ left: "Todos los hombres son mortales, Sócrates es hombre, luego...", right: "Deductivo" }, { left: "He visto 100 cisnes blancos, probablemente todos lo son", right: "Inductivo" }, { left: "¿Cómo cruzar el río con el lobo, la cabra y la col?", right: "Lateral" }, { left: "Si p entonces q; p es verdad; luego q", right: "Deductivo" }]),
+      ],
+    }, { status: "locked", isBoss: true, completion: 0 }),
   ],
 };
 
 // =============================================================
-// MOUNTAIN 6 — REFUGIO EMOCIONAL (1 deep module)
+// MOUNTAIN 6 — REFUGIO EMOCIONAL (COMPLETE)
 // =============================================================
 const social: Mountain = {
   id: "social-refugio",
@@ -536,24 +782,108 @@ const social: Mountain = {
           [{ left: "Feliz", right: "😀" }, { left: "Triste", right: "😢" }, { left: "Enfadado", right: "😡" }, { left: "Sorprendido", right: "😯" }]),
       ],
       avanzado: [
-        q("¿Qué hago si…?", "Pensar antes de actuar.", "Si un amigo está triste, lo mejor es…", ["Reírme", "Preguntarle si está bien", "Irme", "Gritar"], 1),
-        d("Emoción agradable o no", "Algunas se sienten ricas, otras pesadas.", "Arrastra cada emoción",
+        q("¿Qué hago si…?", "Pensar antes de actuar.", "Si un amigo está triste, lo mejor es…", ["Reírme de él", "Preguntarle si está bien", "Irme sin decir nada", "Gritar"], 1),
+        d("Emoción agradable o incómoda", "Todas las emociones son válidas.", "Arrastra cada emoción",
           [{ id: "ag", label: "Agradable", emoji: "🌞" }, { id: "in", label: "Incómoda", emoji: "🌧️" }],
           [{ id: "i1", label: "Alegría", bucket: "ag" }, { id: "i2", label: "Miedo", bucket: "in" }, { id: "i3", label: "Calma", bucket: "ag" }, { id: "i4", label: "Enfado", bucket: "in" }, { id: "i5", label: "Cariño", bucket: "ag" }, { id: "i6", label: "Vergüenza", bucket: "in" }]),
-        q("Calmarse", "Respirar ayuda.", "¿Qué ayuda a calmarse cuando hay enfado?", ["Romper algo", "Respirar profundo", "Gritar", "Esconderse"], 1),
+        q("Calmarse", "Respirar ayuda.", "¿Qué ayuda a calmarse cuando hay enfado?", ["Romper algo", "Respirar profundo", "Gritar más fuerte", "Esconderse"], 1),
       ],
       experto: [
-        q("Empatía", "Ponerse en su lugar.", "Empatizar significa…", ["Reírse de alguien", "Sentir lo que siente otro", "Hacer lo que quieras", "Estar callado"], 1),
-        q("Resolver un conflicto", "Hablar es la primera escalera.", "Si discutes con un amigo, primero…", ["Hablar tranquilo", "Pegar", "Romper amistad", "Esconderte"], 0),
+        q("Empatía", "Ponerse en el lugar de otro.", "Empatizar significa…", ["Reírse de alguien", "Sentir lo que siente otro", "Hacer siempre lo que quieras", "Estar en silencio"], 1),
+        q("Resolver conflicto", "Hablar es la primera escalera.", "Si discutes con un amigo, primero…", ["Hablar tranquilamente", "Pegar", "Terminar la amistad", "Esconderte"], 0),
         m("Une situación con emoción", "Cada momento trae una emoción.", "Une cada situación",
           [{ left: "Examen sorpresa", right: "Nervios" }, { left: "Ganar el partido", right: "Alegría" }, { left: "Perder un juguete", right: "Tristeza" }, { left: "Caja sin abrir", right: "Curiosidad" }]),
       ],
     }, { status: "available", completion: 0 }),
 
-    stub("sr-c2", "Calmar la tormenta", "Trucos para los días difíciles."),
-    stub("sr-c3", "Compartir el camino", "Convivir con otros."),
-    stub("sr-c4", "Pedir y dar ayuda", "Subimos mejor en grupo."),
-    stub("sr-summit", "Cumbre del Refugio", "Tu corazón fuerte y tranquilo."),
+    tiered("sr-c2", "Calmar la tormenta", "Trucos para los días difíciles.", {
+      inicial: [
+        q("Respirar ayuda", "Cuando estás nervioso, respira.", "¿Qué puedes hacer cuando te sientes muy enfadado?", ["Gritar muy fuerte", "Respirar profundo y contar hasta 10", "Tirar cosas", "Correr sin parar"], 1),
+        m("Une emoción con su truco", "Cada emoción tiene su remedio.", "Une cada emoción con lo que ayuda",
+          [{ left: "Enfado", right: "Respirar hondo" }, { left: "Tristeza", right: "Hablar con alguien" }, { left: "Nervios", right: "Contar hasta 10" }, { left: "Miedo", right: "Encender la luz" }]),
+        v("¿Qué te calma?", "Cada uno tiene su refugio 🏠", "¿Cuál de estas cosas te puede calmar?",
+          [{ emoji: "🎵", label: "Música suave" }, { emoji: "🔥", label: "Fuego" }, { emoji: "⚡", label: "Ruido fuerte" }, { emoji: "🌪️", label: "Tormenta" }], 0),
+      ],
+      avanzado: [
+        q("Regulación emocional", "Podemos aprender a manejar cómo nos sentimos.", "¿Qué significa regular las emociones?", ["No sentir nada", "Aprender a manejar cómo nos sentimos", "Esconder los sentimientos", "Llorar siempre"], 1),
+        d("Estrategia útil o no útil", "No todas las reacciones ayudan.", "Arrastra cada reacción",
+          [{ id: "util", label: "Útil", emoji: "✅" }, { id: "noUtil", label: "No útil", emoji: "❌" }],
+          [{ id: "i1", label: "Respirar profundo", bucket: "util" }, { id: "i2", label: "Gritar a todos", bucket: "noUtil" }, { id: "i3", label: "Dar un paseo", bucket: "util" }, { id: "i4", label: "Romper cosas", bucket: "noUtil" }, { id: "i5", label: "Hablar con un adulto", bucket: "util" }, { id: "i6", label: "Ignorar el problema siempre", bucket: "noUtil" }]),
+        q("El cuerpo y las emociones", "El cuerpo también siente.", "¿Qué puede pasar en el cuerpo cuando tienes miedo?", ["Te creces más", "Se te acelera el corazón", "Te vuelves invisible", "Te da hambre siempre"], 1),
+      ],
+      experto: [
+        q("Mindfulness", "Estar presente en el momento.", "¿Qué es el mindfulness?", ["Un deporte extremo", "Una técnica de atención plena al momento presente", "Un tipo de música", "Una forma de dormir"], 1),
+        m("Técnica y su efecto", "Cada técnica tiene su resultado.", "Une cada técnica con su efecto",
+          [{ left: "Respiración diafragmática", right: "Calma el sistema nervioso" }, { left: "Visualización positiva", right: "Reduce la ansiedad" }, { left: "Ejercicio físico", right: "Libera endorfinas" }, { left: "Escritura emocional", right: "Procesa los sentimientos" }]),
+        q("Inteligencia emocional", "Reconocer y gestionar emociones propias y ajenas.", "¿Qué es la inteligencia emocional?", ["Ser muy listo en matemáticas", "Gestionar bien las emociones propias y ajenas", "No sentir emociones", "Tener muchos amigos"], 1),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("sr-c3", "Compartir el camino", "Convivir con otros.", {
+      inicial: [
+        q("¿Qué es un amigo?", "Los amigos se cuidan.", "¿Qué hace un buen amigo?", ["Te ignora", "Te ayuda cuando lo necesitas", "Te quita tus cosas", "Siempre gana"], 1),
+        m("Acción amable o no amable", "Elegimos cómo tratar a los demás.", "Une cada acción con si es amable o no",
+          [{ left: "Prestar un juguete", right: "Amable" }, { left: "Empujar a alguien", right: "No amable" }, { left: "Escuchar cuando hablan", right: "Amable" }, { left: "Burlarse de un error", right: "No amable" }]),
+        v("¿Cómo te sientes cuando te ayudan?", "Recibir ayuda es bonito 💛", "¿Cómo te sientes cuando alguien te ayuda?",
+          [{ emoji: "😀", label: "Feliz" }, { emoji: "😡", label: "Enfadado" }, { emoji: "😴", label: "Aburrido" }, { emoji: "😱", label: "Asustado" }], 0),
+      ],
+      avanzado: [
+        q("Escucha activa", "Escuchar es más que oír.", "¿Qué es escuchar activamente?", ["Oír con los oídos solamente", "Prestar atención completa a quien habla", "Hablar al mismo tiempo", "Pensar en otra cosa"], 1),
+        d("Conducta prosocial o antisocial", "Algunas acciones unen, otras separan.", "Arrastra cada conducta",
+          [{ id: "pro", label: "Prosocial", emoji: "🤝" }, { id: "anti", label: "Antisocial", emoji: "🚫" }],
+          [{ id: "i1", label: "Ayudar a alguien que se cayó", bucket: "pro" }, { id: "i2", label: "Excluir a alguien del juego", bucket: "anti" }, { id: "i3", label: "Compartir la merienda", bucket: "pro" }, { id: "i4", label: "Mentir para no meterse en problemas", bucket: "anti" }, { id: "i5", label: "Defender a quien lo molestan", bucket: "pro" }, { id: "i6", label: "Ignorar cuando alguien llora", bucket: "anti" }]),
+        q("Resolución de conflictos", "Los conflictos se pueden resolver bien.", "¿Cuál es el primer paso para resolver un conflicto?", ["Ganar la pelea", "Escuchar al otro y hablar tranquilo", "Ignorar el problema", "Pedir que otro decida"], 1),
+      ],
+      experto: [
+        q("Asertividad", "Ni agresivo ni pasivo — en el medio.", "¿Qué es ser asertivo?", ["Hacer siempre lo que los demás quieren", "Imponer siempre tu voluntad", "Expresar lo que piensas con respeto", "No opinar nunca"], 2),
+        m("Estilo de comunicación", "Cada estilo tiene consecuencias.", "Une cada estilo con su descripción",
+          [{ left: "Asertivo", right: "Expresa con respeto y firmeza" }, { left: "Agresivo", right: "Impone sin considerar al otro" }, { left: "Pasivo", right: "Cede siempre sin expresarse" }, { left: "Pasivo-agresivo", right: "Expresa indirectamente el malestar" }]),
+        q("Trabajo en equipo", "Juntos se llega más lejos.", "¿Qué hace que un equipo funcione bien?", ["Que uno mande y todos obedezcan", "Comunicación, respeto y objetivo común", "Que cada uno trabaje solo", "Que el más listo haga todo"], 1),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("sr-c4", "Pedir y dar ayuda", "Subimos mejor en grupo.", {
+      inicial: [
+        q("Pedir ayuda", "Pedir ayuda es valiente.", "¿Cuándo está bien pedir ayuda?", ["Nunca, hay que hacerlo solo", "Cuando no puedes resolver algo solo", "Solo si eres pequeño", "Cuando quieres molestar"], 1),
+        v("¿A quién pides ayuda?", "Hay personas de confianza 🧡", "Si te sientes triste, ¿a quién puedes hablar?",
+          [{ emoji: "👨‍👩‍👧", label: "Familia" }, { emoji: "🌵", label: "Un cactus" }, { emoji: "📺", label: "La tele" }, { emoji: "🪨", label: "Una piedra" }], 0),
+        m("¿Ayudar o no ayudar?", "A veces la ayuda tiene límites.", "Une cada situación con la respuesta correcta",
+          [{ left: "Un amigo llora solo", right: "Le pregunto qué le pasa" }, { left: "Alguien me pide hacer trampa", right: "Digo que no" }, { left: "Un compañero no entiende algo", right: "Se lo explico" }, { left: "Me piden que mienta", right: "Me niego con respeto" }]),
+      ],
+      avanzado: [
+        q("Límites saludables", "Ayudar sí, pero sin perder tu bienestar.", "¿Qué es un límite saludable?", ["Nunca hablar con nadie", "Saber hasta dónde puedo ayudar sin hacerme daño", "Hacer siempre lo que me piden", "Ignorar a los demás"], 1),
+        d("Pedir ayuda o resolver solo", "Saber cuándo pedir ayuda es una habilidad.", "Arrastra cada situación",
+          [{ id: "pedir", label: "Pide ayuda", emoji: "🤝" }, { id: "solo", label: "Puedes solo", emoji: "💪" }],
+          [{ id: "i1", label: "No entiendes una tarea difícil", bucket: "pedir" }, { id: "i2", label: "Atar los cordones", bucket: "solo" }, { id: "i3", label: "Te sientes muy mal por mucho tiempo", bucket: "pedir" }, { id: "i4", label: "Elegir qué ropa ponerte", bucket: "solo" }, { id: "i5", label: "Un adulto te hace sentir incómodo", bucket: "pedir" }, { id: "i6", label: "Hacer tu cama", bucket: "solo" }]),
+        q("Red de apoyo", "Tener personas de confianza es un tesoro.", "¿Qué es una red de apoyo?", ["Una red para pescar", "Personas de confianza a quienes acudir", "Solo tus padres", "Un grupo de estudio"], 1),
+      ],
+      experto: [
+        q("Reciprocidad", "El dar y recibir va en dos sentidos.", "¿Qué es la reciprocidad en las relaciones?", ["Dar sin esperar nada", "Equilibrio entre dar y recibir", "Recibir sin dar", "Competir con los demás"], 1),
+        m("Tipo de apoyo", "La ayuda tiene muchas formas.", "Une cada tipo de apoyo con su ejemplo",
+          [{ left: "Apoyo emocional", right: "Escuchar cuando alguien está triste" }, { left: "Apoyo instrumental", right: "Ayudar a cargar algo pesado" }, { left: "Apoyo informativo", right: "Dar un consejo útil" }, { left: "Apoyo de valoración", right: "Decir que algo está bien hecho" }]),
+        q("Dependencia vs interdependencia", "Hay diferencia entre necesitar y apoyarse.", "¿Qué es la interdependencia sana?", ["Depender de alguien para todo", "Ser completamente autónomo siempre", "Apoyarse mutuamente respetando la autonomía", "Evitar pedir ayuda"], 2),
+      ],
+    }, { status: "locked", completion: 0 }),
+
+    tiered("sr-summit", "Cumbre del Refugio", "Tu corazón fuerte y tranquilo.", {
+      inicial: [
+        q("Reto emocional", "Confía en lo aprendido.", "¿Cuál es una emoción agradable?", ["Miedo", "Enfado", "Alegría", "Vergüenza"], 2),
+        q("Reto de amistad", "Los amigos importan.", "¿Qué hace un buen amigo cuando estás triste?", ["Se ríe", "Te escucha", "Se va", "Te ignora"], 1),
+        q("Reto de calma", "Respira y piensa.", "¿Qué ayuda más cuando estás muy nervioso?", ["Correr y gritar", "Respirar profundo", "Comer mucho", "Dormir en el suelo"], 1),
+      ],
+      avanzado: [
+        q("Reto de empatía", "Ponte en su lugar.", "Tu amigo perdió su mascota. ¿Qué le dices?", ['"¡Qué torpe, debías cuidarla!"', '"Lo siento mucho, estoy aquí contigo"', '"No importa, ya tendrás otra"', '"Mejor así, las mascotas dan trabajo"'], 1),
+        m("Reto de estrategias", "Cada situación tiene su respuesta.", "Une cada situación con la mejor estrategia",
+          [{ left: "Estás muy enfadado", right: "Respira y cuenta hasta 10" }, { left: "Un amigo te excluye", right: "Habla con él con calma" }, { left: "No entiendes tus emociones", right: "Escríbelas en un diario" }, { left: "Te sientes solo", right: "Busca a alguien de confianza" }]),
+        q("Reto de comunicación", "Las palabras construyen o destruyen.", "¿Qué es comunicarse asertivamente?", ["Gritar para que te escuchen", "Decir lo que piensas con respeto", "Callarse siempre", "Decir lo que el otro quiere oír"], 1),
+      ],
+      experto: [
+        q("Reto de bienestar", "El bienestar se construye.", "¿Cuál de estas contribuye más al bienestar emocional?", ["Tener muchos juguetes", "Relaciones sanas y autoconocimiento", "Ganar siempre", "No tener problemas nunca"], 1),
+        q("Reto de inteligencia emocional", "Las emociones son información.", "¿Por qué es útil identificar tus emociones?", ["Para ocultarlas mejor", "Para gestionarlas y comunicarlas bien", "Para no sentirlas", "Para tener razón siempre"], 1),
+        m("Reto de habilidades sociales", "Cada habilidad abre una puerta.", "Une cada habilidad con su descripción",
+          [{ left: "Empatía", right: "Entender cómo se siente otro" }, { left: "Asertividad", right: "Expresarse con respeto y firmeza" }, { left: "Escucha activa", right: "Atención plena al que habla" }, { left: "Resolución de conflictos", right: "Llegar a acuerdos respetando a todos" }]),
+      ],
+    }, { status: "locked", isBoss: true, completion: 0 }),
   ],
 };
 
