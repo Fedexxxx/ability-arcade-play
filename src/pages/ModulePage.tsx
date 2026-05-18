@@ -212,7 +212,19 @@ const ModulePage = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.04 }}
-              onClick={() => ch.status !== "locked" && navigate(`/challenge/${sp.id}/${mod.id}/${ch.id}`)}
+              role={ch.status !== "locked" ? "button" : undefined}
+              tabIndex={ch.status !== "locked" ? 0 : -1}
+              onClick={() =>
+                ch.status !== "locked" &&
+                navigate(`/challenge/${sp.id}/${mod.id}/${ch.id}`)
+              }
+              onKeyDown={(e) => {
+                if (ch.status === "locked") return;
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  navigate(`/challenge/${sp.id}/${mod.id}/${ch.id}`);
+                }
+              }}
               className={`gradient-card rounded-xl ${cardPad} border border-border flex items-center gap-3 ${
                 ch.status === "locked" ? "opacity-40" : "cursor-pointer active:scale-[0.98] transition-transform"
               }`}
