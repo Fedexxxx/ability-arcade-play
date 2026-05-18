@@ -6,6 +6,7 @@ import { superpowers, areas, categories } from "@/data/mockData";
 import { mountains } from "@/data/mountains";
 import SherpaSpeech from "@/components/SherpaSpeech";
 import { useDensity } from "@/contexts/AgeDensityContext";
+import { useActiveMountain } from "@/hooks/useChallengeCompletions";
 
 const difficultyLabels = {
   beginner: "Sendero suave",
@@ -70,7 +71,13 @@ const MountainsPage = () => {
 
   // Pinned mountain — the one currently in progress (across the whole catalog,
   // not just the active filter, so the user always sees their climb).
-  const pinnedSP = superpowers.find((s) => s.status === "in-progress") ?? null;
+  // Sourced from mountain_progress (live), with a fallback to the legacy seed.
+  const activeRow = useActiveMountain();
+  const pinnedSP =
+    (activeRow ? superpowers.find((s) => s.id === activeRow.mountainId) : null) ??
+    superpowers.find((s) => s.status === "in-progress") ??
+    null;
+  const pinnedPct = activeRow?.pct ?? pinnedSP?.progress ?? 0;
 
   // Group filtered list by status, excluding the pinned card to avoid duplication.
   const grouped = useMemo(() => {
@@ -162,7 +169,7 @@ const MountainsPage = () => {
               <ArrowRight size={density.scale === "lg" ? 22 : 18} className="text-secondary mt-1 flex-shrink-0" />
             </div>
             <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <div className="h-full rounded-full gradient-sunrise" style={{ width: `${pinnedSP.progress}%` }} />
+              <div className="h-full rounded-full gradient-sunrise" style={{ width: `${pinnedPct}%` }} />
             </div>
             <div className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-secondary">
               Continuar ascenso →

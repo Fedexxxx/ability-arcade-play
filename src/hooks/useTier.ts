@@ -38,6 +38,8 @@ export function useTier(mountainId: string | undefined, moduleId: string | undef
     };
   }, [mountainId, moduleId, ageBand]);
 
-  const tier: Tier = stat?.tier ?? tierFromAgeBand(ageBand);
+  // Default tier is always "inicial" until module_tiers says otherwise.
+  // Age band controls UI density, not starting difficulty.
+  const tier: Tier = stat?.tier ?? "inicial";
   return { tier, pinned: stat?.pinned ?? false, recent: stat?.recent ?? [] };
 }

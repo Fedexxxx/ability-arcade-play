@@ -9,6 +9,7 @@ import { userProfile, superpowers, missions } from "@/data/mockData";
 import { useExplorer } from "@/hooks/useExplorer";
 import { useDensity } from "@/contexts/AgeDensityContext";
 import { useWallet } from "@/hooks/useWallet";
+import { useActiveMountain } from "@/hooks/useChallengeCompletions";
 import AvatarWithGear from "@/components/AvatarWithGear";
 import mountainBg from "@/assets/mountain-bg.jpg";
 
@@ -54,8 +55,18 @@ const BasecampPage = () => {
       return () => window.clearTimeout(t);
     }
   }, [wallet.balance]);
-  const activeSP = superpowers.find((s) => s.status === "in-progress") ?? superpowers.find((s) => s.status === "available");
-  const activeModule = activeSP?.modules.find((m) => m.status === "in-progress") ?? activeSP?.modules.find((m) => m.status === "available");
+  // "Subiendo ahora" comes from the live mountain_progress row — falling
+  // back to the first available mountain when nothing's started yet.
+  const activeRow = useActiveMountain();
+  const activeSP =
+    (activeRow ? superpowers.find((s) => s.id === activeRow.mountainId) : null) ??
+    superpowers.find((s) => s.status === "available") ??
+    superpowers.find((s) => s.status === "in-progress");
+  const activeModule =
+    activeSP?.modules.find((m) => m.status === "in-progress") ??
+    activeSP?.modules.find((m) => m.status === "available");
+  // Prefer the live pct (computed from real completions) over the seed value.
+  const activePct = activeRow?.pct ?? activeSP?.progress ?? 0;
   const dailyMission = missions.find((m) => m.type === "daily" && !m.completed);
 
   const explorerName = explorer?.name ?? userProfile.name;
@@ -199,9 +210,9 @@ const BasecampPage = () => {
             </div>
           </div>
           <div className="mt-4">
-            <ProgressBar value={activeSP.progress} variant="default" size="sm" />
+            <ProgressBar value={activePct} variant="default" size="sm" />
             {density.showSubtext && (
-              <p className="text-[11px] mt-1.5 opacity-90 font-semibold">Altitud {activeSP.progress}% · sigue subiendo</p>
+              <p className="text-[11px] mt-1.5 opacity-90 font-semibold">Altitud {activePct}% · sigue subiendo</p>
             )}
           </div>
         </motion.button>

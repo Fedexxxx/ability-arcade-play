@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_completions: {
+        Row: {
+          challenge_id: string
+          completed_at: string
+          explorer_id: string
+          id: string
+          module_id: string
+          mountain_id: string
+          tier: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string
+          explorer_id: string
+          id?: string
+          module_id: string
+          mountain_id: string
+          tier: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string
+          explorer_id?: string
+          id?: string
+          module_id?: string
+          mountain_id?: string
+          tier?: string
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           active: boolean
@@ -394,6 +424,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_explorer_xp: {
+        Args: { p_amount: number; p_explorer_id: string }
+        Returns: number
+      }
       create_explorer: {
         Args: { p_age_band: string; p_avatar: string; p_name: string }
         Returns: string

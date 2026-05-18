@@ -7,6 +7,7 @@ import { superpowers } from "@/data/mockData";
 import { useDensity } from "@/contexts/AgeDensityContext";
 import { findTieredModule, getActiveChallenges, isSkeleton } from "@/data/mountains";
 import { useTier } from "@/hooks/useTier";
+import { useChallengeCompletions } from "@/hooks/useChallengeCompletions";
 import {
   TIER_LABEL,
   TIER_HINT,
@@ -39,17 +40,38 @@ const ModulePage = () => {
   const tieredModule = tieredFound?.module;
   const legacyMod = sp?.modules.find((m) => m.id === modId);
   const { tier, pinned } = useTier(spId, modId);
+  const completedIds = useChallengeCompletions(spId, modId);
 
   if (!sp || (!tieredModule && !legacyMod))
     return <div className="p-4 text-center text-muted-foreground">No encontrado</div>;
 
   const skeleton = tieredModule ? isSkeleton(tieredModule) : false;
-  const challenges = tieredModule
+  const rawChallenges = tieredModule
     ? getActiveChallenges(tieredModule, tier)
     : legacyMod?.challenges ?? [];
+  // Derive per-challenge status from the persisted completion set so the
+  // user sees checkmarks and the next challenge unlocks immediately.
+  // Sequential unlock: completed challenges show as completed, the first
+  // uncompleted is available, the rest are locked.
+  let firstOpenSeen = false;
+  const challenges = rawChallenges.map((ch) => {
+    if (completedIds.has(ch.id)) {
+      return { ...ch, status: "completed" as const };
+    }
+    if (!firstOpenSeen) {
+      firstOpenSeen = true;
+      return { ...ch, status: "available" as const };
+    }
+    return { ...ch, status: "locked" as const };
+  });
   const mod = tieredModule
     ? { ...tieredModule, challenges }
     : legacyMod!;
+  // Live completion % for the progress bar.
+  if (challenges.length > 0) {
+    const doneCount = challenges.filter((c) => c.status === "completed").length;
+    mod.completion = Math.round((doneCount / challenges.length) * 100);
+  }
 
   const heroTitle = density.scale === "lg" ? "text-2xl" : density.scale === "md" ? "text-xl" : "text-lg";
   const cardPad = density.scale === "lg" ? "p-4" : density.scale === "md" ? "p-3.5" : "p-3";

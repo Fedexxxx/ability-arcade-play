@@ -16,9 +16,11 @@ import { findTieredModule, getActiveChallenges } from "@/data/mountains";
 import { recordChallengeResult } from "@/lib/tiers";
 import { useTier } from "@/hooks/useTier";
 import { useExplorer } from "@/hooks/useExplorer";
+import { recordChallengeCompletion } from "@/lib/completions";
 
 const COIN_PER_CHALLENGE = 10;
 const COIN_FAIL_CONSOLATION = 2;
+const XP_PER_CHALLENGE = 25;
 
 const ChallengePage = () => {
   const { spId, modId, chId } = useParams();
@@ -94,6 +96,16 @@ const ChallengePage = () => {
         sourceId: `${sp.id}:${mod.id}:${challenge.id}`,
         label: challenge.title,
       });
+      // Persist per-challenge completion (powers the checkmark in
+      // ModulePage + sequential unlock) and bump XP on explorer_progress.
+      // Idempotent: the helper no-ops if the row already exists.
+      recordChallengeCompletion({
+        mountainId: sp.id,
+        moduleId: mod.id,
+        challengeId: challenge.id,
+        tier,
+        xp: XP_PER_CHALLENGE,
+      });
     } else {
       earn({
         amount: COIN_FAIL_CONSOLATION,
@@ -102,7 +114,7 @@ const ChallengePage = () => {
         label: `Intento: ${challenge.title}`,
       });
     }
-  }, [phase, isCorrect, challenge, sp, mod]);
+  }, [phase, isCorrect, challenge, sp, mod, tier]);
 
   // Record per-module accuracy for the adaptive tier engine — once per
   // challenge submission. Uses a ref so retries on the same challenge
